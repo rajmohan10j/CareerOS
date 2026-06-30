@@ -1,0 +1,12 @@
+name: Tests
+
+on:
+  pull_request:
+  push:
+    branches: [ main, develop ]
+
+jobs:
+  placeholder-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "CareerOS tests placeholder"

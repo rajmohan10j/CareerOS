@@ -1,0 +1,10 @@
+name: Documentation
+
+on:
+  pull_request:
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Documentation check placeholder"

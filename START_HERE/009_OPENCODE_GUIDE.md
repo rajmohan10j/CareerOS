@@ -1,0 +1,2 @@
+# OpenCode Guide
+Use MASTER_EXECUTION_PROMPT and NEXT_TASK.

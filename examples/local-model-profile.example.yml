@@ -1,0 +1,18 @@
+# local-model-profile.example.yml
+
+hardware_profile: low_end_8gb
+
+providers:
+  default: ollama
+
+models:
+  reasoning: gemma3:4b
+  coding: qwen2.5-coder:3b
+  embedding: nomic-embed-text
+  vision: disabled
+
+features:
+  resume_generation: enabled
+  job_matching: enabled
+  document_search: enabled
+  vision_parsing: disabled

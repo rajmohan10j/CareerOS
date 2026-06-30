@@ -1,0 +1,10 @@
+name: Release
+
+on:
+  workflow_dispatch:
+
+jobs:
+  placeholder-release:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "CareerOS release placeholder"
