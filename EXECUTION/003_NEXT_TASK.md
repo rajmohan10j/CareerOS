@@ -1,7 +1,7 @@
 # Next Task
 
 Current:
-Milestone 09O — Browser Extension v2 Refinements
+Milestone 09P — Desktop App Shell
 
 Completed:
 - Milestone 09A – Backend Skeleton
@@ -73,9 +73,16 @@ Completed:
   - Fill results show field names in all breakdown categories
   - Options page connection test shows response time in ms
   - Better error display with icon prefixes
-  - 39 new/updated tests across 6 test files
-  - All 570 extension tests passing (172+51+46+23+64+46+59+31+56+22)
+  - 91 desktop tests: file structure, package.json, pages, routes, api client, components, security, backend independence
+  - All 91 desktop tests passing
+- Milestone 09P – Desktop App Shell:
+  - Desktop directory with 20 files: src/, components/, pages/, styles/, tests/
+  - SPA with hash routing, 9 pages, sidebar navigation, backend health polling
+  - Settings page with URL config + test connection
+  - No paid/cloud dependencies, thin client design
+  - Tauri setup documented but not configured (toolchain unavailable)
+  - 91 desktop tests passing
 
 Next:
-- Mobile (Milestone 09P) — not started
+- Plugin SDK (Milestone 09Q) — not started
 - Await user instructions

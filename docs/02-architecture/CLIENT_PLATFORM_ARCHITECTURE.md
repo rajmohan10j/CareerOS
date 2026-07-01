@@ -1,9 +1,8 @@
 # CLIENT_PLATFORM_ARCHITECTURE
 
 Document ID: DOC-102  
-Version: 0.1.0  
-Status: Draft  
-Milestone: 08D – Client Platform Pack
+Version: 0.2.0  
+Status: Implemented (Milestone 09P – Desktop App Shell)
 
 ## Purpose
 

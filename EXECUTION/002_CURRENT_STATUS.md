@@ -1,6 +1,6 @@
 # Current Status
 
-Current Milestone: 09O – Browser Extension v2 Refinements
+Current Milestone: 09P – Desktop App Shell
 
 Completed:
 - Milestone 09A: Backend skeleton
@@ -102,9 +102,23 @@ Completed:
   - Updated controlledFill tests: 56 tests (+3) for field name tracking in fill results
   - All 570 extension tests passing (172+51+46+23+64+46+59+31+56+22)
   - Permissions unchanged (storage + localhost:8000)
+- Milestone 09P: Desktop App Shell
+  - Created desktop/ directory structure with 20 source/config/doc files
+  - SPA frontend with hash-based routing (9 pages)
+  - Sidebar navigation with 9 module links and active state
+  - Dashboard page with 6 overview cards + live backend health check
+  - Placeholder pages: Profile, Resumes, Jobs, Applications, Documents, AIStatus, BrowserExtension
+  - Settings page with backend URL input, Save, and Test Connection (shows response time)
+  - BackendStatus component: polls GET /health every 30s, green/red indicator + version/mode
+  - StatusBar with app version + live backend status
+  - apiClient.js: checkHealth with 5s timeout, elapsed time, localStorage-based URL persistence
+  - No paid dependencies, no cloud services, no npm runtime dependencies
+  - Thin client design — no backend service duplication
+  - Tauri setup documented in README.md (not configured — toolchain not available)
+  - 91 desktop tests covering: file structure, package.json validation, page exports, routes, api client, components, settings, security, backend independence
+  - All 91 desktop tests passing
 
 Remaining Milestones (from ROADMAP.md):
-- 09P Mobile
 - 09Q Plugin SDK
 - 09R RAG
 - 09S Analytics

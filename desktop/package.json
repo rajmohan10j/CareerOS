@@ -1,0 +1,12 @@
+{
+  "name": "careeros-desktop",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "CareerOS Desktop Application – local-first career management shell",
+  "scripts": {
+    "test": "node tests/desktop.test.js"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}
