@@ -1,0 +1,25 @@
+{
+  "id": "com.example.job-board-scraper",
+  "name": "Job Board Scraper",
+  "version": "1.0.0",
+  "description": "Import job listings from external job boards",
+  "author": "CareerOS Contributors",
+  "category": "job_portal",
+  "entry_point": "plugins/job-board-scraper/main.py",
+  "permissions": [
+    "read_jobs",
+    "write_jobs",
+    "network_access"
+  ],
+  "supported_platforms": ["windows", "linux", "macos"],
+  "min_careeros_version": "0.1.0",
+  "config_schema": {
+    "type": "object",
+    "properties": {
+      "api_key": { "type": "string" },
+      "board_url": { "type": "string", "format": "uri" }
+    }
+  },
+  "homepage": "https://github.com/careeros/job-board-scraper",
+  "license": "MIT"
+}

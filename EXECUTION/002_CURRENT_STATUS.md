@@ -1,6 +1,6 @@
 # Current Status
 
-Current Milestone: 09P – Desktop App Shell
+Current Milestone: 09Q – Plugin SDK Foundation
 
 Completed:
 - Milestone 09A: Backend skeleton
@@ -117,9 +117,21 @@ Completed:
   - Tauri setup documented in README.md (not configured — toolchain not available)
   - 91 desktop tests covering: file structure, package.json validation, page exports, routes, api client, components, settings, security, backend independence
   - All 91 desktop tests passing
+- Milestone 09Q: Plugin SDK Foundation
+  - Created plugins/ directory with 7 documentation/schema/example files
+  - Plugin manifest JSON Schema, sample plugin manifest
+  - Comprehensive docs: PLUGIN_SDK.md, PLUGIN_MANIFEST.md, PLUGIN_PERMISSIONS.md, PLUGIN_LIFECYCLE.md, PLUGIN_SECURITY.md
+  - Plugin SQLModel with plugins table (source_id, name, version, description, author, category, entry_point, permissions_json, supported_platforms_json, min_careeros_version, config_schema_json, homepage, license, status)
+  - Plugin schemas: PluginRegister, PluginValidate, PluginValidationResult, PluginResponse
+  - Plugin repository, service (register, enable, disable, delete, validate), validate_manifest function
+  - Plugin API endpoints: GET /plugins, POST /plugins/register, POST /plugins/validate, GET /plugins/{id}, POST /plugins/{id}/enable, POST /plugins/{id}/disable, DELETE /plugins/{id}
+  - All routes properly ordered (literal paths before parameterized paths)
+  - Plugin router registered in main.py, Plugin model added to models/__init__.py
+  - 55 plugin tests: manifest validation (12), API (15), service (15), repository (8), no-regression (4), response shape (1)
+  - All 435 backend tests passing (380 existing + 55 new), Ruff clean
+  - No plugin code execution, no paid APIs, no dangerous permissions
 
 Remaining Milestones (from ROADMAP.md):
-- 09Q Plugin SDK
 - 09R RAG
 - 09S Analytics
 - 09T Production

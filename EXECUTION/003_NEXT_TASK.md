@@ -1,7 +1,7 @@
 # Next Task
 
 Current:
-Milestone 09P — Desktop App Shell
+Milestone 09Q — Plugin SDK Foundation
 
 Completed:
 - Milestone 09A – Backend Skeleton
@@ -82,7 +82,16 @@ Completed:
   - No paid/cloud dependencies, thin client design
   - Tauri setup documented but not configured (toolchain unavailable)
   - 91 desktop tests passing
+- Milestone 09Q – Plugin SDK Foundation:
+  - Plugin SDK folder structure (plugins/docs/, plugins/schemas/, plugins/examples/)
+  - Plugin manifest schema, sample manifest, validation logic
+  - Plugin docs: SDK, manifest, permissions, lifecycle, security
+  - Plugin backend: model, schemas, repository, service, API (7 endpoints)
+  - Plugin validation: required fields, types, semver, category enum, known permissions, no duplicates, platform validation, source_id pattern
+  - Plugin lifecycle: register, enable, disable, delete
+  - No plugin code execution implemented
+  - 55 plugin tests, all 435 backend tests passing, Ruff clean
 
 Next:
-- Plugin SDK (Milestone 09Q) — not started
+- RAG (Milestone 09R) — not started
 - Await user instructions

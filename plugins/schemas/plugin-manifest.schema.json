@@ -1,0 +1,100 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://careeros.dev/plugin-manifest.schema.json",
+  "title": "Plugin Manifest",
+  "description": "Schema for CareerOS plugin manifests",
+  "type": "object",
+  "required": [
+    "id",
+    "name",
+    "version",
+    "description",
+    "author",
+    "category",
+    "entry_point",
+    "permissions",
+    "min_careeros_version"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique plugin identifier (reverse domain or UUID)",
+      "pattern": "^[a-zA-Z0-9._-]+$"
+    },
+    "name": {
+      "type": "string",
+      "description": "Human-readable plugin name"
+    },
+    "version": {
+      "type": "string",
+      "description": "Semantic version string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "description": {
+      "type": "string",
+      "description": "Short description of the plugin"
+    },
+    "author": {
+      "type": "string",
+      "description": "Plugin author or organization"
+    },
+    "category": {
+      "type": "string",
+      "description": "Plugin category",
+      "enum": [
+        "job_portal",
+        "resume_export",
+        "ai_provider",
+        "browser_extension",
+        "document_import",
+        "notification",
+        "other"
+      ]
+    },
+    "entry_point": {
+      "type": "string",
+      "description": "Relative path to the plugin entry module"
+    },
+    "permissions": {
+      "type": "array",
+      "description": "List of required permissions",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    },
+    "supported_platforms": {
+      "type": "array",
+      "description": "List of supported platforms",
+      "items": {
+        "type": "string",
+        "enum": [
+          "windows",
+          "linux",
+          "macos",
+          "web",
+          "browser_extension"
+        ]
+      },
+      "uniqueItems": true
+    },
+    "min_careeros_version": {
+      "type": "string",
+      "description": "Minimum CareerOS version required",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "config_schema": {
+      "type": "object",
+      "description": "JSON Schema for plugin configuration"
+    },
+    "homepage": {
+      "type": "string",
+      "description": "Plugin homepage URL",
+      "format": "uri"
+    },
+    "license": {
+      "type": "string",
+      "description": "Plugin license identifier"
+    }
+  }
+}

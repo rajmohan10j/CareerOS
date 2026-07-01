@@ -1,8 +1,8 @@
 # Plugin Policy
 
-Document ID: EB-014  
-Version: 0.1.0  
-Status: Draft
+Document ID: EB-014
+Version: 0.2.0
+Status: Implemented (Milestone 09Q)
 
 ## Plugin Rules
 
