@@ -46,5 +46,6 @@ def create_provider() -> ModelProvider:
         if not settings.openrouter_api_key:
             raise ValueError("OpenRouter API key is not configured")
         from app.models.openrouter import OpenRouterProvider
+
         return OpenRouterProvider()
     return OllamaProvider()

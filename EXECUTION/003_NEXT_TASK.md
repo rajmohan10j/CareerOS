@@ -1,7 +1,7 @@
 # Next Task
 
 Current:
-Milestone 09K – Browser Field Detection Engine
+Milestone 09L – Universal Autofill Mapping Engine
 
 Completed:
 - Milestone 09A – Backend Skeleton
@@ -40,7 +40,14 @@ Completed:
   - Popup "Detect Form Fields" button with field count + debug table
   - No autofill, no submit, no credential storage, no network calls
   - 93 new extension tests (153 total), all passing
+- Milestone 09L – Universal Autofill Mapping Engine:
+  - profileClient.js: fetches profile/skills/experiences, normalizes JSON fields
+  - autofillMapper.js: maps 20 field intents to profile data — 5 status levels, sensitive tagging, name derivation, latest experience lookup, skills concatenation
+  - Popup UI: "Map Fields to Profile" button, collapsible mapping summary + detail table
+  - 23 profileClient tests, 62 autofillMapper tests, extension.test.js updated to 88 tests
+  - All 266 extension tests passing
+  - No value assignments — mapping is read-only proposal
 
 Next:
-- Desktop App (Milestone 09L) — not started
+- Desktop App (Milestone 09M) — not started
 - Await user instructions

@@ -35,9 +35,17 @@ class ApplicationRepository:
         return True
 
     def list_by_status(self, status: str) -> list[Application]:
-        statement = select(Application).where(Application.status == status).order_by(Application.updated_at.desc())
+        statement = (
+            select(Application)
+            .where(Application.status == status)
+            .order_by(Application.updated_at.desc())
+        )
         return list(self.session.exec(statement).all())
 
     def list_by_job(self, job_id: int) -> list[Application]:
-        statement = select(Application).where(Application.job_id == job_id).order_by(Application.updated_at.desc())
+        statement = (
+            select(Application)
+            .where(Application.job_id == job_id)
+            .order_by(Application.updated_at.desc())
+        )
         return list(self.session.exec(statement).all())

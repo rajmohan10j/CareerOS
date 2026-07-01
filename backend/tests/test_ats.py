@@ -74,14 +74,18 @@ def _session():
         _test_app.dependency_overrides.clear()
 
 
-def _create_resume(session: Session, content: str = "Test resume content\n\n## Experience\nEngineer at Acme\n") -> int:
+def _create_resume(
+    session: Session, content: str = "Test resume content\n\n## Experience\nEngineer at Acme\n"
+) -> int:
     repo = ResumeRepository(session)
     r = Resume(profile_id=1, title="Test Resume", content=content, version=1, is_latest=True)
     created = repo.create(r)
     return created.id
 
 
-def _create_job(session: Session, jd_text: str = "We need an engineer", skills: str | None = "['Python', 'SQL']") -> int:
+def _create_job(
+    session: Session, jd_text: str = "We need an engineer", skills: str | None = "['Python', 'SQL']"
+) -> int:
     repo = JobRepository(session)
     j = Job(
         profile_id=1,
@@ -115,7 +119,9 @@ class TestAtsAPI:
     def test_score_without_ai_returns_basic_score(self, _session):
         client = TestClient(_test_app)
         _create_resume(_session)
-        resp = client.post("/ats/score", json={"resume_id": 1, "job_description": "We need an engineer"})
+        resp = client.post(
+            "/ats/score", json={"resume_id": 1, "job_description": "We need an engineer"}
+        )
         assert resp.status_code == 200
         data = resp.json()
         assert data["resume_id"] == 1
@@ -282,7 +288,11 @@ class TestAtsAPI:
             mock_gen.return_value = fake
             resp = client.post(
                 "/ats/optimize",
-                json={"resume_id": rid, "job_description": "Dev needed", "target_role": "Senior Dev"},
+                json={
+                    "resume_id": rid,
+                    "job_description": "Dev needed",
+                    "target_role": "Senior Dev",
+                },
             )
         assert resp.status_code == 200
         assert resp.json()["optimized_content"] == fake
@@ -293,6 +303,7 @@ class TestAtsService:
         svc = AtsService(ResumeRepository(_session))
         with pytest.raises(ValueError, match="not found"):
             import asyncio
+
             asyncio.run(svc.score(AtsScoreRequest(resume_id=999, job_description="JD")))
 
     def test_score_no_jd(self, _session):
@@ -301,6 +312,7 @@ class TestAtsService:
         svc = AtsService(repo)
         with pytest.raises(ValueError, match="No job description"):
             import asyncio
+
             asyncio.run(svc.score(AtsScoreRequest(resume_id=1)))
 
     def test_score_no_content(self, _session):
@@ -309,6 +321,7 @@ class TestAtsService:
         svc = AtsService(repo)
         with pytest.raises(ValueError, match="no content"):
             import asyncio
+
             asyncio.run(svc.score(AtsScoreRequest(resume_id=1, job_description="JD")))
 
     def test_score_without_ai(self, _session):
@@ -316,7 +329,10 @@ class TestAtsService:
         repo.create(Resume(profile_id=1, title="T", content="Test resume"))
         svc = AtsService(repo)
         import asyncio
-        result = asyncio.run(svc.score(AtsScoreRequest(resume_id=1, job_description="Engineer needed")))
+
+        result = asyncio.run(
+            svc.score(AtsScoreRequest(resume_id=1, job_description="Engineer needed"))
+        )
         assert isinstance(result, AtsScoreResponse)
         assert result.ats_score is None
         assert result.resume_id == 1
@@ -328,6 +344,7 @@ class TestAtsService:
         mock_ai.generate.return_value = '{"ats_score": 88, "formatting_score": 90, "compliance_issues": [], "suggestions": ["Add skills"]}'
         svc = AtsService(repo, ai_service=mock_ai)
         import asyncio
+
         result = asyncio.run(svc.score(AtsScoreRequest(resume_id=1, job_description="Engineer")))
         assert result.ats_score == 88.0
         assert result.formatting_score == 90.0
@@ -335,27 +352,43 @@ class TestAtsService:
 
     def test_score_with_skills_matching(self, _session):
         from app.repositories.skill import SkillRepository
+
         resume_repo = ResumeRepository(_session)
         resume_repo.create(Resume(profile_id=1, title="T", content="Content"))
         skill_repo = SkillRepository(_session)
         skill_repo.create(Skill(name="Python", category="Lang", profile_id=1))
-        svc = AtsService(resume_repo, skill_repository=skill_repo, ai_service=AsyncMock(spec=AIService))
+        svc = AtsService(
+            resume_repo, skill_repository=skill_repo, ai_service=AsyncMock(spec=AIService)
+        )
         import asyncio
-        result = asyncio.run(svc.score(AtsScoreRequest(
-            resume_id=1, job_description="Python dev",
-        )))
+
+        result = asyncio.run(
+            svc.score(
+                AtsScoreRequest(
+                    resume_id=1,
+                    job_description="Python dev",
+                )
+            )
+        )
         assert result.matched_keywords == []
 
     def test_score_with_job_skills_matching(self, _session):
         from app.repositories.skill import SkillRepository
+
         resume_repo = ResumeRepository(_session)
         resume_repo.create(Resume(profile_id=1, title="T", content="Content"))
         skill_repo = SkillRepository(_session)
         skill_repo.create(Skill(name="Python", category="Lang", profile_id=1))
         job_repo = JobRepository(_session)
         job_repo.create(Job(profile_id=1, jd_text="JD", skills="['Python', 'SQL']"))
-        svc = AtsService(resume_repo, job_repository=job_repo, skill_repository=skill_repo, ai_service=AsyncMock(spec=AIService))
+        svc = AtsService(
+            resume_repo,
+            job_repository=job_repo,
+            skill_repository=skill_repo,
+            ai_service=AsyncMock(spec=AIService),
+        )
         import asyncio
+
         result = asyncio.run(svc.score(AtsScoreRequest(resume_id=1, job_id=1)))
         assert "Python" in result.matched_keywords
         assert "SQL" in result.missing_keywords
@@ -365,6 +398,7 @@ class TestAtsService:
         svc = AtsService(ResumeRepository(_session))
         with pytest.raises(ValueError, match="not found"):
             import asyncio
+
             asyncio.run(svc.analyze(AtsAnalyzeRequest(resume_id=999, job_description="JD")))
 
     def test_analyze_no_jd(self, _session):
@@ -373,6 +407,7 @@ class TestAtsService:
         svc = AtsService(repo)
         with pytest.raises(ValueError, match="No job description"):
             import asyncio
+
             asyncio.run(svc.analyze(AtsAnalyzeRequest(resume_id=1)))
 
     def test_analyze_without_ai(self, _session):
@@ -380,7 +415,10 @@ class TestAtsService:
         repo.create(Resume(profile_id=1, title="T", content="Content"))
         svc = AtsService(repo)
         import asyncio
-        result = asyncio.run(svc.analyze(AtsAnalyzeRequest(resume_id=1, job_description="Engineer")))
+
+        result = asyncio.run(
+            svc.analyze(AtsAnalyzeRequest(resume_id=1, job_description="Engineer"))
+        )
         assert isinstance(result, AtsAnalyzeResponse)
         assert result.ats_score is None
         assert isinstance(result.section_scores, dict)
@@ -396,35 +434,53 @@ class TestAtsService:
         )
         svc = AtsService(repo, ai_service=mock_ai)
         import asyncio
-        result = asyncio.run(svc.analyze(AtsAnalyzeRequest(resume_id=1, job_description="Engineer")))
+
+        result = asyncio.run(
+            svc.analyze(AtsAnalyzeRequest(resume_id=1, job_description="Engineer"))
+        )
         assert result.ats_score == 75.0
         assert result.section_scores == {"contact": 90, "experience": 70}
         assert result.content_analysis == "Room for improvement"
 
     def test_analyze_with_skills_from_job(self, _session):
         from app.repositories.skill import SkillRepository
+
         resume_repo = ResumeRepository(_session)
         resume_repo.create(Resume(profile_id=1, title="T", content="Content"))
         skill_repo = SkillRepository(_session)
         skill_repo.create(Skill(name="Python", category="Lang", profile_id=1))
         job_repo = JobRepository(_session)
         job_repo.create(Job(profile_id=1, jd_text="JD", skills="['Python', 'Docker']"))
-        svc = AtsService(resume_repo, job_repository=job_repo, skill_repository=skill_repo, ai_service=AsyncMock(spec=AIService))
+        svc = AtsService(
+            resume_repo,
+            job_repository=job_repo,
+            skill_repository=skill_repo,
+            ai_service=AsyncMock(spec=AIService),
+        )
         import asyncio
+
         result = asyncio.run(svc.analyze(AtsAnalyzeRequest(resume_id=1, job_id=1)))
         assert "Python" in result.matched_keywords
         assert "Docker" in result.missing_keywords
 
     def test_optimize_creates_resume_version(self, _session):
         repo = ResumeRepository(_session)
-        repo.create(Resume(profile_id=1, title="Original", content="Old content", version=1, is_latest=True))
+        repo.create(
+            Resume(profile_id=1, title="Original", content="Old content", version=1, is_latest=True)
+        )
         mock_ai = AsyncMock(spec=AIService)
         mock_ai.generate.return_value = "New optimized content"
         svc = AtsService(repo, ai_service=mock_ai)
         import asyncio
-        result = asyncio.run(svc.optimize(AtsOptimizeRequest(
-            resume_id=1, job_description="Engineer needed",
-        )))
+
+        result = asyncio.run(
+            svc.optimize(
+                AtsOptimizeRequest(
+                    resume_id=1,
+                    job_description="Engineer needed",
+                )
+            )
+        )
         assert result.resume_id == 1
         assert result.optimized_content == "New optimized content"
         assert result.version == 2
@@ -441,6 +497,7 @@ class TestAtsService:
         svc = AtsService(ResumeRepository(_session))
         with pytest.raises(ValueError, match="not found"):
             import asyncio
+
             asyncio.run(svc.optimize(AtsOptimizeRequest(resume_id=999, job_description="JD")))
 
     def test_optimize_no_content(self, _session):
@@ -449,6 +506,7 @@ class TestAtsService:
         svc = AtsService(repo)
         with pytest.raises(ValueError, match="no content"):
             import asyncio
+
             asyncio.run(svc.optimize(AtsOptimizeRequest(resume_id=1, job_description="JD")))
 
     def test_optimize_no_ai(self, _session):
@@ -457,24 +515,39 @@ class TestAtsService:
         svc = AtsService(repo)
         with pytest.raises(ValueError, match="AI service"):
             import asyncio
+
             asyncio.run(svc.optimize(AtsOptimizeRequest(resume_id=1, job_description="JD")))
 
     def test_optimize_with_skills_and_experience_in_prompt(self, _session):
         from app.repositories.experience import ExperienceRepository
         from app.repositories.skill import SkillRepository
+
         resume_repo = ResumeRepository(_session)
         resume_repo.create(Resume(profile_id=1, title="T", content="Content"))
         skill_repo = SkillRepository(_session)
         skill_repo.create(Skill(name="Python", category="Lang", profile_id=1))
         exp_repo = ExperienceRepository(_session)
-        exp_repo.create(Experience(company="Acme", title="Dev", description="Built stuff", profile_id=1))
+        exp_repo.create(
+            Experience(company="Acme", title="Dev", description="Built stuff", profile_id=1)
+        )
         mock_ai = AsyncMock(spec=AIService)
         mock_ai.generate.return_value = "Optimized"
-        svc = AtsService(resume_repo, skill_repository=skill_repo, experience_repository=exp_repo, ai_service=mock_ai)
+        svc = AtsService(
+            resume_repo,
+            skill_repository=skill_repo,
+            experience_repository=exp_repo,
+            ai_service=mock_ai,
+        )
         import asyncio
-        result = asyncio.run(svc.optimize(AtsOptimizeRequest(
-            resume_id=1, job_description="Python dev",
-        )))
+
+        result = asyncio.run(
+            svc.optimize(
+                AtsOptimizeRequest(
+                    resume_id=1,
+                    job_description="Python dev",
+                )
+            )
+        )
         assert result.optimized_content == "Optimized"
         mock_ai.generate.assert_called_once()
         prompt = mock_ai.generate.call_args[0][0]

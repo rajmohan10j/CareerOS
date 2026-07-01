@@ -132,10 +132,7 @@ class OllamaProvider(ModelProvider):
             response = await self.client.get("/api/tags")
             response.raise_for_status()
             data = response.json()
-            return [
-                {"name": m["name"], "provider": self.name}
-                for m in data.get("models", [])
-            ]
+            return [{"name": m["name"], "provider": self.name} for m in data.get("models", [])]
         except Exception:
             return []
 

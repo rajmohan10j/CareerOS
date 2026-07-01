@@ -18,12 +18,18 @@ def resume_to_response(resume: Resume) -> dict:
         "job_description": resume.job_description,
         "version": resume.version,
         "is_latest": resume.is_latest,
-        "created_at": resume.created_at.replace(tzinfo=None).isoformat() if resume.created_at else None,
-        "updated_at": resume.updated_at.replace(tzinfo=None).isoformat() if resume.updated_at else None,
+        "created_at": resume.created_at.replace(tzinfo=None).isoformat()
+        if resume.created_at
+        else None,
+        "updated_at": resume.updated_at.replace(tzinfo=None).isoformat()
+        if resume.updated_at
+        else None,
     }
 
 
-def _build_generation_prompt(profile: Profile, target_role: str, job_description: str | None) -> str:
+def _build_generation_prompt(
+    profile: Profile, target_role: str, job_description: str | None
+) -> str:
     lines = ["You are a professional resume writer.", ""]
     lines.append("Generate a resume in Markdown format using ONLY the following candidate data.")
     lines.append("Do NOT invent experience, employers, education, titles, dates, or achievements.")

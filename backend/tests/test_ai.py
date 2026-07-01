@@ -182,9 +182,7 @@ class TestAIAPI:
 
     def test_health_returns_ok(self):
         client = TestClient(_test_app)
-        with patch.object(
-            AIService, "health_check", new_callable=AsyncMock
-        ) as mock_health:
+        with patch.object(AIService, "health_check", new_callable=AsyncMock) as mock_health:
             mock_health.return_value = {"status": "ok", "provider": "mock"}
             response = client.get("/ai/health")
         assert response.status_code == 200
@@ -192,9 +190,7 @@ class TestAIAPI:
 
     def test_generate_returns_text(self):
         client = TestClient(_test_app)
-        with patch.object(
-            AIService, "generate", new_callable=AsyncMock
-        ) as mock_gen:
+        with patch.object(AIService, "generate", new_callable=AsyncMock) as mock_gen:
             mock_gen.return_value = "Mock response for: Hello"
             response = client.post("/ai/generate", json={"prompt": "Hello"})
         assert response.status_code == 200
@@ -202,9 +198,7 @@ class TestAIAPI:
 
     def test_generate_with_task_type(self):
         client = TestClient(_test_app)
-        with patch.object(
-            AIService, "generate", new_callable=AsyncMock
-        ) as mock_gen:
+        with patch.object(AIService, "generate", new_callable=AsyncMock) as mock_gen:
             mock_gen.return_value = "Mock response for: Write code"
             response = client.post(
                 "/ai/generate",
@@ -215,9 +209,7 @@ class TestAIAPI:
 
     def test_generate_returns_503_on_provider_error(self):
         client = TestClient(_test_app, raise_server_exceptions=False)
-        with patch.object(
-            AIService, "generate", new_callable=AsyncMock
-        ) as mock_gen:
+        with patch.object(AIService, "generate", new_callable=AsyncMock) as mock_gen:
             mock_gen.side_effect = AIProviderNotAvailable("ollama")
             response = client.post("/ai/generate", json={"prompt": "Hello"})
         assert response.status_code == 503
@@ -229,9 +221,7 @@ class TestAIAPI:
 
     def test_embed_returns_embeddings(self):
         client = TestClient(_test_app)
-        with patch.object(
-            AIService, "embed", new_callable=AsyncMock
-        ) as mock_embed:
+        with patch.object(AIService, "embed", new_callable=AsyncMock) as mock_embed:
             mock_embed.return_value = [[0.1, 0.2, 0.3]]
             response = client.post("/ai/embed", json={"texts": ["hello"]})
         assert response.status_code == 200
@@ -246,18 +236,14 @@ class TestAIAPI:
 
     def test_embed_returns_503_on_error(self):
         client = TestClient(_test_app, raise_server_exceptions=False)
-        with patch.object(
-            AIService, "embed", new_callable=AsyncMock
-        ) as mock_embed:
+        with patch.object(AIService, "embed", new_callable=AsyncMock) as mock_embed:
             mock_embed.side_effect = AIProviderNotAvailable("ollama")
             response = client.post("/ai/embed", json={"texts": ["hello"]})
         assert response.status_code == 503
 
     def test_list_models(self):
         client = TestClient(_test_app)
-        with patch.object(
-            AIService, "list_models", new_callable=AsyncMock
-        ) as mock_list:
+        with patch.object(AIService, "list_models", new_callable=AsyncMock) as mock_list:
             mock_list.return_value = [{"name": "mock-model", "provider": "mock"}]
             response = client.get("/ai/models")
         assert response.status_code == 200
@@ -439,7 +425,9 @@ class TestAIService:
         registry = get_registry()
         registry.register(MockProvider())
         service = AIService()
-        with patch("app.ai.router.AIRouter.list_models", return_value=[{"name": "m", "provider": "mock"}]):
+        with patch(
+            "app.ai.router.AIRouter.list_models", return_value=[{"name": "m", "provider": "mock"}]
+        ):
             result = await service.list_models()
         assert len(result) == 1
         assert result[0]["name"] == "m"
@@ -620,12 +608,14 @@ async def test_ollama_list_models_returns_parsed_tags():
     provider = OllamaProvider()
     provider._client = AsyncMock(spec=httpx.AsyncClient)
     mock_resp = MagicMock(spec=httpx.Response)
-    mock_resp.json = MagicMock(return_value={
-        "models": [
-            {"name": "llama3.2:latest", "size": 123},
-            {"name": "nomic-embed-text:latest", "size": 456},
-        ]
-    })
+    mock_resp.json = MagicMock(
+        return_value={
+            "models": [
+                {"name": "llama3.2:latest", "size": 123},
+                {"name": "nomic-embed-text:latest", "size": 456},
+            ]
+        }
+    )
     provider._client.get = AsyncMock(return_value=mock_resp)
 
     result = await provider.list_models()

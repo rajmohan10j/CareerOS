@@ -66,10 +66,14 @@ def _build_evaluate_prompt(
     user_skills: list[Skill],
     user_experiences: list[Experience],
 ) -> str:
-    skills_text = ", ".join(
-        f"{s.name} (proficiency: {s.proficiency}, category: {s.category})"
-        for s in user_skills if s.name
-    ) or "No skills listed"
+    skills_text = (
+        ", ".join(
+            f"{s.name} (proficiency: {s.proficiency}, category: {s.category})"
+            for s in user_skills
+            if s.name
+        )
+        or "No skills listed"
+    )
 
     exp_lines = []
     for e in user_experiences:
@@ -152,7 +156,9 @@ def _parse_skills_from_text(skills_text: str | None) -> list[str]:
     return [s.strip() for s in cleaned.split(",") if s.strip()]
 
 
-def _match_skills(jd_skills_text: str | None, user_skills: list[Skill]) -> tuple[list[str], list[str]]:
+def _match_skills(
+    jd_skills_text: str | None, user_skills: list[Skill]
+) -> tuple[list[str], list[str]]:
     jd_skills = _parse_skills_from_text(jd_skills_text)
     if not jd_skills:
         return [], []
@@ -298,7 +304,9 @@ class JobService:
         user_skills = self._skill_repo.list_all() if self._skill_repo else []
         user_experiences = self._experience_repo.list_all() if self._experience_repo else []
 
-        prompt = _build_evaluate_prompt(profile, job.jd_text, job.url, user_skills, user_experiences)
+        prompt = _build_evaluate_prompt(
+            profile, job.jd_text, job.url, user_skills, user_experiences
+        )
         result = await self._ai_service.generate(prompt, task_type="reasoning")
 
         response = _build_evaluate_response(job_id, result, job.skills, user_skills)
@@ -323,7 +331,9 @@ class JobService:
         user_skills = self._skill_repo.list_all() if self._skill_repo else []
         user_experiences = self._experience_repo.list_all() if self._experience_repo else []
 
-        prompt = _build_evaluate_prompt(profile, data.description, data.url, user_skills, user_experiences)
+        prompt = _build_evaluate_prompt(
+            profile, data.description, data.url, user_skills, user_experiences
+        )
         result = await self._ai_service.generate(prompt, task_type="reasoning")
 
         response = _build_evaluate_response(None, result, None, user_skills)

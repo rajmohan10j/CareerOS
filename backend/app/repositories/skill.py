@@ -35,5 +35,7 @@ class SkillRepository:
         return True
 
     def list_by_category(self, category: str) -> list[Skill]:
-        statement = select(Skill).where(Skill.category == category).order_by(Skill.updated_at.desc())
+        statement = (
+            select(Skill).where(Skill.category == category).order_by(Skill.updated_at.desc())
+        )
         return list(self.session.exec(statement).all())

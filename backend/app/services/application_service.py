@@ -15,8 +15,12 @@ def application_to_response(application: Application) -> dict:
         "applied_at": application.applied_at,
         "notes": application.notes,
         "follow_up_date": application.follow_up_date,
-        "created_at": application.created_at.replace(tzinfo=None).isoformat() if application.created_at else None,
-        "updated_at": application.updated_at.replace(tzinfo=None).isoformat() if application.updated_at else None,
+        "created_at": application.created_at.replace(tzinfo=None).isoformat()
+        if application.created_at
+        else None,
+        "updated_at": application.updated_at.replace(tzinfo=None).isoformat()
+        if application.updated_at
+        else None,
     }
 
 

@@ -15,8 +15,12 @@ def experience_to_response(experience: Experience) -> dict:
         "end_date": experience.end_date,
         "description": experience.description,
         "achievements_json": experience.achievements_json,
-        "created_at": experience.created_at.replace(tzinfo=None).isoformat() if experience.created_at else None,
-        "updated_at": experience.updated_at.replace(tzinfo=None).isoformat() if experience.updated_at else None,
+        "created_at": experience.created_at.replace(tzinfo=None).isoformat()
+        if experience.created_at
+        else None,
+        "updated_at": experience.updated_at.replace(tzinfo=None).isoformat()
+        if experience.updated_at
+        else None,
     }
 
 

@@ -82,7 +82,9 @@ class TestExperienceAPI:
         client = TestClient(_test_app)
         create_resp = client.post("/experiences", json={"title": "Junior"})
         exp_id = create_resp.json()["id"]
-        update_resp = client.put(f"/experiences/{exp_id}", json={"title": "Senior", "company": "Acme"})
+        update_resp = client.put(
+            f"/experiences/{exp_id}", json={"title": "Senior", "company": "Acme"}
+        )
         assert update_resp.status_code == 200
         data = update_resp.json()
         assert data["title"] == "Senior"

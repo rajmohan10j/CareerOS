@@ -28,7 +28,7 @@ def _build_parse_prompt(content: str) -> str:
     lines = [
         "You are a document intelligence assistant.",
         "Extract structured information from the following document content.",
-        'Return a JSON object with these keys:',
+        "Return a JSON object with these keys:",
         '  - "title": the document title',
         '  - "summary": a brief summary of the document',
         '  - "key_entities": list of key entities found (names, dates, organizations, skills)',

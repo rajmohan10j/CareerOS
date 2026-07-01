@@ -83,7 +83,9 @@ class TestSkillAPI:
         client = TestClient(_test_app)
         create_resp = client.post("/skills", json={"name": "Python"})
         skill_id = create_resp.json()["id"]
-        update_resp = client.put(f"/skills/{skill_id}", json={"proficiency": 4, "category": "Language"})
+        update_resp = client.put(
+            f"/skills/{skill_id}", json={"proficiency": 4, "category": "Language"}
+        )
         assert update_resp.status_code == 200
         data = update_resp.json()
         assert data["proficiency"] == 4

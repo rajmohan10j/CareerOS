@@ -66,7 +66,9 @@ async def classify_document(document_id: int, session: Session = Depends(get_ses
 
 
 @router.put("/documents/{document_id}")
-def update_document(document_id: int, body: DocumentUpdate, session: Session = Depends(get_session)):
+def update_document(
+    document_id: int, body: DocumentUpdate, session: Session = Depends(get_session)
+):
     service = _service(session)
     doc = service.update(document_id, body)
     if doc is None:

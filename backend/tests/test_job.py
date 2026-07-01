@@ -159,9 +159,12 @@ class TestJobAPI:
 
     def test_analyze_with_ai(self, _session):
         client = TestClient(_test_app)
-        create_resp = client.post("/jobs", json={
-            "jd_text": "We need a Python developer with 5 years experience",
-        })
+        create_resp = client.post(
+            "/jobs",
+            json={
+                "jd_text": "We need a Python developer with 5 years experience",
+            },
+        )
         job_id = create_resp.json()["id"]
         fake_result = (
             '{"title": "Python Developer", "company": "Unknown", '
@@ -209,9 +212,12 @@ class TestJobAPI:
         )
         with patch.object(AIService, "generate", new_callable=AsyncMock) as mock_gen:
             mock_gen.return_value = fake_result
-            resp = client.post("/jobs/evaluate-text", json={
-                "description": "Python developer needed",
-            })
+            resp = client.post(
+                "/jobs/evaluate-text",
+                json={
+                    "description": "Python developer needed",
+                },
+            )
         assert resp.status_code == 200
         data = resp.json()
         assert data["fit_score"] == 85.0
@@ -228,9 +234,12 @@ class TestJobAPI:
     def test_evaluate_existing_job_returns_structured(self, _session):
         client = TestClient(_test_app)
         client.put("/profile", json={"summary": "Dev"})
-        create_resp = client.post("/jobs", json={
-            "jd_text": "Senior engineer needed",
-        })
+        create_resp = client.post(
+            "/jobs",
+            json={
+                "jd_text": "Senior engineer needed",
+            },
+        )
         job_id = create_resp.json()["id"]
         fake_result = (
             '{"fit_score": 70, "summary": "Decent match", '
@@ -251,9 +260,12 @@ class TestJobAPI:
     def test_evaluate_saves_to_job_record(self, _session):
         client = TestClient(_test_app)
         client.put("/profile", json={"summary": "Dev"})
-        create_resp = client.post("/jobs", json={
-            "jd_text": "Senior engineer needed",
-        })
+        create_resp = client.post(
+            "/jobs",
+            json={
+                "jd_text": "Senior engineer needed",
+            },
+        )
         job_id = create_resp.json()["id"]
         fake_result = (
             '{"fit_score": 75, "summary": "Good", "strengths": [], '
@@ -278,10 +290,13 @@ class TestJobAPI:
         client.put("/profile", json={"summary": "Dev"})
         client.post("/skills", json={"name": "Python", "category": "Language"})
         client.post("/skills", json={"name": "Django", "category": "Framework"})
-        create_resp = client.post("/jobs", json={
-            "jd_text": "Python Django developer needed",
-            "skills": "['Python', 'Django', 'Kubernetes']",
-        })
+        create_resp = client.post(
+            "/jobs",
+            json={
+                "jd_text": "Python Django developer needed",
+                "skills": "['Python', 'Django', 'Kubernetes']",
+            },
+        )
         job_id = create_resp.json()["id"]
         fake_result = (
             '{"fit_score": 80, "summary": "Good fit", "strengths": ["Python"], '
@@ -361,6 +376,7 @@ class TestJobService:
         svc = JobService(repo)
         job = svc.create(JobCreate(jd_text="Some text", title="Original"))
         import asyncio
+
         result = asyncio.run(svc.analyze(job.id))
         assert result is not None
         assert result.title == "Original"
@@ -375,6 +391,7 @@ class TestJobService:
         svc = JobService(repo, ai_service=mock_ai)
         job = svc.create(JobCreate(jd_text="ML engineer needed"))
         import asyncio
+
         result = asyncio.run(svc.analyze(job.id))
         assert result is not None
         assert result.title == "AI Engineer"
@@ -387,6 +404,7 @@ class TestJobService:
         svc = JobService(repo, ai_service=mock_ai)
         job = svc.create(JobCreate(title="No JD"))
         import asyncio
+
         result = asyncio.run(svc.analyze(job.id))
         assert result is not None
         assert result.title == "No JD"
@@ -396,6 +414,7 @@ class TestJobService:
         repo = JobRepository(_session)
         svc = JobService(repo)
         import asyncio
+
         assert asyncio.run(svc.analyze(999)) is None
 
     def test_evaluate_without_profile_repo_unchanged(self, _session):
@@ -403,21 +422,25 @@ class TestJobService:
         svc = JobService(repo)
         job = svc.create(JobCreate(jd_text="Engineer needed"))
         import asyncio
+
         result = asyncio.run(svc.evaluate(job.id))
         assert result is None
 
     def test_evaluate_without_ai_unchanged(self, _session):
         from app.repositories.profile import ProfileRepository
+
         repo = JobRepository(_session)
         ProfileRepository(_session).upsert(Profile(summary="Dev", user_id=1))
         svc = JobService(repo, profile_repository=ProfileRepository(_session))
         job = svc.create(JobCreate(jd_text="Engineer needed"))
         import asyncio
+
         result = asyncio.run(svc.evaluate(job.id))
         assert result is None
 
     def test_evaluate_with_ai(self, _session):
         from app.repositories.profile import ProfileRepository
+
         ProfileRepository(_session).upsert(Profile(summary="Python dev", user_id=1))
         repo = JobRepository(_session)
         mock_ai = AsyncMock(spec=AIService)
@@ -428,6 +451,7 @@ class TestJobService:
         svc = JobService(repo, profile_repository=ProfileRepository(_session), ai_service=mock_ai)
         job = svc.create(JobCreate(jd_text="Python engineer needed"))
         import asyncio
+
         result = asyncio.run(svc.evaluate(job.id))
         assert result is not None
         assert result["fit_score"] == 90.0
@@ -436,12 +460,14 @@ class TestJobService:
 
     def test_evaluate_no_jd_text(self, _session):
         from app.repositories.profile import ProfileRepository
+
         ProfileRepository(_session).upsert(Profile(summary="Dev", user_id=1))
         repo = JobRepository(_session)
         mock_ai = AsyncMock(spec=AIService)
         svc = JobService(repo, profile_repository=ProfileRepository(_session), ai_service=mock_ai)
         job = svc.create(JobCreate(title="No JD"))
         import asyncio
+
         result = asyncio.run(svc.evaluate(job.id))
         assert result is None
         mock_ai.generate.assert_not_called()
@@ -450,36 +476,48 @@ class TestJobService:
         repo = JobRepository(_session)
         svc = JobService(repo)
         import asyncio
+
         assert asyncio.run(svc.evaluate(999)) is None
 
     def test_evaluate_text_raises_without_profile_repo(self, _session):
         repo = JobRepository(_session)
         svc = JobService(repo, ai_service=AIService())
         from app.schemas.job import JobEvaluateTextRequest
+
         with pytest.raises(ValueError, match="Profile repository"):
             import asyncio
+
             asyncio.run(svc.evaluate_text(JobEvaluateTextRequest(description="Test")))
 
     def test_evaluate_text_raises_without_ai(self, _session):
         from app.repositories.profile import ProfileRepository
+
         repo = JobRepository(_session)
         svc = JobService(repo, profile_repository=ProfileRepository(_session))
         from app.schemas.job import JobEvaluateTextRequest
+
         with pytest.raises(ValueError, match="AI service"):
             import asyncio
+
             asyncio.run(svc.evaluate_text(JobEvaluateTextRequest(description="Test")))
 
     def test_evaluate_text_raises_without_profile(self, _session):
         from app.repositories.profile import ProfileRepository
+
         repo = JobRepository(_session)
-        svc = JobService(repo, profile_repository=ProfileRepository(_session), ai_service=AIService())
+        svc = JobService(
+            repo, profile_repository=ProfileRepository(_session), ai_service=AIService()
+        )
         from app.schemas.job import JobEvaluateTextRequest
+
         with pytest.raises(ValueError, match="profile"):
             import asyncio
+
             asyncio.run(svc.evaluate_text(JobEvaluateTextRequest(description="Test")))
 
     def test_evaluate_text_with_ai(self, _session):
         from app.repositories.profile import ProfileRepository
+
         ProfileRepository(_session).upsert(Profile(summary="Dev", user_id=1))
         repo = JobRepository(_session)
         mock_ai = AsyncMock(spec=AIService)
@@ -490,12 +528,14 @@ class TestJobService:
         svc = JobService(repo, profile_repository=ProfileRepository(_session), ai_service=mock_ai)
         from app.schemas.job import JobEvaluateTextRequest
         import asyncio
+
         result = asyncio.run(svc.evaluate_text(JobEvaluateTextRequest(description="Engineer role")))
         assert result["fit_score"] == 75.0
         assert result["recommendation"] == "consider"
 
     def test_evaluate_text_fit_score_none_on_bad_json(self, _session):
         from app.repositories.profile import ProfileRepository
+
         ProfileRepository(_session).upsert(Profile(summary="Dev", user_id=1))
         repo = JobRepository(_session)
         mock_ai = AsyncMock(spec=AIService)
@@ -503,6 +543,7 @@ class TestJobService:
         svc = JobService(repo, profile_repository=ProfileRepository(_session), ai_service=mock_ai)
         from app.schemas.job import JobEvaluateTextRequest
         import asyncio
+
         result = asyncio.run(svc.evaluate_text(JobEvaluateTextRequest(description="Engineer role")))
         assert result["fit_score"] is None
         assert result["summary"] == ""
@@ -514,6 +555,7 @@ class TestJobService:
         svc = JobService(repo, ai_service=mock_ai)
         job = svc.create(JobCreate(jd_text="In-office"))
         import asyncio
+
         result = asyncio.run(svc.analyze(job.id))
         assert result is not None
         assert result.remote is False
@@ -525,12 +567,14 @@ class TestJobService:
         svc = JobService(repo, ai_service=mock_ai)
         job = svc.create(JobCreate(jd_text="Some job"))
         import asyncio
+
         result = asyncio.run(svc.analyze(job.id))
         assert result is not None
         assert result.remote is None
 
     def test_evaluate_with_skill_matching_detects_matched(self, _session):
         from app.repositories.profile import ProfileRepository
+
         ProfileRepository(_session).upsert(Profile(summary="Dev", user_id=1))
         SkillRepository(_session).create(Skill(name="Python", category="Language", profile_id=1))
         SkillRepository(_session).create(Skill(name="Django", category="Framework", profile_id=1))
@@ -546,8 +590,11 @@ class TestJobService:
             skill_repository=SkillRepository(_session),
             ai_service=mock_ai,
         )
-        job = svc.create(JobCreate(jd_text="Python dev", skills="['Python', 'Django', 'Kubernetes']"))
+        job = svc.create(
+            JobCreate(jd_text="Python dev", skills="['Python', 'Django', 'Kubernetes']")
+        )
         import asyncio
+
         result = asyncio.run(svc.evaluate(job.id))
         assert result is not None
         assert "Python" in result["matched_skills"]
@@ -556,6 +603,7 @@ class TestJobService:
 
     def test_evaluate_with_empty_skills(self, _session):
         from app.repositories.profile import ProfileRepository
+
         ProfileRepository(_session).upsert(Profile(summary="Dev", user_id=1))
         repo = JobRepository(_session)
         mock_ai = AsyncMock(spec=AIService)
@@ -571,6 +619,7 @@ class TestJobService:
         )
         job = svc.create(JobCreate(jd_text="Some job"))
         import asyncio
+
         result = asyncio.run(svc.evaluate(job.id))
         assert result is not None
         assert result["matched_skills"] == []
@@ -578,6 +627,7 @@ class TestJobService:
 
     def test_evaluate_prompt_includes_skills_and_experience(self, _session):
         from app.repositories.profile import ProfileRepository
+
         ProfileRepository(_session).upsert(Profile(summary="Dev", user_id=1))
         SkillRepository(_session).create(Skill(name="Python", category="Language", profile_id=1))
         ExperienceRepository(_session).create(
@@ -598,6 +648,7 @@ class TestJobService:
         )
         job = svc.create(JobCreate(jd_text="Python dev needed"))
         import asyncio
+
         result = asyncio.run(svc.evaluate(job.id))
         assert result is not None
         assert result["fit_score"] == 85.0
@@ -680,7 +731,9 @@ class TestBuildEvaluateResponse:
             '"experience_match": "Matches", "location_match": "Remote OK", '
             '"risks": ["Risk1"], "resume_suggestions": ["Suggestion1"]}'
         )
-        result = _build_evaluate_response(1, ai_text, "['Python']", [Skill(name="Python", category="Lang", profile_id=1)])
+        result = _build_evaluate_response(
+            1, ai_text, "['Python']", [Skill(name="Python", category="Lang", profile_id=1)]
+        )
         assert isinstance(result, JobEvaluateResponse)
         assert result.fit_score == 80.0
         assert result.recommendation == "apply"
@@ -694,7 +747,12 @@ class TestBuildEvaluateResponse:
 
     def test_build_from_ai_result_with_gaps(self):
         ai_text = '{"fit_score": 60, "recommendation": "consider"}'
-        result = _build_evaluate_response(None, ai_text, "['Python', 'K8s']", [Skill(name="Python", category="Lang", profile_id=1)])
+        result = _build_evaluate_response(
+            None,
+            ai_text,
+            "['Python', 'K8s']",
+            [Skill(name="Python", category="Lang", profile_id=1)],
+        )
         assert result.fit_score == 60.0
         assert result.matched_skills == ["Python"]
         assert result.missing_skills == ["K8s"]

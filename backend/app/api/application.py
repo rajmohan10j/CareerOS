@@ -46,7 +46,9 @@ def create_application(body: ApplicationCreate, session: Session = Depends(get_s
 
 
 @router.put("/applications/{application_id}")
-def update_application(application_id: int, body: ApplicationUpdate, session: Session = Depends(get_session)):
+def update_application(
+    application_id: int, body: ApplicationUpdate, session: Session = Depends(get_session)
+):
     service = _service(session)
     application = service.update(application_id, body)
     if application is None:

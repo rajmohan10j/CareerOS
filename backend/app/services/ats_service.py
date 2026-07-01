@@ -35,7 +35,9 @@ def _parse_skills_from_text(skills_text: str | None) -> list[str]:
     return [s.strip() for s in cleaned.split(",") if s.strip()]
 
 
-def _match_keywords(jd_skills_text: str | None, user_skills: list[Skill]) -> tuple[list[str], list[str]]:
+def _match_keywords(
+    jd_skills_text: str | None, user_skills: list[Skill]
+) -> tuple[list[str], list[str]]:
     jd_skills = _parse_skills_from_text(jd_skills_text)
     if not jd_skills:
         return [], []
@@ -87,7 +89,9 @@ def _analyze_formatting(content: str) -> tuple[float, list[str]]:
     return max(0.0, score), issues
 
 
-def _resolve_jd(job_repo: JobRepository | None, job_id: int | None, job_description: str | None) -> str | None:
+def _resolve_jd(
+    job_repo: JobRepository | None, job_id: int | None, job_description: str | None
+) -> str | None:
     if job_description:
         return job_description
     if job_id is not None and job_repo is not None:
@@ -112,10 +116,14 @@ def _build_score_prompt(
     user_skills: list[Skill],
     user_experiences: list[Experience],
 ) -> str:
-    skills_text = ", ".join(
-        f"{s.name} (proficiency: {s.proficiency}, category: {s.category})"
-        for s in user_skills if s.name
-    ) or "No skills listed"
+    skills_text = (
+        ", ".join(
+            f"{s.name} (proficiency: {s.proficiency}, category: {s.category})"
+            for s in user_skills
+            if s.name
+        )
+        or "No skills listed"
+    )
 
     exp_lines = []
     for e in user_experiences:
@@ -186,9 +194,10 @@ def _build_optimize_prompt(
     user_skills: list[Skill],
     user_experiences: list[Experience],
 ) -> str:
-    skills_text = ", ".join(
-        f"{s.name} (proficiency: {s.proficiency})" for s in user_skills if s.name
-    ) or "No skills listed"
+    skills_text = (
+        ", ".join(f"{s.name} (proficiency: {s.proficiency})" for s in user_skills if s.name)
+        or "No skills listed"
+    )
 
     exp_lines = []
     for e in user_experiences:
@@ -228,7 +237,9 @@ def _build_optimize_prompt(
     lines.append("Job Description:")
     lines.append(jd_text)
     lines.append("")
-    lines.append("Return ONLY the rewritten resume in clean Markdown format. No JSON, no explanation.")
+    lines.append(
+        "Return ONLY the rewritten resume in clean Markdown format. No JSON, no explanation."
+    )
     return "\n".join(lines)
 
 
@@ -281,7 +292,9 @@ class AtsService:
         jd_skills_text = _resolve_skills(self._job_repo, request.job_id)
         user_skills = self._load_skills()
         matched, missing = _match_keywords(jd_skills_text, user_skills)
-        keyword_rate = len(matched) / (len(matched) + len(missing)) if (matched or missing) else None
+        keyword_rate = (
+            len(matched) / (len(matched) + len(missing)) if (matched or missing) else None
+        )
 
         formatting_score, compliance_issues = _analyze_formatting(resume.content)
 
@@ -291,7 +304,9 @@ class AtsService:
         if self._ai_service:
             profile = self._load_profile()
             user_experiences = self._load_experiences()
-            prompt = _build_score_prompt(profile, resume.content, jd_text, user_skills, user_experiences)
+            prompt = _build_score_prompt(
+                profile, resume.content, jd_text, user_skills, user_experiences
+            )
             try:
                 result = await self._ai_service.generate(prompt, task_type="reasoning")
             except Exception:
@@ -342,7 +357,9 @@ class AtsService:
         jd_skills_text = _resolve_skills(self._job_repo, request.job_id)
         user_skills = self._load_skills()
         matched, missing = _match_keywords(jd_skills_text, user_skills)
-        keyword_rate = len(matched) / (len(matched) + len(missing)) if (matched or missing) else None
+        keyword_rate = (
+            len(matched) / (len(matched) + len(missing)) if (matched or missing) else None
+        )
 
         formatting_score, compliance_issues = _analyze_formatting(resume.content)
         section_scores: dict = {}
@@ -352,7 +369,9 @@ class AtsService:
         if self._ai_service:
             profile = self._load_profile()
             user_experiences = self._load_experiences()
-            prompt = _build_analyze_prompt(profile, resume.content, jd_text, user_skills, user_experiences)
+            prompt = _build_analyze_prompt(
+                profile, resume.content, jd_text, user_skills, user_experiences
+            )
             try:
                 result = await self._ai_service.generate(prompt, task_type="reasoning")
             except Exception:

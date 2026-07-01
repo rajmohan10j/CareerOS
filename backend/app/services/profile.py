@@ -27,7 +27,13 @@ class ProfileService:
     def get(self) -> Profile | None:
         return self.repository.get()
 
-    _JSON_FIELDS = {"target_roles", "industries", "locations", "salary_expectations", "preferences_json"}
+    _JSON_FIELDS = {
+        "target_roles",
+        "industries",
+        "locations",
+        "salary_expectations",
+        "preferences_json",
+    }
 
     def _to_db_value(self, field: str, value: object) -> object:
         if field in self._JSON_FIELDS:
@@ -62,6 +68,10 @@ def profile_to_response(profile: Profile) -> dict:
         "locations": _json_loads(profile.locations),
         "salary_expectations": _json_loads(profile.salary_expectations),
         "preferences_json": _json_loads(profile.preferences_json),
-        "created_at": profile.created_at.replace(tzinfo=None).isoformat() if profile.created_at else None,
-        "updated_at": profile.updated_at.replace(tzinfo=None).isoformat() if profile.updated_at else None,
+        "created_at": profile.created_at.replace(tzinfo=None).isoformat()
+        if profile.created_at
+        else None,
+        "updated_at": profile.updated_at.replace(tzinfo=None).isoformat()
+        if profile.updated_at
+        else None,
     }

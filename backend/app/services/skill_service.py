@@ -13,8 +13,12 @@ def skill_to_response(skill: Skill) -> dict:
         "category": skill.category,
         "proficiency": skill.proficiency,
         "evidence": skill.evidence,
-        "created_at": skill.created_at.replace(tzinfo=None).isoformat() if skill.created_at else None,
-        "updated_at": skill.updated_at.replace(tzinfo=None).isoformat() if skill.updated_at else None,
+        "created_at": skill.created_at.replace(tzinfo=None).isoformat()
+        if skill.created_at
+        else None,
+        "updated_at": skill.updated_at.replace(tzinfo=None).isoformat()
+        if skill.updated_at
+        else None,
     }
 
 

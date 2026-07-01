@@ -113,7 +113,9 @@ class TestDocumentAPI:
 
     def test_search_by_title(self, _session):
         client = TestClient(_test_app)
-        client.post("/documents", json={"filename": "resume.pdf", "title": "Software Engineer Resume"})
+        client.post(
+            "/documents", json={"filename": "resume.pdf", "title": "Software Engineer Resume"}
+        )
         client.post("/documents", json={"filename": "cover.pdf", "title": "Cover Letter"})
         response = client.get("/documents/search?q=engineer")
         assert response.status_code == 200
@@ -123,7 +125,10 @@ class TestDocumentAPI:
 
     def test_search_by_content(self, _session):
         client = TestClient(_test_app)
-        client.post("/documents", json={"filename": "doc.txt", "content": "Python developer with 5 years experience"})
+        client.post(
+            "/documents",
+            json={"filename": "doc.txt", "content": "Python developer with 5 years experience"},
+        )
         client.post("/documents", json={"filename": "other.txt", "content": "Marketing specialist"})
         response = client.get("/documents/search?q=Python")
         assert response.status_code == 200
@@ -140,11 +145,17 @@ class TestDocumentAPI:
 
     def test_parse_with_ai(self, _session):
         client = TestClient(_test_app)
-        create_resp = client.post("/documents", json={
-            "filename": "doc.txt", "content": "John Doe, Software Engineer, 5 years at Google",
-        })
+        create_resp = client.post(
+            "/documents",
+            json={
+                "filename": "doc.txt",
+                "content": "John Doe, Software Engineer, 5 years at Google",
+            },
+        )
         doc_id = create_resp.json()["id"]
-        fake_metadata = '{"title": "Resume", "summary": "Engineer", "key_entities": ["John Doe", "Google"]}'
+        fake_metadata = (
+            '{"title": "Resume", "summary": "Engineer", "key_entities": ["John Doe", "Google"]}'
+        )
         with patch.object(AIService, "generate", new_callable=AsyncMock) as mock_gen:
             mock_gen.return_value = fake_metadata
             resp = client.post(f"/documents/{doc_id}/parse")
@@ -158,9 +169,13 @@ class TestDocumentAPI:
 
     def test_classify_with_ai(self, _session):
         client = TestClient(_test_app)
-        create_resp = client.post("/documents", json={
-            "filename": "doc.txt", "content": "This is a resume for a software engineer",
-        })
+        create_resp = client.post(
+            "/documents",
+            json={
+                "filename": "doc.txt",
+                "content": "This is a resume for a software engineer",
+            },
+        )
         doc_id = create_resp.json()["id"]
         with patch.object(AIService, "generate", new_callable=AsyncMock) as mock_gen:
             mock_gen.return_value = "resume"
@@ -232,6 +247,7 @@ class TestDocumentService:
         svc = DocumentService(repo)
         doc = svc.create(DocumentCreate(filename="doc.txt", content="Some content"))
         import asyncio
+
         result = asyncio.run(svc.parse(doc.id))
         assert result is not None
         assert result.metadata_json is None
@@ -243,6 +259,7 @@ class TestDocumentService:
         svc = DocumentService(repo, ai_service=mock_ai)
         doc = svc.create(DocumentCreate(filename="doc.txt", content="Some content"))
         import asyncio
+
         result = asyncio.run(svc.parse(doc.id))
         assert result is not None
         assert result.metadata_json == '{"title": "Parsed"}'
@@ -251,6 +268,7 @@ class TestDocumentService:
         repo = DocumentRepository(_session)
         svc = DocumentService(repo)
         import asyncio
+
         result = asyncio.run(svc.parse(999))
         assert result is None
 
@@ -259,6 +277,7 @@ class TestDocumentService:
         svc = DocumentService(repo)
         doc = svc.create(DocumentCreate(filename="doc.txt", content="Some content"))
         import asyncio
+
         result = asyncio.run(svc.classify(doc.id))
         assert result is not None
         assert result.category is None
@@ -270,6 +289,7 @@ class TestDocumentService:
         svc = DocumentService(repo, ai_service=mock_ai)
         doc = svc.create(DocumentCreate(filename="doc.txt", content="Some content"))
         import asyncio
+
         result = asyncio.run(svc.classify(doc.id))
         assert result is not None
         assert result.category == "resume"
@@ -281,6 +301,7 @@ class TestDocumentService:
         svc = DocumentService(repo, ai_service=mock_ai)
         doc = svc.create(DocumentCreate(filename="doc.txt", content="Some content"))
         import asyncio
+
         result = asyncio.run(svc.classify(doc.id))
         assert result is not None
         assert result.category == "other"
@@ -289,6 +310,7 @@ class TestDocumentService:
         repo = DocumentRepository(_session)
         svc = DocumentService(repo)
         import asyncio
+
         result = asyncio.run(svc.classify(999))
         assert result is None
 
@@ -298,6 +320,7 @@ class TestDocumentService:
         svc = DocumentService(repo, ai_service=mock_ai)
         doc = svc.create(DocumentCreate(filename="doc.txt"))
         import asyncio
+
         result = asyncio.run(svc.parse(doc.id))
         assert result is not None
         assert result.metadata_json is None
@@ -309,6 +332,7 @@ class TestDocumentService:
         svc = DocumentService(repo, ai_service=mock_ai)
         doc = svc.create(DocumentCreate(filename="doc.txt"))
         import asyncio
+
         result = asyncio.run(svc.classify(doc.id))
         assert result is not None
         assert result.category is None

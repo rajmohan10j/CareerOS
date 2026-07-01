@@ -86,7 +86,9 @@ class TestApplicationAPI:
         client = TestClient(_test_app)
         create_resp = client.post("/applications", json={"status": "saved"})
         app_id = create_resp.json()["id"]
-        update_resp = client.put(f"/applications/{app_id}", json={"status": "applied", "notes": "Applied!"})
+        update_resp = client.put(
+            f"/applications/{app_id}", json={"status": "applied", "notes": "Applied!"}
+        )
         assert update_resp.status_code == 200
         data = update_resp.json()
         assert data["status"] == "applied"

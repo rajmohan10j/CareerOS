@@ -37,7 +37,9 @@ def create_experience(body: ExperienceCreate, session: Session = Depends(get_ses
 
 
 @router.put("/experiences/{experience_id}")
-def update_experience(experience_id: int, body: ExperienceUpdate, session: Session = Depends(get_session)):
+def update_experience(
+    experience_id: int, body: ExperienceUpdate, session: Session = Depends(get_session)
+):
     service = _service(session)
     experience = service.update(experience_id, body)
     if experience is None:

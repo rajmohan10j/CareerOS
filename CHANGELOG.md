@@ -15,3 +15,4 @@
 - Milestone 09I: ATS Optimization Engine (score/analyze/optimize, keyword matching, formatting analysis, ATS-optimized resume generation, 66 tests)
 - Milestone 09J: Browser Extension Skeleton (Manifest V3, popup health check, content script placeholder, options page, minimal permissions, 37 tests)
 - Milestone 09K: Browser Field Detection Engine (fieldDetector.js, fieldClassifier.js, 20 field types, confidence scoring, sensitive field tagging, debug table, 93 tests)
+- Milestone 09L: Universal Autofill Mapping Engine (profileClient.js, autofillMapper.js, 20-intent mapping with 5 status levels, sensitive field tagging, name/experience derivation, popup Map Fields UI, collapsible mapping summary + detail table, 85 new tests, all 266 extension tests passing)

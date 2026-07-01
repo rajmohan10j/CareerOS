@@ -139,10 +139,7 @@ class OpenRouterProvider(ModelProvider):
             response = await self.client.get("/models")
             response.raise_for_status()
             data = response.json()
-            return [
-                {"name": m["id"], "provider": self.name}
-                for m in data.get("data", [])
-            ]
+            return [{"name": m["id"], "provider": self.name} for m in data.get("data", [])]
         except Exception:
             return []
 

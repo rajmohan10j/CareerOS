@@ -1,6 +1,6 @@
 # Current Status
 
-Current Milestone: 09K – Browser Field Detection Engine
+Current Milestone: 09L – Universal Autofill Mapping Engine
 
 Completed:
 - Milestone 09A: Backend skeleton
@@ -51,11 +51,21 @@ Completed:
   - Collapsible debug table showing all detected fields with intent/confidence/sensitivity
   - No autofill, no submit, no credential storage, no network calls from detector/classifier
   - 93 new extension tests (153 total), all passing
+- Milestone 09L: Universal Autofill Mapping Engine
+  - profileClient.js: fetches profile/skills/experiences from local backend in parallel, normalizes JSON fields (locations, target_roles, salary_expectations, industries), 5s timeout per fetch
+  - autofillMapper.js: maps 20 field intents to profile data with 5 status levels (available/derived/missing/manual_review/unknown), sensitive field tagging (phone/address/salary/work_auth), deriveFirstLastFromSummary heuristic for name fields, getLatestExperience sorted by start_date for company/title, skills concatenation, salary expectations from profile
+  - Popup UI: "Map Fields to Profile" button after detection, collapsible mapping summary (available/derived/missing/manual/sensitive counts), mapping detail table with proposed values, status badges, confidence scores, sensitive tags
+  - 23 profileClient tests (exports, fetch patterns, normalizeProfile, parseJsonField, security)
+  - 62 autofillMapper tests (all 20 intents, status values, sensitive fields, derivation logic, no value assignment, security)
+  - extension.test.js updated: 88 tests (+25) covering new files and mapping UI elements
+  - All 266 extension tests passing (88+51+42+23+62)
+  - No value assignments to DOM — mapping is read-only/proposal only
+  - UNIVERSAL_AUTOFILL.md updated to Implemented
 
 Remaining Milestones (from ROADMAP.md):
-- 09L Desktop App
-- 09M Mobile
-- 09N Plugin SDK
-- 09O RAG
-- 09P Analytics
-- 09Q Production
+- 09M Desktop App
+- 09N Mobile
+- 09O Plugin SDK
+- 09P RAG
+- 09Q Analytics
+- 09R Production

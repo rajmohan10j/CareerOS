@@ -6,7 +6,9 @@ from app.config import settings
 
 
 def get_engine():
-    connect_args = {"check_same_thread": False} if settings.database_url.startswith("sqlite") else {}
+    connect_args = (
+        {"check_same_thread": False} if settings.database_url.startswith("sqlite") else {}
+    )
     return create_engine(
         settings.database_url,
         echo=settings.debug,

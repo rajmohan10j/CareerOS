@@ -111,6 +111,8 @@ const expectedFiles = [
   "src/options.html",
   "src/options.js",
   "src/apiClient.js",
+  "src/profileClient.js",
+  "src/autofillMapper.js",
   "styles/popup.css",
   "icons/icon16.png",
   "icons/icon48.png",
@@ -118,6 +120,8 @@ const expectedFiles = [
   "tests/extension.test.js",
   "tests/fieldDetector.test.js",
   "tests/fieldClassifier.test.js",
+  "tests/profileClient.test.js",
+  "tests/autofillMapper.test.js",
 ];
 
 for (const f of expectedFiles) {
@@ -189,6 +193,22 @@ assert(
   popupHTML.includes("debugContent"),
   "popup.html has debug content area"
 );
+assert(
+  popupHTML.includes("mappingSection"),
+  "popup.html has mapping section"
+);
+assert(
+  popupHTML.includes("mapFieldsBtn"),
+  "popup.html has map fields button"
+);
+assert(
+  popupHTML.includes("mappingSummary"),
+  "popup.html has mapping summary area"
+);
+assert(
+  popupHTML.includes("mappingContent"),
+  "popup.html has mapping content area"
+);
 
 const popupJS = readFile("src/popup.js");
 assert(
@@ -206,6 +226,34 @@ assert(
 assert(
   popupJS.includes("fieldCount"),
   "popup.js displays field count"
+);
+assert(
+  popupJS.includes("fetchAllProfileData"),
+  "popup.js imports fetchAllProfileData"
+);
+assert(
+  popupJS.includes("mapFields"),
+  "popup.js imports mapFields"
+);
+assert(
+  popupJS.includes("summarizeMappings"),
+  "popup.js imports summarizeMappings"
+);
+assert(
+  popupJS.includes("mappingSection"),
+  "popup.js references mappingSection"
+);
+assert(
+  popupJS.includes("mapFieldsBtn"),
+  "popup.js references map fields button"
+);
+assert(
+  popupJS.includes("renderMappingSummary"),
+  "popup.js has renderMappingSummary function"
+);
+assert(
+  popupJS.includes("renderMappingTable"),
+  "popup.js has renderMappingTable function"
 );
 
 const apiClient = readFile("src/apiClient.js");
@@ -255,6 +303,62 @@ assert(
 assert(
   !classifier.includes(".value ="),
   "fieldClassifier.js does not assign values"
+);
+
+const profileClient = readFile("src/profileClient.js");
+assert(
+  profileClient.includes("fetchAllProfileData"),
+  "profileClient.js exports fetchAllProfileData"
+);
+assert(
+  profileClient.includes("normalizeProfile"),
+  "profileClient.js exports normalizeProfile"
+);
+assert(
+  profileClient.includes("parseJsonField"),
+  "profileClient.js has parseJsonField"
+);
+assert(
+  profileClient.includes("AbortController"),
+  "profileClient.js uses AbortController"
+);
+assert(
+  !profileClient.includes("apiKey") && !profileClient.includes("api_key"),
+  "profileClient.js does not contain secrets"
+);
+
+const autofillMapper = readFile("src/autofillMapper.js");
+assert(
+  autofillMapper.includes("mapFields"),
+  "autofillMapper.js exports mapFields"
+);
+assert(
+  autofillMapper.includes("mapIntentToValue"),
+  "autofillMapper.js exports mapIntentToValue"
+);
+assert(
+  autofillMapper.includes("summarizeMappings"),
+  "autofillMapper.js exports summarizeMappings"
+);
+assert(
+  autofillMapper.includes("SENSITIVE_TYPES"),
+  "autofillMapper.js defines SENSITIVE_TYPES"
+);
+assert(
+  autofillMapper.includes("getLatestExperience"),
+  "autofillMapper.js has getLatestExperience"
+);
+assert(
+  autofillMapper.includes("deriveFirstLastFromSummary"),
+  "autofillMapper.js has deriveFirstLastFromSummary"
+);
+assert(
+  !autofillMapper.includes(".value ="),
+  "autofillMapper.js does not assign values"
+);
+assert(
+  !autofillMapper.includes("fetch("),
+  "autofillMapper.js does not make network calls"
 );
 
 // ── Summary ───────────────────────────────────────────────────────

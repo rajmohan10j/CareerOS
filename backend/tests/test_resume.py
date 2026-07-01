@@ -113,9 +113,7 @@ class TestResumeAPI:
         client = TestClient(_test_app)
         with patch.object(AIService, "generate", new_callable=AsyncMock) as mock_gen:
             mock_gen.return_value = "# Resume\n\nExperience: ..."
-            response = client.post(
-                "/resumes/generate", json={"target_role": "Engineer"}
-            )
+            response = client.post("/resumes/generate", json={"target_role": "Engineer"})
         assert response.status_code == 400
         assert "profile" in response.json()["detail"].lower()
 
@@ -204,12 +202,14 @@ class TestResumeService:
         svc = ResumeService(repo, ai_service=AIService())
         with pytest.raises(ValueError, match="Profile repository"):
             import asyncio
+
             asyncio.run(svc.generate(ResumeGenerateRequest(target_role="Engineer")))
 
     @pytest.mark.asyncio
     async def test_generate_raises_without_ai_service(self, _session):
         repo = ResumeRepository(_session)
         from app.repositories.profile import ProfileRepository
+
         svc = ResumeService(repo, profile_repository=ProfileRepository(_session))
         with pytest.raises(ValueError, match="AI service"):
             await svc.generate(ResumeGenerateRequest(target_role="Engineer"))
@@ -222,7 +222,9 @@ class TestResumeService:
         repo = ResumeRepository(_session)
         mock_ai = AsyncMock(spec=AIService)
         mock_ai.generate.return_value = "# Generated Resume"
-        svc = ResumeService(repo, profile_repository=ProfileRepository(_session), ai_service=mock_ai)
+        svc = ResumeService(
+            repo, profile_repository=ProfileRepository(_session), ai_service=mock_ai
+        )
 
         resume = await svc.generate(ResumeGenerateRequest(target_role="Engineer"))
         assert resume.content == "# Generated Resume"
@@ -233,11 +235,15 @@ class TestResumeService:
 
     def test_generate_needs_profile(self, _session):
         from app.repositories.profile import ProfileRepository
+
         repo = ResumeRepository(_session)
         mock_ai = AsyncMock(spec=AIService)
-        svc = ResumeService(repo, profile_repository=ProfileRepository(_session), ai_service=mock_ai)
+        svc = ResumeService(
+            repo, profile_repository=ProfileRepository(_session), ai_service=mock_ai
+        )
         with pytest.raises(ValueError, match="profile"):
             import asyncio
+
             asyncio.run(svc.generate(ResumeGenerateRequest(target_role="Engineer")))
 
 

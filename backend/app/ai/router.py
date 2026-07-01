@@ -27,14 +27,16 @@ class AIRouter:
         providers = self._registry.all()
         result = []
         for name, provider in providers.items():
-            result.append({
-                "name": name,
-                "default_model": (
-                    settings.ollama_reasoning_model
-                    if name == "ollama"
-                    else settings.openrouter_default_model
-                ),
-            })
+            result.append(
+                {
+                    "name": name,
+                    "default_model": (
+                        settings.ollama_reasoning_model
+                        if name == "ollama"
+                        else settings.openrouter_default_model
+                    ),
+                }
+            )
         return result
 
     async def list_models(self) -> list[dict]:
