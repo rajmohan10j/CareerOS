@@ -26,3 +26,13 @@
 - Milestone 09T: Production Readiness Foundation (7 PowerShell scripts: start-backend, test-backend, test-extension, test-desktop, verify-all, doctor, release-check; 4 docs: LOCAL_STARTUP_GUIDE, TROUBLESHOOTING, DEVELOPER_PREVIEW_CHECKLIST, MILESTONE_09_COMPLETION_REPORT; all 1,184 tests passing; Ruff clean; no paid APIs, no cloud, no telemetry)
 
 All 20 Milestone 09 sub-milestones completed.
+
+---
+
+## v0.2.0 (planned)
+- Milestone 10A: Developer Preview Release Preparation (test hardening, doc finalization, checklist completion)
+- Milestone 10B: GitHub Repository Publication Prep (README refresh, contribution guide, issue templates, license, CI)
+- Milestone 10C: Installer / Setup Improvements (bootstrap script, backend auto-setup, dependency checks)
+- Milestone 10D: Real-World Browser Extension Testing Pack (test pages, fill scenarios, edge case database)
+- Milestone 10E: Desktop Backend Integration v1 (desktop components call real backend APIs)
+- Milestone 10F: Public Developer Preview v0.1.0 (release tag, changelog finalization, announcement)

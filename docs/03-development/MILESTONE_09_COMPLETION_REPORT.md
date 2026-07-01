@@ -103,3 +103,14 @@ Milestone 09 delivered a complete local-first career management platform across 
 ## Next Steps
 
 See `EXECUTION/003_NEXT_TASK.md` for planned future work.
+
+---
+
+## Milestone 10 – Developer Preview (Planned)
+
+- **10A** – Developer Preview Release Preparation
+- **10B** – GitHub Repository Publication Prep
+- **10C** – Installer / Setup Improvements
+- **10D** – Real-World Browser Extension Testing Pack
+- **10E** – Desktop Backend Integration v1
+- **10F** – Public Developer Preview v0.1.0

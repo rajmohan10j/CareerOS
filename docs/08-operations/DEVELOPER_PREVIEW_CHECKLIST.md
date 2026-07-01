@@ -2,7 +2,7 @@
 
 Document ID: DOC-072  
 Version: 0.1.0  
-Status: Implemented (Milestone 09T – Production Readiness Foundation)
+Status: Implemented (Milestone 09T – Production Readiness Foundation) — to be finalized in Milestone 10A
 
 Use this checklist to verify CareerOS is ready for a developer preview release.
 

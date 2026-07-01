@@ -2,7 +2,10 @@
 
 ## CareerOS — Milestone 09 Complete
 
-All 20 sub-milestones (09A–09T) are implemented.
+All 20 sub-milestones (09A–09T) are implemented.  
+**Next:** Milestone 10 – Developer Preview (starting with 10A).
+
+See `EXECUTION/003_NEXT_TASK.md` for detailed milestone plan.
 
 ### Getting Started
 

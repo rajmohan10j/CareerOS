@@ -1,6 +1,6 @@
 # Current Status
 
-Current Milestone: 09T – Production Readiness Foundation
+Current Milestone: 10A – Developer Preview Release Preparation
 
 Completed:
 - Milestone 09A: Backend skeleton
@@ -163,3 +163,16 @@ Completed:
   - Updated: 002_CURRENT_STATUS.md, 003_NEXT_TASK.md, CHANGELOG.md, ROADMAP.md, README.md, AI_DEVELOPMENT_PLAYBOOK.md, START_HERE/000_START.md
 
 All Milestone 09 milestones completed.
+
+---
+
+## Next: Milestone 10 – Developer Preview
+
+- **10A** – Developer Preview Release Preparation: Test hardening, doc finalization, checklist completion, release-readiness audit.
+- **10B** – GitHub Repository Publication Prep: README refresh, CONTRIBUTING guide, issue/PR templates, license headers, CI workflow setup.
+- **10C** – Installer / Setup Improvements: Bootstrap script (install.bat/ps1), backend auto-setup (venv + deps), dependency verification, error recovery.
+- **10D** – Real-World Browser Extension Testing Pack: Structured test pages (multiple form layouts, dynamic fields, shadow DOM, iframes), fill scenario catalog, edge case database, automated detection/mapping/fill tests.
+- **10E** – Desktop Backend Integration v1: Replace placeholder pages with live API calls, wire Profile/Resume/Job/Application pages to real endpoints, form validation, error handling.
+- **10F** – Public Developer Preview v0.1.0: Release tag, final changelog review, announcement doc, distribution notes.
+
+**10A is next.** Do not begin implementation without user confirmation.

@@ -1,7 +1,7 @@
 # Next Task
 
 Current:
-Milestone 09T — Production Readiness Foundation
+Milestone 10A — Developer Preview Release Preparation
 
 Completed:
 - Milestone 09A – Backend Skeleton
@@ -118,5 +118,45 @@ Completed:
 
 All Milestone 09 milestones completed.
 
-Next:
-- Await user instructions for Milestone 10+ planning
+---
+
+## Next: Milestone 10 – Developer Preview
+
+- **10A** – Developer Preview Release Preparation
+  - Test hardening: review and stabilize all test suites (backend, extension, desktop)
+  - Documentation finalization: verify all doc cross-references, remove draft markings
+  - Release checklist completion: run DEVELOPER_PREVIEW_CHECKLIST.md end-to-end
+  - Release-readiness audit: verify no secrets, no hardcoded paths, no stale references
+
+- **10B** – GitHub Repository Publication Prep
+  - README refresh: features, screenshots, badges, quick-start section
+  - CONTRIBUTING guide: coding standards, PR workflow, test expectations
+  - Issue and PR templates (bug report, feature request, pull request)
+  - License headers on source files (MIT)
+  - CI workflow (GitHub Actions): run all tests on push/PR, Ruff check
+
+- **10C** – Installer / Setup Improvements
+  - Bootstrap script (`install.ps1`): clone, venv creation, pip install, auto-detect dependencies
+  - Backend auto-setup: verify Python version, create .venv, install deps, init DB
+  - Dependency verification: check Python/Node.js versions and required packages
+  - Error recovery: graceful failure messages, rollback on partial setup
+
+- **10D** – Real-World Browser Extension Testing Pack
+  - Structured test pages: multiple form layouts (single-column, multi-column, inline), dynamic fields (added via JS), shadow DOM, iframes
+  - Fill scenario catalog: required vs optional, field ordering, cross-field validation
+  - Edge case database: very long fields, empty fields, special characters, duplicate labels
+  - Automated tests: detection accuracy, mapping correctness, fill safety across all test pages
+
+- **10E** – Desktop Backend Integration v1
+  - Replace placeholder pages with live API calls (Profile, Resumes, Jobs, Applications, Documents)
+  - Form validation and error handling for all pages
+  - Loading states and empty states for API-backed pages
+  - Remove placeholder content from desktop pages
+
+- **10F** – Public Developer Preview v0.1.0
+  - Release tag in repository
+  - Final changelog review and version bump
+  - Announcement document
+  - Distribution notes (zip archive, load-extension instructions, browser compatibility)
+
+**10A is next.** Do not begin implementation without user confirmation.
