@@ -9,6 +9,7 @@ from app.api.document import router as document_router
 from app.api.experience import router as experience_router
 from app.api.health import router as health_router
 from app.api.job import router as job_router
+from app.api.knowledge import router as knowledge_router
 from app.api.plugin import router as plugin_router
 from app.api.profile import router as profile_router
 from app.api.resume import router as resume_router
@@ -40,4 +41,5 @@ app.include_router(skill_router)
 app.include_router(application_router)
 app.include_router(ats_router)
 app.include_router(plugin_router)
+app.include_router(knowledge_router)
 app.include_router(ai_router)

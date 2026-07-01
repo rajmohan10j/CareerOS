@@ -4,6 +4,7 @@ from app.models.database import BaseTable
 from app.models.document import Document
 from app.models.experience import Experience
 from app.models.job import Job
+from app.models.knowledge import Knowledge
 from app.models.openrouter import OpenRouterProvider
 from app.models.plugin import Plugin
 from app.models.profile import Profile
@@ -24,4 +25,5 @@ __all__ = [
     "Skill",
     "Application",
     "Plugin",
+    "Knowledge",
 ]

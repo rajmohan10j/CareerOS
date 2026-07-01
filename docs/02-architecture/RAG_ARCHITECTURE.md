@@ -1,8 +1,8 @@
 # RAG_ARCHITECTURE
 
-Document ID: DOC-031  
-Version: 0.1.0  
-Status: Draft
+Document ID: DOC-031
+Version: 0.2.0
+Status: Implemented (Milestone 09R)
 
 ## Purpose
 
@@ -24,26 +24,39 @@ Defines Retrieval-Augmented Generation architecture for CareerOS.
 ```text
 Document
   ↓
-Chunking
+Chunking (ChunkingService)
   ↓
-Embedding
+Embedding (AIService.embed via Ollama)
   ↓
-Vector Store
+Vector Storage (knowledge table embedding_json field)
   ↓
-Retrieval
+Retrieval (keyword search; semantic search placeholder)
   ↓
-Reranking
-  ↓
-LLM Response
+LLM Response (future: reranking + context injection)
 ```
 
-## Vector Collections
+## Storage
 
-- profile_chunks
-- resume_chunks
-- job_chunks
-- interview_chunks
-- learning_chunks
+Knowledge records are stored in a local SQLite `knowledge` table.
+Chunks and embeddings are serialized as JSON fields.
+All data remains local — no cloud vector database required.
+
+## Source Types
+
+- profile, resume, document, job, application, note, plugin, other
+
+## API Endpoints
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | /knowledge | List knowledge records |
+| POST | /knowledge | Create a knowledge record |
+| GET | /knowledge/{id} | Get record by ID |
+| DELETE | /knowledge/{id} | Delete a record |
+| POST | /knowledge/chunk | Chunk a record |
+| POST | /knowledge/index | Index (embed) a record |
+| POST | /knowledge/search | Keyword search |
+| GET | /knowledge/source/{type}/{id} | Get by source |
 
 ## Privacy Rule
 
