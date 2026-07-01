@@ -1,1 +1,35 @@
-* @maintainers
+# Each line is a file pattern followed by one or more owners.
+# Order matters: the last matching pattern takes precedence.
+
+# Default owner for everything (team placeholder)
+* @careeros/maintainers
+
+# Backend
+/backend/ @careeros/maintainers
+
+# Browser Extension
+/browser-extension/ @careeros/maintainers
+
+# Desktop App
+/desktop/ @careeros/maintainers
+
+# Plugin SDK
+/plugins/ @careeros/maintainers
+
+# Documentation
+/docs/ @careeros/maintainers
+
+# GitHub configuration
+/.github/ @careeros/maintainers
+
+# Scripts
+/scripts/ @careeros/maintainers
+
+# Root configuration files
+/README.md @careeros/maintainers
+/CHANGELOG.md @careeros/maintainers
+/ROADMAP.md @careeros/maintainers
+/CONTRIBUTING.md @careeros/maintainers
+/CODE_OF_CONDUCT.md @careeros/maintainers
+/SECURITY.md @careeros/maintainers
+/LICENSE @careeros/maintainers

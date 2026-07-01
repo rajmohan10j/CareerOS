@@ -2,7 +2,7 @@
 
 Document ID: DOC-075  
 Version: 0.1.0  
-Status: Implemented (Milestone 10A – Developer Preview Release Preparation)
+Status: Updated (Milestone 10B – GitHub Repository Publication Prep)
 
 ## Pre-Release
 

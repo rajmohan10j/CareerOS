@@ -1,6 +1,6 @@
 # Current Status
 
-Current Milestone: 10B – GitHub Repository Publication Prep
+Current Milestone: 10C – Installer / Setup Improvements
 
 Completed:
 - Milestone 09A: Backend skeleton
@@ -174,10 +174,15 @@ All Milestone 09 milestones completed.
   - Verified: all 1,184 tests pass, Ruff clean, no paid API, no telemetry, no secrets
   - See `docs/08-operations/DEVELOPER_PREVIEW_RELEASE_NOTES.md` for full release notes
 
-- **10B** – GitHub Repository Publication Prep 👈 next
-  - README refresh, CONTRIBUTING guide, issue/PR templates, license headers, CI workflow setup
+- **10B** – GitHub Repository Publication Prep ✅
+  - Created: 5 issue templates, 5 CI workflows, PR template, CODEOWNERS, discussion template
+  - Created: GITHUB_PUBLICATION_GUIDE.md, CONTRIBUTOR_ONBOARDING.md, FIRST_GOOD_ISSUES.md
+  - Rewrote: CONTRIBUTING.md, CODE_OF_CONDUCT.md, SECURITY.md, LICENSE (MIT), .gitignore, README.md
+  - Updated: ROADMAP.md, CHANGELOG.md, 002_CURRENT_STATUS.md, 003_NEXT_TASK.md, GITHUB_RELEASE_CHECKLIST.md, PUBLIC_RELEASE_READINESS.md
+  - Verified: all 1,184 tests pass, Ruff clean, no paid API, no telemetry, no secrets
+  - See `docs/06-community/GITHUB_PUBLICATION_GUIDE.md` for publication steps
 
-- **10C** – Installer / Setup Improvements
+- **10C** – Installer / Setup Improvements 👈 next
   - Bootstrap script (install.ps1), backend auto-setup (venv + deps), dependency verification, error recovery
 
 - **10D** – Real-World Browser Extension Testing Pack
@@ -189,4 +194,4 @@ All Milestone 09 milestones completed.
 - **10F** – Public Developer Preview v0.1.0
   - Release tag, final changelog review, announcement doc, distribution notes
 
-**10B is next.** Do not begin implementation without user confirmation.
+**10C is next.** Do not begin implementation without user confirmation.

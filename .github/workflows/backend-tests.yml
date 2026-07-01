@@ -1,16 +1,21 @@
-name: Lint
+name: Backend Tests
 
 on:
   push:
     branches: [main, develop]
+    paths:
+      - "backend/**"
+      - ".github/workflows/backend-tests.yml"
   pull_request:
     branches: [main]
+    paths:
+      - "backend/**"
 
 permissions:
   contents: read
 
 jobs:
-  ruff:
+  test:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -33,5 +38,8 @@ jobs:
       - name: Run Ruff
         run: python -m ruff check app tests
 
-      - name: Lint summary
-        run: echo "Ruff passed."
+      - name: Run tests
+        run: python -m pytest tests/ -v --tb=short -q
+
+      - name: Test summary
+        run: echo "Backend tests completed."

@@ -1,9 +1,18 @@
 # Next Task
 
 Current:
-Milestone 10B — GitHub Repository Publication Prep
+Milestone 10C — Installer / Setup Improvements
 
 Completed:
+- Milestone 10B – GitHub Repository Publication Prep
+  - Created: 5 issue templates (bug_report, feature_request, documentation, security_report, browser_site_compatibility)
+  - Created: 5 CI workflows (backend-tests, extension-tests, desktop-tests, lint, release-check)
+  - Created: PULL_REQUEST_TEMPLATE.md, CODEOWNERS, DISCUSSION_TEMPLATE.md
+  - Created: docs/06-community/ (GITHUB_PUBLICATION_GUIDE.md, CONTRIBUTOR_ONBOARDING.md, FIRST_GOOD_ISSUES.md)
+  - Rewrote: CONTRIBUTING.md (full contributor guide), CODE_OF_CONDUCT.md (Contributor Covenant v2.1), SECURITY.md (comprehensive), LICENSE (MIT full text), .gitignore (expanded), README.md (public-ready)
+  - Updated: ROADMAP.md, CHANGELOG.md, 002_CURRENT_STATUS.md, 003_NEXT_TASK.md, GITHUB_RELEASE_CHECKLIST.md, PUBLIC_RELEASE_READINESS.md
+  - Verified: all 1,184 tests pass, Ruff clean, no paid API, no telemetry, no secrets
+  - See docs/06-community/GITHUB_PUBLICATION_GUIDE.md for publication steps
 - Milestone 10A – Developer Preview Release Preparation
   - Created: DEVELOPER_PREVIEW_RELEASE_NOTES.md, GITHUB_RELEASE_CHECKLIST.md, PUBLIC_RELEASE_READINESS.md, BROWSER_SUPPORT_MATRIX.md, MILESTONE_09_RELEASE_MANIFEST.md
   - Updated: README.md, ROADMAP.md, CHANGELOG.md, SECURITY.md, 002_CURRENT_STATUS.md, 003_NEXT_TASK.md, START_HERE/000_START.md
@@ -127,14 +136,7 @@ All Milestone 09 milestones completed.
 
 ## Next: Milestone 10 – Developer Preview
 
-- **10B** – GitHub Repository Publication Prep 👈 next
-  - README refresh: features, screenshots, badges, quick-start section
-  - CONTRIBUTING guide: coding standards, PR workflow, test expectations
-  - Issue and PR templates (bug report, feature request, pull request)
-  - License headers on source files (MIT)
-  - CI workflow (GitHub Actions): run all tests on push/PR, Ruff check
-
-- **10C** – Installer / Setup Improvements
+- **10C** – Installer / Setup Improvements 👈 next
   - Bootstrap script (`install.ps1`): clone, venv creation, pip install, auto-detect dependencies
   - Backend auto-setup: verify Python version, create .venv, install deps, init DB
   - Dependency verification: check Python/Node.js versions and required packages

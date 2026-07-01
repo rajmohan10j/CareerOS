@@ -31,7 +31,7 @@ All 20 Milestone 09 sub-milestones completed.
 
 ## v0.2.0
 - Milestone 10A: Developer Preview Release Preparation — release notes, GitHub release checklist, public readiness doc, browser support matrix, Milestone 09 release manifest; README updated with features/browsers/privacy tables; 5 new docs created; all 1,184 tests verified; no paid API, no telemetry, no secrets confirmed
-- Milestone 10B: GitHub Repository Publication Prep (planned — README refresh, contribution guide, issue templates, license, CI)
+- Milestone 10B: GitHub Repository Publication Prep — 5 issue templates (bug, feature, docs, security, site compatibility), 5 CI workflows (backend, extension, desktop, lint, release-check), PR template, CODEOWNERS, discussion template, community docs (publication guide, contributor onboarding, first good issues); root files rewritten (README, CONTRIBUTING, CODE_OF_CONDUCT, SECURITY, LICENSE to MIT, .gitignore); all 1,184 tests pass; no paid API, no telemetry, no secrets
 - Milestone 10C: Installer / Setup Improvements (planned — bootstrap script, backend auto-setup, dependency checks)
 - Milestone 10D: Real-World Browser Extension Testing Pack (planned — test pages, fill scenarios, edge case database)
 - Milestone 10E: Desktop Backend Integration v1 (planned — desktop components call real backend APIs)

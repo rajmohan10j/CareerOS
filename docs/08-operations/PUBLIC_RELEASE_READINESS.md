@@ -2,7 +2,7 @@
 
 Document ID: DOC-076  
 Version: 0.1.0  
-Status: Implemented (Milestone 10A – Developer Preview Release Preparation)
+Status: Updated (Milestone 10B – GitHub Repository Publication Prep)
 
 ## Overview
 
@@ -41,8 +41,6 @@ Per `ENGINEERING_BIBLE/010_RELEASE_STANDARDS.md`, the release stages are:
 - Desktop app is a Vanilla JS SPA — not wrapped in Tauri/Electron
 - Desktop placeholder pages not wired to live API endpoints
 - No automated installer/setup script
-- No CI/CD pipeline
-- No contribution guide or issue templates
 - Firefox extension not implemented
 - Mobile browsers not supported
 - No distribution artifacts (zip, installer)
@@ -53,7 +51,7 @@ Per `ENGINEERING_BIBLE/010_RELEASE_STANDARDS.md`, the release stages are:
 
 To progress from Developer Preview to Alpha:
 
-1. **GitHub publication**: public repository, CONTRIBUTING guide, issue/PR templates, CI workflow (10B)
+1. ~~GitHub publication: public repository, CONTRIBUTING guide, issue/PR templates, CI workflow~~ ✅ (10B)
 2. **Installer**: automated setup script with dependency verification (10C)
 3. **Browser extension testing**: structured test pages, fill scenarios, edge case validation (10D)
 4. **Desktop integration**: wire all placeholder pages to live API endpoints (10E)
