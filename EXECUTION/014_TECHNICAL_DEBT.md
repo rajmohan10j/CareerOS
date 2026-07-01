@@ -10,3 +10,10 @@ Capture shortcuts and future improvements.
 - ATS keyword matching is exact/case-insensitive only. Synonym detection or fuzzy matching not implemented.
 - ATS formatting analysis is heuristic-based (tables, images, section headers, line length, non-ASCII). More sophisticated ATS parsing engines may detect additional issues.
 
+
+## Milestone 09K Follow-up
+- No DOM-based integration tests yet. Add jsdom or browser test runner later.
+- Confidence scoring is heuristic-based and should be refined after real-world form testing.
+- Some unusual form layouts may produce false positives.
+- Field label matching currently supports English patterns only. Add i18n later.
+

@@ -1,6 +1,6 @@
 # Current Status
 
-Current Milestone: 09J – Browser Extension Skeleton
+Current Milestone: 09K – Browser Field Detection Engine
 
 Completed:
 - Milestone 09A: Backend skeleton
@@ -42,11 +42,20 @@ Completed:
   - No browsing history, tabs, cookies, or credentials collected
   - No autofill or submit behavior implemented
   - 37 extension structure/permission tests, all passing
+- Milestone 09K: Browser Field Detection Engine
+  - fieldDetector.js: DOM scanner for input/textarea/select/radio/checkbox
+  - Extracts signals: name, id, label, placeholder, aria-label, nearby text, section heading, input type, select options
+  - fieldClassifier.js: Intent classifier — 20 field types with confidence scoring
+  - Sensitive field tagging (phone, address, salary, work authorization)
+  - Popup "Detect Form Fields" button with field count display
+  - Collapsible debug table showing all detected fields with intent/confidence/sensitivity
+  - No autofill, no submit, no credential storage, no network calls from detector/classifier
+  - 93 new extension tests (153 total), all passing
 
 Remaining Milestones (from ROADMAP.md):
-- 09K Desktop App
-- 09L Mobile
-- 09M Plugin SDK
-- 09N RAG
-- 09O Analytics
-- 09P Production
+- 09L Desktop App
+- 09M Mobile
+- 09N Plugin SDK
+- 09O RAG
+- 09P Analytics
+- 09Q Production

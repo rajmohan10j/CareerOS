@@ -1,7 +1,7 @@
 # Next Task
 
 Current:
-Milestone 09J – Browser Extension Skeleton
+Milestone 09K – Browser Field Detection Engine
 
 Completed:
 - Milestone 09A – Backend Skeleton
@@ -33,7 +33,14 @@ Completed:
   - Options page (backend URL configuration)
   - Minimal permissions (storage only)
   - 37 extension structure/permission tests
+- Milestone 09K – Browser Field Detection Engine:
+  - fieldDetector.js: DOM scanner for input/textarea/select/radio/checkbox
+  - fieldClassifier.js: Intent classifier — 20 field types with confidence scoring
+  - Sensitive field tagging (phone, address, salary, work authorization)
+  - Popup "Detect Form Fields" button with field count + debug table
+  - No autofill, no submit, no credential storage, no network calls
+  - 93 new extension tests (153 total), all passing
 
 Next:
-- Desktop App (Milestone 09K) — not started
+- Desktop App (Milestone 09L) — not started
 - Await user instructions

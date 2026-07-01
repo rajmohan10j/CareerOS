@@ -104,6 +104,8 @@ const expectedFiles = [
   "manifest.json",
   "src/background.js",
   "src/content.js",
+  "src/fieldDetector.js",
+  "src/fieldClassifier.js",
   "src/popup.html",
   "src/popup.js",
   "src/options.html",
@@ -113,6 +115,9 @@ const expectedFiles = [
   "icons/icon16.png",
   "icons/icon48.png",
   "icons/icon128.png",
+  "tests/extension.test.js",
+  "tests/fieldDetector.test.js",
+  "tests/fieldClassifier.test.js",
 ];
 
 for (const f of expectedFiles) {
@@ -127,6 +132,14 @@ const background = readFile("src/background.js");
 assert(
   background.includes("CHECK_HEALTH"),
   "background.js handles CHECK_HEALTH message"
+);
+assert(
+  background.includes("DETECT_FIELDS"),
+  "background.js handles DETECT_FIELDS message"
+);
+assert(
+  background.includes("tabs.sendMessage"),
+  "background.js forwards to content script"
 );
 assert(
   background.includes("http://localhost:8000"),
@@ -146,17 +159,53 @@ assert(
   content.includes("GET_PAGE_INFO"),
   "content.js handles GET_PAGE_INFO message"
 );
+assert(
+  content.includes("DETECT_FIELDS"),
+  "content.js handles DETECT_FIELDS message"
+);
+assert(
+  content.includes("detectFields"),
+  "content.js imports detectFields"
+);
+assert(
+  content.includes("classifyFields"),
+  "content.js imports classifyFields"
+);
 
 const popupHTML = readFile("src/popup.html");
 assert(
   popupHTML.includes("backendStatus"),
   "popup.html has backendStatus element"
 );
+assert(
+  popupHTML.includes("detectFieldsBtn"),
+  "popup.html has detect fields button"
+);
+assert(
+  popupHTML.includes("fieldCount"),
+  "popup.html has field count element"
+);
+assert(
+  popupHTML.includes("debugContent"),
+  "popup.html has debug content area"
+);
 
 const popupJS = readFile("src/popup.js");
 assert(
   popupJS.includes("checkHealth"),
   "popup.js imports and calls checkHealth"
+);
+assert(
+  popupJS.includes("DETECT_FIELDS"),
+  "popup.js sends DETECT_FIELDS message"
+);
+assert(
+  popupJS.includes("renderDebugTable"),
+  "popup.js has renderDebugTable function"
+);
+assert(
+  popupJS.includes("fieldCount"),
+  "popup.js displays field count"
 );
 
 const apiClient = readFile("src/apiClient.js");
@@ -175,6 +224,38 @@ assert(
 
 const popupCSS = readFile("styles/popup.css");
 assert(popupCSS.length > 0, "popup.css is not empty");
+
+const detector = readFile("src/fieldDetector.js");
+assert(
+  detector.includes("querySelectorAll"),
+  "fieldDetector.js uses querySelectorAll"
+);
+assert(
+  detector.includes("findLabel"),
+  "fieldDetector.js has findLabel function"
+);
+assert(
+  !detector.includes(".value ="),
+  "fieldDetector.js does not assign values"
+);
+assert(
+  !detector.includes(".submit("),
+  "fieldDetector.js does not submit forms"
+);
+
+const classifier = readFile("src/fieldClassifier.js");
+assert(
+  classifier.includes("SENSITIVE_TYPES"),
+  "fieldClassifier.js defines SENSITIVE_TYPES"
+);
+assert(
+  classifier.includes("sensitive"),
+  "fieldClassifier.js marks sensitive fields"
+);
+assert(
+  !classifier.includes(".value ="),
+  "fieldClassifier.js does not assign values"
+);
 
 // ── Summary ───────────────────────────────────────────────────────
 

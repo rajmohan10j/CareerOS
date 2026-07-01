@@ -1,3 +1,6 @@
+import { detectFields } from "./fieldDetector.js";
+import { classifyFields } from "./fieldClassifier.js";
+
 (function () {
   "use strict";
 
@@ -13,6 +16,26 @@
         url: window.location.href,
         title: document.title,
       });
+      return;
+    }
+    if (message.type === "DETECT_FIELDS") {
+      try {
+        const raw = detectFields();
+        const classified = classifyFields(raw);
+        sendResponse({
+          success: true,
+          fieldCount: classified.length,
+          fields: classified,
+          url: window.location.href,
+        });
+      } catch (err) {
+        sendResponse({
+          success: false,
+          error: err.message,
+          fieldCount: 0,
+          fields: [],
+        });
+      }
       return;
     }
   });

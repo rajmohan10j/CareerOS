@@ -12,6 +12,7 @@
         <h1 class="title">CareerOS</h1>
         <span class="version">v0.1.0</span>
       </header>
+
       <section class="status-section">
         <div class="status-row">
           <span class="label">Backend</span>
@@ -26,7 +27,21 @@
           <span id="backendMode" class="value">—</span>
         </div>
       </section>
+
       <div id="errorDetail" class="error-detail hidden"></div>
+
+      <section class="detection-section">
+        <button id="detectFieldsBtn" class="detect-btn">Detect Form Fields</button>
+        <div id="fieldSummary" class="field-summary hidden">
+          <span class="label">Fields detected</span>
+          <span id="fieldCount" class="field-count">0</span>
+        </div>
+        <div id="fieldDebug" class="field-debug hidden">
+          <button id="toggleDebugBtn" class="debug-toggle">Show field details</button>
+          <div id="debugContent" class="debug-content hidden"></div>
+        </div>
+      </section>
+
       <footer class="footer">
         <a href="#" id="openOptionsLink">Settings</a>
       </footer>

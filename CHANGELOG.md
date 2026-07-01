@@ -14,3 +14,4 @@
 - Milestone 09H: Additional Domain Models (Experience, Skill, Application CRUD with filtering)
 - Milestone 09I: ATS Optimization Engine (score/analyze/optimize, keyword matching, formatting analysis, ATS-optimized resume generation, 66 tests)
 - Milestone 09J: Browser Extension Skeleton (Manifest V3, popup health check, content script placeholder, options page, minimal permissions, 37 tests)
+- Milestone 09K: Browser Field Detection Engine (fieldDetector.js, fieldClassifier.js, 20 field types, confidence scoring, sensitive field tagging, debug table, 93 tests)

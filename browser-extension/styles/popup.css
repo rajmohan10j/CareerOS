@@ -10,7 +10,7 @@ body {
   font-size: 14px;
   color: #1a1a2e;
   background: #f8f9fa;
-  width: 320px;
+  width: 360px;
 }
 
 .container {
@@ -90,6 +90,134 @@ body {
 
 .error-detail.hidden {
   display: none;
+}
+
+.detection-section {
+  margin-bottom: 12px;
+}
+
+.detect-btn {
+  width: 100%;
+  padding: 10px;
+  background: #1565c0;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.detect-btn:hover {
+  background: #0d47a1;
+}
+
+.detect-btn:disabled {
+  background: #90a4ae;
+  cursor: not-allowed;
+}
+
+.field-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  margin-top: 10px;
+  background: #e8f5e9;
+  border: 1px solid #a5d6a7;
+  border-radius: 6px;
+}
+
+.field-summary.hidden {
+  display: none;
+}
+
+.field-count {
+  font-family: "SF Mono", "Fira Code", monospace;
+  font-size: 20px;
+  font-weight: 700;
+  color: #2e7d32;
+}
+
+.field-debug {
+  margin-top: 8px;
+}
+
+.field-debug.hidden {
+  display: none;
+}
+
+.debug-toggle {
+  width: 100%;
+  padding: 6px;
+  background: #eee;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  color: #555;
+}
+
+.debug-toggle:hover {
+  background: #e0e0e0;
+}
+
+.debug-content {
+  margin-top: 6px;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.debug-content.hidden {
+  display: none;
+}
+
+.debug-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+}
+
+.debug-table th {
+  background: #f0f0f0;
+  padding: 4px 6px;
+  text-align: left;
+  position: sticky;
+  top: 0;
+  font-weight: 600;
+  border-bottom: 1px solid #ddd;
+}
+
+.debug-table td {
+  padding: 3px 6px;
+  border-bottom: 1px solid #f0f0f0;
+  white-space: nowrap;
+}
+
+.debug-table tbody tr:hover {
+  background: #f5f5f5;
+}
+
+.debug-signal {
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sensitive-yes {
+  color: #c62828;
+  font-weight: 600;
+}
+
+.sensitive-no {
+  color: #888;
+}
+
+.debug-empty {
+  font-size: 12px;
+  color: #888;
+  padding: 8px;
 }
 
 .footer {

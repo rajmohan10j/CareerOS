@@ -35,4 +35,22 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     });
     return true;
   }
+
+  if (message.type === "DETECT_FIELDS") {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      const tab = tabs[0];
+      if (!tab || !tab.id) {
+        sendResponse({ success: false, error: "No active tab", fieldCount: 0, fields: [] });
+        return;
+      }
+      chrome.tabs.sendMessage(tab.id, { type: "DETECT_FIELDS" }, (response) => {
+        if (chrome.runtime.lastError) {
+          sendResponse({ success: false, error: chrome.runtime.lastError.message, fieldCount: 0, fields: [] });
+          return;
+        }
+        sendResponse(response || { success: false, error: "No response from content script", fieldCount: 0, fields: [] });
+      });
+    });
+    return true;
+  }
 });
