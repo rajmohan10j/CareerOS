@@ -1,9 +1,13 @@
 from app.ai.base import EmbeddingOptions, GenerationOptions, ModelProvider
+from app.models.application import Application
 from app.models.database import BaseTable
-from app.models.openrouter import OpenRouterProvider
 from app.models.document import Document
+from app.models.experience import Experience
+from app.models.job import Job
+from app.models.openrouter import OpenRouterProvider
 from app.models.profile import Profile
 from app.models.resume import Resume
+from app.models.skill import Skill
 
 __all__ = [
     "ModelProvider",
@@ -14,4 +18,8 @@ __all__ = [
     "Profile",
     "Resume",
     "Document",
+    "Job",
+    "Experience",
+    "Skill",
+    "Application",
 ]

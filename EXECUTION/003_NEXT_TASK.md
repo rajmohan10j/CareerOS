@@ -1,7 +1,7 @@
 # Next Task
 
 Current:
-Milestone 09G – Additional domain models (Job, Application, Experience, Skill)
+Milestone 09H – Additional Domain Models (Experience, Skill, Application)
 
 Completed:
 - Milestone 09A – Backend Skeleton
@@ -9,16 +9,15 @@ Completed:
 - Milestone 09C – Master Candidate Profile API
 - Milestone 09D – AI Provider Service
 - Milestone 09E – Resume Intelligence Engine
-- Milestone 09F – Document Intelligence Engine:
-  - Document SQLModel table with metadata storage and categorization
-  - DocumentCreate, DocumentUpdate, DocumentResponse Pydantic schemas
-  - DocumentRepository: CRUD + full-text search (title, content, filename, category)
-  - DocumentService: CRUD + AI parse (extract JSON metadata), AI classify (categorize into resume/certificate/transcript/job_description/cover_letter/other)
-  - 8 endpoints: GET /documents, GET /documents/search?q=, GET /documents/{id}, POST /documents, POST /documents/{id}/parse, POST /documents/{id}/classify, PUT /documents/{id}, DELETE /documents/{id}
-  - 45 tests covering API, service, repository, no-regression, edge cases
-  - Full test suite: 150/150 passing
+- Milestone 09F – Document Intelligence Engine
+- Milestone 09G – Job Intelligence Engine
+- Milestone 09H – Additional domain models:
+  - Experience model (company, title, start_date, end_date, description, achievements_json)
+  - Skill model (name, category, proficiency, evidence) with list_by_category filtering
+  - Application model (job_id, resume_id, status, applied_at, notes, follow_up_date) with list_by_status and list_by_job filtering
+  - All three with full CRUD: model, schemas, repository, service, API, 6 endpoints each
+  - 85 new tests (290 total), all passing, ruff clean
 
 Next:
-- Add remaining core domain models (Job, Application, Experience, Skill)
-- Add corresponding repositories, services, and API endpoints
-- Add tests for each model
+- No remaining domain models to implement
+- Await user instructions for next milestone

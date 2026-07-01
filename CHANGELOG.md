@@ -2,3 +2,13 @@
 
 ## v0.1.0
 - Initial Blueprint repository created.
+
+## v0.1.1
+- Milestone 09A: Backend skeleton (FastAPI, /health, layered structure, pytest)
+- Milestone 09B: Database setup (SQLite + SQLModel, BaseTable)
+- Milestone 09C: Master Candidate Profile API
+- Milestone 09D: AI Provider Service (Ollama, registry, router, retry)
+- Milestone 09E: Resume Intelligence Engine (CRUD, AI generation, versioning)
+- Milestone 09F: Document Intelligence Engine (CRUD, AI parse/classify, search)
+- Milestone 09G: Job Intelligence Engine (CRUD, AI analyze/evaluate-text, fit scoring, gap analysis, recommendation)
+- Milestone 09H: Additional Domain Models (Experience, Skill, Application CRUD with filtering)
