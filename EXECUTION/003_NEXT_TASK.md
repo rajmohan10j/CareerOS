@@ -93,5 +93,15 @@ Completed:
   - 55 plugin tests, all 435 backend tests passing, Ruff clean
 
 Next:
-- RAG (Milestone 09R) — not started
+- RAG & Knowledge Base Foundation (Milestone 09R) — not started
+  - Vector storage for resume/document/job embeddings
+  - Semantic search across profile, resumes, documents, jobs
+  - Knowledge base for skill/job/industry data
+  - Retrieval-Augmented Generation for AI prompts
+- Analytics Dashboard Foundation (Milestone 09S) — not started
+  - Dashboard page with statistics endpoints
+  - Job application tracking charts
+  - Resume version history tracking
+  - ATS score trends
+  - Profile completeness metrics
 - Await user instructions
