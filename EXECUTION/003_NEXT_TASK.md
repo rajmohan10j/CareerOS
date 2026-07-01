@@ -1,7 +1,7 @@
 # Next Task
 
 Current:
-Milestone 09G – Job Intelligence Engine (enhanced)
+Milestone 09I – ATS Optimization Engine
 
 Completed:
 - Milestone 09A – Backend Skeleton
@@ -17,10 +17,15 @@ Completed:
   - fit_score returned as float
   - POST /jobs/{id}/evaluate and POST /jobs/evaluate-text return structured JobEvaluateResponse (response_model)
   - Evaluation JSON saved to job record
-  - 24 new tests: API structured response (5), service skill matching (3), skill matching unit (5), fit score parsing (5), build response (2), no-regression (3)
-  - 314 total tests, all passing, ruff clean
+  - 24 new tests (314 total), all passing, ruff clean
 - Milestone 09H – Additional domain models (Experience, Skill, Application)
+- Milestone 09I – ATS Optimization Engine:
+  - POST /ats/score: ATS compatibility score + keyword matching + formatting analysis
+  - POST /ats/analyze: Full analysis with section scores, compliance issues, content alignment
+  - POST /ats/optimize: ATS-optimized resume generation as new versioned record
+  - AtsService with score/analyze/optimize methods, wired to all repositories + AI
+  - 66 new tests (380 total), all passing, ruff clean
 
 Next:
-- No remaining domain models to implement
+- No remaining intelligence milestones to implement
 - Await user instructions for next milestone

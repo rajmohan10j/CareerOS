@@ -4,6 +4,7 @@ from fastapi import FastAPI
 
 from app.api.ai import router as ai_router
 from app.api.application import router as application_router
+from app.api.ats import router as ats_router
 from app.api.document import router as document_router
 from app.api.experience import router as experience_router
 from app.api.health import router as health_router
@@ -36,4 +37,5 @@ app.include_router(job_router)
 app.include_router(experience_router)
 app.include_router(skill_router)
 app.include_router(application_router)
+app.include_router(ats_router)
 app.include_router(ai_router)

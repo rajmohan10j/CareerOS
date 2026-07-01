@@ -1,6 +1,6 @@
 # Current Status
 
-Current Milestone: 09G – Job Intelligence Engine (enhanced)
+Current Milestone: 09I – ATS Optimization Engine
 
 Completed:
 - Milestone 09A: Backend skeleton
@@ -23,3 +23,20 @@ Completed:
   - Experience: model, schemas, repository, service, 5 API endpoints
   - Skill: model, schemas, repository (with list_by_category), service, 5 API endpoints
   - Application: model, schemas, repository (with list_by_status, list_by_job), service, 5 API endpoints
+- Milestone 09I: ATS Optimization Engine
+  - POST /ats/score: ATS compatibility score, keyword matching against Skill records, formatting heuristics
+  - POST /ats/analyze: Full analysis with section scores, content alignment, compliance check
+  - POST /ats/optimize: ATS-optimized resume generation as new versioned record
+  - AtsService with score/analyze/optimize methods, wired to SkillRepo, ExperienceRepo, ProfileRepo, JobRepo, ResumeRepo, AIService
+  - Formatting analyzer: detects tables, images, missing section headers, long lines, non-ASCII
+  - AI prompts include actual skills & experience data; AI failures fall back gracefully
+  - 66 new tests (380 total), all passing, ruff clean
+  - ATS_ENGINE.md spec updated to v0.2.0
+
+Remaining Milestones (from ROADMAP.md):
+- 09J Browser Extension
+- 09K Desktop App
+- 09L Plugin SDK
+- 09M RAG
+- 09N Analytics
+- 09O Production
