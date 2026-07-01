@@ -3,7 +3,7 @@
   Run all CareerOS browser extension tests.
 #>
 
-$ExtensionDir = Join-Path $PSScriptRoot ".." "browser-extension" -Resolve
+$ExtensionDir = Resolve-Path "$PSScriptRoot\..\browser-extension"
 
 Write-Host "[test-extension] Running extension tests..."
 Push-Location $ExtensionDir

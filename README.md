@@ -1,16 +1,34 @@
 # CareerOS
 
-Local-first career management platform with AI-powered job tracking, resume optimization, browser autofill, and analytics.
+> Developer Preview v0.1.1 — Local-first career management platform with AI-powered job tracking, resume optimization, browser autofill, and analytics.
 
-## Milestone 09 Complete
+[![Milestone 09](https://img.shields.io/badge/milestone-09--T%20complete-brightgreen)](#)
+[![Tests](https://img.shields.io/badge/tests-1%2C184%20passing-brightgreen)](#)
+[![License](https://img.shields.io/badge/license-MIT-blue)](#)
 
-All 20 sub-milestones (09A–09T) are implemented:
+## Privacy & Security
 
-- **Backend** (FastAPI, SQLite, 506 tests) — Profile, resumes, documents, jobs, applications, skills, experience, ATS optimization, RAG knowledge base, plugin SDK, analytics
-- **Browser Extension** (Manifest V3, 570 tests) — Field detection, autofill mapping, approval preview, safe fill execution
-- **Desktop App** (Vanilla JS SPA, 108 tests) — Dashboard with live analytics, sidebar navigation, health monitoring
-- **Plugin SDK** — Manifest schema, validation, lifecycle management, 7 API endpoints
-- **Operations** — 7 PowerShell scripts, local startup guide, troubleshooting guide
+- **Local-first** — all data stays on your machine
+- **No paid API required** — works with free local Ollama
+- **No telemetry** — no analytics, no tracking, no external calls
+- **No cloud dependency** — fully self-contained
+- **User approval required** for all autofill operations
+- **Minimal permissions** — `storage` + `localhost:8000` only
+
+## Features
+
+| Module | Description |
+|---|---|
+| **Backend APIs** | FastAPI + SQLite — profile, resumes, documents, jobs, applications, skills, experience |
+| **Resume Engine** | AI-powered generation, versioning, and content optimization |
+| **Document Intelligence** | AI parse, classify, and search uploaded documents |
+| **Job Intelligence** | AI evaluate, skill matching, gap analysis, and recommendations |
+| **ATS Engine** | Score, analyze, and optimize resumes for applicant tracking systems |
+| **Browser Extension** | Manifest V3 — field detection (22 types), autofill mapping, user approval, safe fill |
+| **Desktop Shell** | Vanilla JS SPA — dashboard, analytics, health monitoring, settings |
+| **Plugin SDK** | Manifest schema, validation, lifecycle management, 7 API endpoints |
+| **Knowledge Base** | RAG-powered chunking, embedding, and keyword search |
+| **Analytics Dashboard** | 8 live stat cards across all platform modules |
 
 ## Quick Start
 
@@ -26,6 +44,19 @@ Open `http://127.0.0.1:8000/docs` for Swagger UI.
 
 Run `.\scripts\doctor.ps1` to check your environment.
 
+## Browser Support
+
+| Browser | Status |
+|---|---|
+| Chrome | ✅ Primary |
+| Edge | ✅ Primary |
+| Brave | 🔶 Best effort |
+| Firefox | 📋 Planned |
+| Safari | 🔮 Future |
+| Mobile | ❌ Not supported |
+
+See `browser-extension/docs/BROWSER_SUPPORT_MATRIX.md` for details.
+
 ## Test Count
 
 | Component | Tests |
@@ -35,14 +66,9 @@ Run `.\scripts\doctor.ps1` to check your environment.
 | Desktop | 108 |
 | **Total** | **1,184** |
 
-## Next: Milestone 10 – Developer Preview
+## Documentation
 
-- **10A** – Developer Preview Release Preparation
-- **10B** – GitHub Repository Publication Prep
-- **10C** – Installer / Setup Improvements
-- **10D** – Real-World Browser Extension Testing Pack
-- **10E** – Desktop Backend Integration v1
-- **10F** – Public Developer Preview v0.1.0
+See `docs/08-operations/LOCAL_STARTUP_GUIDE.md` for full setup instructions.
 
 ## License
 

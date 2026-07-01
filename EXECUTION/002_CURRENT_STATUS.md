@@ -1,6 +1,6 @@
 # Current Status
 
-Current Milestone: 10A – Developer Preview Release Preparation
+Current Milestone: 10B – GitHub Repository Publication Prep
 
 Completed:
 - Milestone 09A: Backend skeleton
@@ -166,13 +166,27 @@ All Milestone 09 milestones completed.
 
 ---
 
-## Next: Milestone 10 – Developer Preview
+## Milestone 10 – Developer Preview
 
-- **10A** – Developer Preview Release Preparation: Test hardening, doc finalization, checklist completion, release-readiness audit.
-- **10B** – GitHub Repository Publication Prep: README refresh, CONTRIBUTING guide, issue/PR templates, license headers, CI workflow setup.
-- **10C** – Installer / Setup Improvements: Bootstrap script (install.bat/ps1), backend auto-setup (venv + deps), dependency verification, error recovery.
-- **10D** – Real-World Browser Extension Testing Pack: Structured test pages (multiple form layouts, dynamic fields, shadow DOM, iframes), fill scenario catalog, edge case database, automated detection/mapping/fill tests.
-- **10E** – Desktop Backend Integration v1: Replace placeholder pages with live API calls, wire Profile/Resume/Job/Application pages to real endpoints, form validation, error handling.
-- **10F** – Public Developer Preview v0.1.0: Release tag, final changelog review, announcement doc, distribution notes.
+- **10A** — Developer Preview Release Preparation ✅
+  - Created: `DEVELOPER_PREVIEW_RELEASE_NOTES.md`, `GITHUB_RELEASE_CHECKLIST.md`, `PUBLIC_RELEASE_READINESS.md`, `BROWSER_SUPPORT_MATRIX.md`, `MILESTONE_09_RELEASE_MANIFEST.md`
+  - Updated: `README.md`, `ROADMAP.md`, `CHANGELOG.md`, `SECURITY.md`, `002_CURRENT_STATUS.md`, `003_NEXT_TASK.md`, `START_HERE/000_START.md`
+  - Verified: all 1,184 tests pass, Ruff clean, no paid API, no telemetry, no secrets
+  - See `docs/08-operations/DEVELOPER_PREVIEW_RELEASE_NOTES.md` for full release notes
 
-**10A is next.** Do not begin implementation without user confirmation.
+- **10B** – GitHub Repository Publication Prep 👈 next
+  - README refresh, CONTRIBUTING guide, issue/PR templates, license headers, CI workflow setup
+
+- **10C** – Installer / Setup Improvements
+  - Bootstrap script (install.ps1), backend auto-setup (venv + deps), dependency verification, error recovery
+
+- **10D** – Real-World Browser Extension Testing Pack
+  - Structured test pages (multiple form layouts, dynamic fields, shadow DOM, iframes), fill scenario catalog, edge case database, automated detection/mapping/fill tests
+
+- **10E** – Desktop Backend Integration v1
+  - Replace placeholder pages with live API calls, wire Profile/Resume/Job/Application pages to real endpoints, form validation, error handling
+
+- **10F** – Public Developer Preview v0.1.0
+  - Release tag, final changelog review, announcement doc, distribution notes
+
+**10B is next.** Do not begin implementation without user confirmation.

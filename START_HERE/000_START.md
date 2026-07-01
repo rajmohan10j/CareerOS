@@ -1,9 +1,10 @@
 # Start Here
 
-## CareerOS — Milestone 09 Complete
+## CareerOS — Developer Preview v0.1.1
 
-All 20 sub-milestones (09A–09T) are implemented.  
-**Next:** Milestone 10 – Developer Preview (starting with 10A).
+All 20 Milestone 09 sub-milestones (09A–09T) are implemented.  
+Milestone 10A (Developer Preview Release Preparation) is complete.  
+**Next:** Milestone 10B – GitHub Repository Publication Prep.
 
 See `EXECUTION/003_NEXT_TASK.md` for detailed milestone plan.
 

@@ -9,15 +9,15 @@
   .\scripts\start-backend.ps1 --reload
 #>
 
-$BackendDir = Join-Path $PSScriptRoot ".." "backend" -Resolve
+$BackendDir = Resolve-Path "$PSScriptRoot\..\backend"
 $Python = "python"
 
 # Try common venv locations
 $VenvDirs = @(
-    Join-Path $BackendDir ".venv\Scripts\python.exe",
-    Join-Path $BackendDir "venv\Scripts\python.exe",
-    Join-Path $BackendDir ".venv\bin\python",
-    Join-Path $BackendDir "venv\bin\python"
+    "$BackendDir\.venv\Scripts\python.exe",
+    "$BackendDir\venv\Scripts\python.exe",
+    "$BackendDir\.venv\bin\python",
+    "$BackendDir\venv\bin\python"
 )
 
 foreach ($vp in $VenvDirs) {

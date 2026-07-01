@@ -1,9 +1,14 @@
 # Next Task
 
 Current:
-Milestone 10A — Developer Preview Release Preparation
+Milestone 10B — GitHub Repository Publication Prep
 
 Completed:
+- Milestone 10A – Developer Preview Release Preparation
+  - Created: DEVELOPER_PREVIEW_RELEASE_NOTES.md, GITHUB_RELEASE_CHECKLIST.md, PUBLIC_RELEASE_READINESS.md, BROWSER_SUPPORT_MATRIX.md, MILESTONE_09_RELEASE_MANIFEST.md
+  - Updated: README.md, ROADMAP.md, CHANGELOG.md, SECURITY.md, 002_CURRENT_STATUS.md, 003_NEXT_TASK.md, START_HERE/000_START.md
+  - Verified: all 1,184 tests pass, Ruff clean, no paid API, no telemetry, no secrets
+  - See docs/08-operations/DEVELOPER_PREVIEW_RELEASE_NOTES.md for full release notes
 - Milestone 09A – Backend Skeleton
 - Milestone 09B – Database setup (SQLite + SQLModel)
 - Milestone 09C – Master Candidate Profile API
@@ -122,13 +127,7 @@ All Milestone 09 milestones completed.
 
 ## Next: Milestone 10 – Developer Preview
 
-- **10A** – Developer Preview Release Preparation
-  - Test hardening: review and stabilize all test suites (backend, extension, desktop)
-  - Documentation finalization: verify all doc cross-references, remove draft markings
-  - Release checklist completion: run DEVELOPER_PREVIEW_CHECKLIST.md end-to-end
-  - Release-readiness audit: verify no secrets, no hardcoded paths, no stale references
-
-- **10B** – GitHub Repository Publication Prep
+- **10B** – GitHub Repository Publication Prep 👈 next
   - README refresh: features, screenshots, badges, quick-start section
   - CONTRIBUTING guide: coding standards, PR workflow, test expectations
   - Issue and PR templates (bug report, feature request, pull request)

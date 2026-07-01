@@ -3,7 +3,7 @@
   Run all CareerOS desktop app tests.
 #>
 
-$DesktopDir = Join-Path $PSScriptRoot ".." "desktop" -Resolve
+$DesktopDir = Resolve-Path "$PSScriptRoot\..\desktop"
 
 Write-Host "[test-desktop] Running desktop tests..."
 Push-Location $DesktopDir

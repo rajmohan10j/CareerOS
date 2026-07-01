@@ -6,15 +6,15 @@
   Exits with non-zero if any check fails.
 #>
 
-$BackendDir = Join-Path $PSScriptRoot ".." "backend" -Resolve
+$BackendDir = Resolve-Path "$PSScriptRoot\..\backend"
 $Python = "python"
 
 # Try common venv locations
 $VenvDirs = @(
-    Join-Path $BackendDir ".venv\Scripts\python.exe",
-    Join-Path $BackendDir "venv\Scripts\python.exe",
-    Join-Path $BackendDir ".venv\bin\python",
-    Join-Path $BackendDir "venv\bin\python"
+    "$BackendDir\.venv\Scripts\python.exe",
+    "$BackendDir\venv\Scripts\python.exe",
+    "$BackendDir\.venv\bin\python",
+    "$BackendDir\venv\bin\python"
 )
 
 foreach ($vp in $VenvDirs) {
@@ -28,7 +28,7 @@ $ErrorActionPreference = "Continue"
 $ExitCode = 0
 
 Write-Host "[test-backend] Running Ruff..."
-& $Python -m ruff check $BackendDir\app $BackendDir\tests
+& $Python -m ruff check "$BackendDir\app" "$BackendDir\tests"
 if ($LASTEXITCODE -ne 0) {
     Write-Host "[test-backend] FAILED: Ruff found issues" -ForegroundColor Red
     $ExitCode = 1
