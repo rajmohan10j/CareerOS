@@ -47,12 +47,13 @@ desktop/
 ├── styles/
 │   └── app.css                 # Application styles
 └── tests/
-    └── desktop.test.js         # 91 tests — file structure, pages, security
+    └── desktop.test.js         # 108 tests — file structure, pages, security, analytics dashboard
 ```
 
 ## Capabilities
 
-- Dashboard with overview cards linking to each module
+- Dashboard with 8 live analytics cards (Profile, Resumes, Jobs, Applications, Documents, Knowledge, Plugins, Backend Status) fetched from `GET /analytics/summary`
+- Dashboard shows empty-state messages when no data exists
 - Sidebar navigation with 9 pages (hash-based SPA routing)
 - Backend health check (checks `GET /health` on startup and every 30s)
 - Status bar showing backend connection status

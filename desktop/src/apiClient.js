@@ -47,4 +47,27 @@ async function checkHealth() {
   }
 }
 
-export { checkHealth, getStoredBackendUrl, setStoredBackendUrl, DEFAULT_BACKEND_URL };
+async function fetchAnalytics() {
+  const baseUrl = await getStoredBackendUrl();
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 5000);
+  try {
+    const resp = await fetch(`${baseUrl}/analytics/summary`, {
+      signal: controller.signal,
+    });
+    clearTimeout(timeout);
+    if (!resp.ok) {
+      return { status: "error", message: `Analytics returned HTTP ${resp.status}` };
+    }
+    const data = await resp.json();
+    return { status: "ok", data };
+  } catch (err) {
+    clearTimeout(timeout);
+    if (err.name === "AbortError") {
+      return { status: "error", message: "Analytics request timed out" };
+    }
+    return { status: "error", message: `Analytics error: ${err.message}` };
+  }
+}
+
+export { checkHealth, fetchAnalytics, getStoredBackendUrl, setStoredBackendUrl, DEFAULT_BACKEND_URL };

@@ -140,11 +140,13 @@ console.log("\n[api client]");
 
 const apiClient = readFile("src/apiClient.js");
 assert(apiClient.includes("checkHealth"), "apiClient.js has checkHealth");
+assert(apiClient.includes("fetchAnalytics"), "apiClient.js has fetchAnalytics");
 assert(apiClient.includes("getStoredBackendUrl"), "apiClient.js has getStoredBackendUrl");
 assert(apiClient.includes("setStoredBackendUrl"), "apiClient.js has setStoredBackendUrl");
 assert(apiClient.includes("DEFAULT_BACKEND_URL"), "apiClient.js has DEFAULT_BACKEND_URL");
 assert(apiClient.includes("AbortController"), "apiClient.js uses AbortController");
 assert(apiClient.includes("/health"), "apiClient.js calls /health endpoint");
+assert(apiClient.includes("/analytics/summary"), "apiClient.js calls /analytics/summary endpoint");
 assert(apiClient.includes("localhost:8000"), "apiClient.js defaults to localhost:8000");
 assert(
   !apiClient.includes("apiKey") && !apiClient.includes("api_key") && !apiClient.includes("secret"),
@@ -224,6 +226,35 @@ assert(
 assert(
   !sourceFiles.includes("apiKey") && !sourceFiles.includes("api_key") && !sourceFiles.includes("secret"),
   "no secrets hardcoded in source"
+);
+
+// ── Analytics dashboard ────────────────────────────────────────
+
+console.log("\n[analytics dashboard]");
+
+const dashboard = readFile("src/pages/Dashboard.js");
+assert(dashboard.includes("fetchAnalytics"), "Dashboard uses fetchAnalytics");
+assert(dashboard.includes("fetchAnalytics"), "Dashboard uses fetchAnalytics");
+assert(dashboard.includes("dash-card-stat"), "Dashboard has stat cards");
+assert(dashboard.includes("dash-card-health"), "Dashboard has health card");
+assert(dashboard.includes("Profile"), "Dashboard shows Profile card");
+assert(dashboard.includes("Resumes"), "Dashboard shows Resumes card");
+assert(dashboard.includes("Jobs"), "Dashboard shows Jobs card");
+assert(dashboard.includes("Applications"), "Dashboard shows Applications card");
+assert(dashboard.includes("Documents"), "Dashboard shows Documents card");
+assert(dashboard.includes("Knowledge"), "Dashboard shows Knowledge card");
+assert(dashboard.includes("Plugins"), "Dashboard shows Plugins card");
+assert(dashboard.includes("Backend Status"), "Dashboard shows Backend Status card");
+assert(dashboard.includes("No profile yet") || dashboard.includes("No resumes yet") || dashboard.includes("no"),
+  "Dashboard has empty-state messages"
+);
+assert(
+  !dashboard.includes("api.openai.com"),
+  "Dashboard has no OpenAI API endpoints"
+);
+assert(
+  !dashboard.includes("apiKey") && !dashboard.includes("api_key") && !dashboard.includes("secret"),
+  "Dashboard has no secrets"
 );
 
 // ── Backend independence ───────────────────────────────────────

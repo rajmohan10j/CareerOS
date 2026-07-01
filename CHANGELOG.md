@@ -21,5 +21,5 @@
 - Milestone 09O: Browser Extension v2 Refinements (diversity/equal_opportunity field types added to classifier + mapper, remove()/clear() methods in approvalState.js, confidence shown as percentage, low-confidence badges, sensitive field warnings, better backend error messages with hints, fill results show field names, options page response time, all 570 extension tests passing)
 - Milestone 09P: Desktop App Shell (SPA with hash routing, 9 pages, sidebar navigation, backend health polling, settings page with URL config + test connection, 91 tests, no paid/cloud deps)
 - Milestone 09Q: Plugin SDK Foundation (plugin manifest schema, permission model, validation, registration, listing, enable/disable, delete, 7 API endpoints, 55 plugin tests, 435 total backend tests, Ruff clean, no plugin code execution)
-- Milestone 09R: RAG & Knowledge Base Foundation — planned (not started)
-- Milestone 09S: Analytics Dashboard Foundation — planned (not started)
+- Milestone 09R: RAG & Knowledge Base Foundation (knowledge model, chunking service, keyword search, source type filtering, embedding via AIService, 8 API endpoints, 54 tests)
+- Milestone 09S: Analytics Dashboard Foundation (10 analytics schemas, AnalyticsService with profile/resume/job/application/document/ATS/knowledge/plugin analytics, 8 API endpoints, Desktop Dashboard with 8 stat cards consuming /analytics/summary, fetchAnalytics in apiClient.js, 17 backend + 17 desktop tests, 506 total backend tests, 108 desktop tests, Ruff clean)

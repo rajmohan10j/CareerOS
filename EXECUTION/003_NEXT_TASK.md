@@ -1,7 +1,7 @@
 # Next Task
 
 Current:
-Milestone 09Q — Plugin SDK Foundation
+Milestone 09S — Analytics Dashboard Foundation
 
 Completed:
 - Milestone 09A – Backend Skeleton
@@ -91,17 +91,27 @@ Completed:
   - Plugin lifecycle: register, enable, disable, delete
   - No plugin code execution implemented
   - 55 plugin tests, all 435 backend tests passing, Ruff clean
+- Milestone 09R – RAG & Knowledge Base Foundation:
+  - Knowledge model, schemas, repository (CRUD + keyword search + source type filtering)
+  - chunking_service.py (paragraph-aware + fixed-size chunking)
+  - KnowledgeService (create, chunk, index/embed, search, reindex)
+  - 8 API endpoints (CRUD, chunk, index, search, get_by_source)
+  - 54 tests, all passing
+- Milestone 09S – Analytics Dashboard Foundation:
+  - 10 analytics Pydantic schemas, AnalyticsService with 10 methods across 7 repositories
+  - 8 API endpoints (GET /analytics/summary, /profile, /resumes, /jobs, /applications, /documents, /knowledge, /plugins)
+  - Dashboard.js rewritten with 8 stat cards consuming /analytics/summary
+  - fetchAnalytics() in apiClient.js with 5s timeout
+  - 17 backend tests (empty DB, with data, individual endpoints, recent activity, ATS eval JSON, no-regression)
+  - 17 desktop test additions (analytics dashboard)
+  - 506 total backend tests passing, 108 desktop tests passing, Ruff clean
+  - No paid APIs, no cloud, no telemetry
 
 Next:
-- RAG & Knowledge Base Foundation (Milestone 09R) — not started
-  - Vector storage for resume/document/job embeddings
-  - Semantic search across profile, resumes, documents, jobs
-  - Knowledge base for skill/job/industry data
-  - Retrieval-Augmented Generation for AI prompts
-- Analytics Dashboard Foundation (Milestone 09S) — not started
-  - Dashboard page with statistics endpoints
-  - Job application tracking charts
-  - Resume version history tracking
-  - ATS score trends
-  - Profile completeness metrics
+- Production hardening (Milestone 09T) — not started
+  - Error handling review
+  - Logging review
+  - Configuration review
+  - Startup scripts
+  - Documentation finalization
 - Await user instructions

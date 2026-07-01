@@ -28,6 +28,20 @@ placeholder screens for all core modules.
 - Click **Test Connection** to verify connectivity.
 - Click **Save** to persist the URL.
 
+## Dashboard
+
+The Dashboard page now fetches live analytics from the backend and displays:
+- **Profile** — populated field count and completeness percentage
+- **Resumes** — total count, content status, latest version
+- **Jobs** — total count, number with scores
+- **Applications** — total count, number linked to resumes
+- **Documents** — total count and total file size
+- **Knowledge** — total records, indexed count, chunk total
+- **Plugins** — total count, status distribution
+- **Backend Status** — connection status and last activity date
+
+All data comes from the `GET /analytics/summary` endpoint. The dashboard shows empty-state messages when no data exists.
+
 ## Planned Sections
 
 - Installation

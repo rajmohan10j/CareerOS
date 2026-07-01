@@ -1,6 +1,6 @@
 # Current Status
 
-Current Milestone: 09Q – Plugin SDK Foundation
+Current Milestone: 09S – Analytics Dashboard Foundation
 
 Completed:
 - Milestone 09A: Backend skeleton
@@ -130,8 +130,27 @@ Completed:
   - 55 plugin tests: manifest validation (12), API (15), service (15), repository (8), no-regression (4), response shape (1)
   - All 435 backend tests passing (380 existing + 55 new), Ruff clean
   - No plugin code execution, no paid APIs, no dangerous permissions
+- Milestone 09R: RAG & Knowledge Base Foundation
+  - Knowledge model (SQLModel): source_id, source_type, title, content, chunks_json, metadata_json, embedding_json, chunk_count, indexed_at
+  - Knowledge schemas (Pydantic): KnowledgeCreate, KnowledgeChunkItem, KnowledgeChunkRequest, KnowledgeSearch, KnowledgeSearchResult, KnowledgeResponse
+  - KnowledgeRepository: CRUD + search_by_keyword (LIKE-based, title/content), list_by_source_type, get_by_source
+  - chunking_service.py: chunk_text (paragraph-aware word-level chunking) + chunk_text_fixed_size (sliding window)
+  - KnowledgeService: create, chunk_knowledge, index_knowledge (embeds via AIService.embed), search (keyword), list_by_source_type, get_by_source, reindex_all
+  - 8 API endpoints: GET/POST/DELETE /knowledge, GET /knowledge/{id}, POST /knowledge/chunk, POST /knowledge/index, POST /knowledge/search, GET /knowledge/source/{type}/{id}
+  - 54 tests across chunking, API, service, repository, and no-regression
+  - All backend tests pass, Ruff clean
+- Milestone 09S: Analytics Dashboard Foundation
+  - Analytics schemas (Pydantic): ProfileAnalytics, ResumeAnalytics, JobAnalytics, ApplicationAnalytics, DocumentAnalytics, AtsAnalytics, KnowledgeAnalytics, PluginAnalytics, RecentActivity, AnalyticsSummary
+  - AnalyticsService: get_profile_analytics (5-field completeness %), get_resume_analytics (total, versions, content), get_job_analytics (total, by_status, with_score, avg_score), get_application_analytics (total, by_status, with_resume), get_document_analytics (total, by_category, by_source, total_size_bytes), get_ats_analytics (total_scores, avg_ats_score, avg_keyword_match_rate, avg_formatting_score), get_knowledge_analytics (total, by_source_type, indexed, total_chunks), get_plugin_analytics (total, by_status, by_category), get_recent_activity (7-day counts, last_activity timestamp), get_summary (all sections combined)
+  - 8 API endpoints: GET /analytics/summary, GET /analytics/profile, GET /analytics/resumes, GET /analytics/jobs, GET /analytics/applications, GET /analytics/documents, GET /analytics/knowledge, GET /analytics/plugins
+  - Thin API routes, business logic in AnalyticsService, data from 7 repositories
+  - Desktop Dashboard.js rewritten: fetches /analytics/summary, renders 8 stat cards (Profile, Resumes, Jobs, Applications, Documents, Knowledge, Plugins, Backend Status) with live counts and contextual subtitles, empty-state messages when no data
+  - desktop apiClient.js: added fetchAnalytics() with 5s timeout + AbortController
+  - 17 backend analytics tests (empty DB, with data, individual endpoints, recent activity, ATS eval JSON, no-regression)
+  - 17 desktop test additions (apiClient, dashboard cards, empty-state, no cloud/paid/telemetry)
+  - 506 total backend tests passing, 108 desktop tests passing, Ruff clean
+  - No paid APIs, no cloud dependency, no telemetry, no external analytics/tracking
+  - Updated: EXECUTION/002_CURRENT_STATUS.md, EXECUTION/003_NEXT_TASK.md, CHANGELOG.md, DESKTOP_USER_GUIDE.md, desktop/README.md
 
 Remaining Milestones (from ROADMAP.md):
-- 09R RAG
-- 09S Analytics
 - 09T Production

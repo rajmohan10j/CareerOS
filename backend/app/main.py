@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from app.api.ai import router as ai_router
+from app.api.analytics import router as analytics_router
 from app.api.application import router as application_router
 from app.api.ats import router as ats_router
 from app.api.document import router as document_router
@@ -42,4 +43,5 @@ app.include_router(application_router)
 app.include_router(ats_router)
 app.include_router(plugin_router)
 app.include_router(knowledge_router)
+app.include_router(analytics_router)
 app.include_router(ai_router)
