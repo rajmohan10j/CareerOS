@@ -6,7 +6,11 @@ app/main.py
 app/api/__init__.py
 app/api/health.py
 app/core/__init__.py
+app/core/database.py
 app/models/__init__.py
+app/models/base.py
+app/models/database.py
+app/models/openrouter.py
 app/repositories/__init__.py
 app/services/__init__.py
 careeros_backend.egg-info/PKG-INFO
@@ -14,4 +18,5 @@ careeros_backend.egg-info/SOURCES.txt
 careeros_backend.egg-info/dependency_links.txt
 careeros_backend.egg-info/requires.txt
 careeros_backend.egg-info/top_level.txt
+tests/test_database.py
 tests/test_health.py

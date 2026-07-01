@@ -35,15 +35,32 @@ The backend provides the shared service layer for CareerOS across desktop, mobil
 ```
 backend/
 ├── app/
+│   ├── ai/             # AI provider abstraction layer
+│   │   ├── base.py     # ModelProvider ABC, options dataclasses
+│   │   ├── exceptions.py
+│   │   ├── provider.py # ProviderRegistry, create_provider factory
+│   │   ├── schemas.py  # Pydantic request/response models
+│   │   ├── ollama.py   # Ollama provider implementation
+│   │   └── router.py   # AIRouter (provider-agnostic routing)
 │   ├── api/            # Route handlers (thin)
 │   ├── core/           # Core utilities
-│   ├── services/       # Business logic
+│   ├── services/       # Business logic (AIService, ProfileService)
 │   ├── models/         # Domain/data models
 │   └── repositories/   # Persistence layer
 ├── tests/              # pytest suite
 ├── pyproject.toml
 └── README.md
 ```
+
+## AI Endpoints
+
+| Method | Path             | Description                        |
+|--------|------------------|------------------------------------|
+| GET    | /ai/providers    | List configured AI providers       |
+| GET    | /ai/models       | List available models from provider |
+| GET    | /ai/health       | Provider health check              |
+| POST   | /ai/generate     | Generate text from prompt          |
+| POST   | /ai/embed        | Generate embeddings for texts      |
 
 ## Quickstart
 
