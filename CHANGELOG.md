@@ -10,5 +10,5 @@
 - Milestone 09D: AI Provider Service (Ollama, registry, router, retry)
 - Milestone 09E: Resume Intelligence Engine (CRUD, AI generation, versioning)
 - Milestone 09F: Document Intelligence Engine (CRUD, AI parse/classify, search)
-- Milestone 09G: Job Intelligence Engine (CRUD, AI analyze/evaluate-text, fit scoring, gap analysis, recommendation)
+- Milestone 09G: Job Intelligence Engine (CRUD, AI analyze/evaluate, structured evaluation with skill matching/gap analysis/recommendation, experience/location matching, resume suggestions)
 - Milestone 09H: Additional Domain Models (Experience, Skill, Application CRUD with filtering)

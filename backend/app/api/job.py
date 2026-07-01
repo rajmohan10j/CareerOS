@@ -2,9 +2,11 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlmodel import Session
 
 from app.core.database import get_session
+from app.repositories.experience import ExperienceRepository
 from app.repositories.job import JobRepository
 from app.repositories.profile import ProfileRepository
-from app.schemas.job import JobCreate, JobEvaluateTextRequest, JobUpdate
+from app.repositories.skill import SkillRepository
+from app.schemas.job import JobCreate, JobEvaluateResponse, JobEvaluateTextRequest, JobUpdate
 from app.services.ai_service import AIService
 from app.services.job_service import JobService, job_to_response
 
@@ -15,6 +17,8 @@ def _service(session: Session) -> JobService:
     return JobService(
         JobRepository(session),
         profile_repository=ProfileRepository(session),
+        skill_repository=SkillRepository(session),
+        experience_repository=ExperienceRepository(session),
         ai_service=AIService(),
     )
 
@@ -49,12 +53,11 @@ def create_job(body: JobCreate, session: Session = Depends(get_session)):
     return job_to_response(job)
 
 
-@router.post("/jobs/evaluate-text")
+@router.post("/jobs/evaluate-text", response_model=JobEvaluateResponse)
 async def evaluate_job_text(body: JobEvaluateTextRequest, session: Session = Depends(get_session)):
     service = _service(session)
     try:
-        result = await service.evaluate_text(body)
-        return result
+        return await service.evaluate_text(body)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -68,13 +71,13 @@ async def analyze_job(job_id: int, session: Session = Depends(get_session)):
     return job_to_response(job)
 
 
-@router.post("/jobs/{job_id}/evaluate")
+@router.post("/jobs/{job_id}/evaluate", response_model=JobEvaluateResponse)
 async def evaluate_job(job_id: int, session: Session = Depends(get_session)):
     service = _service(session)
-    job = await service.evaluate(job_id)
-    if job is None:
+    result = await service.evaluate(job_id)
+    if result is None:
         raise HTTPException(status_code=404, detail="Job not found")
-    return job_to_response(job)
+    return result
 
 
 @router.put("/jobs/{job_id}")

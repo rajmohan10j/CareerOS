@@ -1,10 +1,14 @@
 from datetime import datetime, timezone
 
+from app.models.experience import Experience
 from app.models.job import Job
 from app.models.profile import Profile
+from app.models.skill import Skill
+from app.repositories.experience import ExperienceRepository
 from app.repositories.job import JobRepository
 from app.repositories.profile import ProfileRepository
-from app.schemas.job import JobCreate, JobEvaluateTextRequest, JobUpdate
+from app.repositories.skill import SkillRepository
+from app.schemas.job import JobCreate, JobEvaluateResponse, JobEvaluateTextRequest, JobUpdate
 from app.services.ai_service import AIService
 
 
@@ -55,19 +59,40 @@ def _build_analyze_prompt(jd_text: str) -> str:
     return "\n".join(lines)
 
 
-def _build_evaluate_prompt(profile: Profile, jd_text: str, url: str | None) -> str:
+def _build_evaluate_prompt(
+    profile: Profile,
+    jd_text: str,
+    url: str | None,
+    user_skills: list[Skill],
+    user_experiences: list[Experience],
+) -> str:
+    skills_text = ", ".join(
+        f"{s.name} (proficiency: {s.proficiency}, category: {s.category})"
+        for s in user_skills if s.name
+    ) or "No skills listed"
+
+    exp_lines = []
+    for e in user_experiences:
+        period = f"{e.start_date or '?'} - {e.end_date or 'present'}"
+        line = f"- {e.title or 'Unknown'} at {e.company or 'Unknown'} ({period}): {e.description or ''}"
+        exp_lines.append(line)
+    experiences_text = "\n".join(exp_lines) or "No experience listed"
+
     lines = [
         "You are a job evaluation assistant.",
-        "Evaluate the following job against the candidate profile.",
+        "Evaluate the following job against the candidate profile, skills, and experience.",
         "Do not exaggerate the candidate's fit or invent experience.",
         "Return a JSON object with these keys:",
         '  - "fit_score": a number from 0 to 100 indicating overall fit',
         '  - "summary": a 2-3 sentence evaluation of the opportunity',
-        '  - "strengths": list of candidate strengths relevant to this role, matched from profile data only',
+        '  - "strengths": list of candidate strengths relevant to this role, matched from profile/skills/experience data only',
         '  - "gaps": list of missing requirements or areas where the candidate falls short',
         '  - "risks": list of potential concerns or risks',
         '  - "recommendation": one of "apply", "consider", or "skip"',
         '  - "reasoning": brief justification for the recommendation',
+        '  - "experience_match": assessment of how candidate experience aligns with role requirements',
+        '  - "location_match": assessment of location/work-mode fit',
+        '  - "resume_suggestions": list of suggestions for tailoring the resume to this role',
         "",
         "Candidate Profile:",
         f"- Summary: {profile.summary or 'Not provided'}",
@@ -75,6 +100,12 @@ def _build_evaluate_prompt(profile: Profile, jd_text: str, url: str | None) -> s
         f"- Industries: {profile.industries or 'Not provided'}",
         f"- Locations: {profile.locations or 'Not provided'}",
         f"- Salary Expectations: {profile.salary_expectations or 'Not provided'}",
+        "",
+        "Candidate Skills:",
+        skills_text,
+        "",
+        "Candidate Experience:",
+        experiences_text,
         "",
         "Job Description:",
         jd_text,
@@ -93,17 +124,73 @@ def _parse_json_field(text: str) -> dict | None:
         return None
 
 
-def _parse_fit_score(text: str) -> int | None:
+def _parse_fit_score(text: str) -> float | None:
     data = _parse_json_field(text)
     if data is None:
         return None
     score = data.get("fit_score")
     if score is not None:
         try:
-            return int(score)
+            return float(score)
         except (ValueError, TypeError):
             return None
     return None
+
+
+def _parse_skills_from_text(skills_text: str | None) -> list[str]:
+    if not skills_text:
+        return []
+    import ast
+
+    try:
+        parsed = ast.literal_eval(skills_text)
+        if isinstance(parsed, list):
+            return [str(s).strip() for s in parsed if s]
+    except (ValueError, SyntaxError):
+        pass
+    cleaned = skills_text.replace("[", "").replace("]", "").replace("'", "").replace('"', "")
+    return [s.strip() for s in cleaned.split(",") if s.strip()]
+
+
+def _match_skills(jd_skills_text: str | None, user_skills: list[Skill]) -> tuple[list[str], list[str]]:
+    jd_skills = _parse_skills_from_text(jd_skills_text)
+    if not jd_skills:
+        return [], []
+
+    user_skill_names = {s.name.lower().strip() for s in user_skills if s.name}
+
+    matched = []
+    missing = []
+    for skill in jd_skills:
+        if skill.lower().strip() in user_skill_names:
+            matched.append(skill)
+        else:
+            missing.append(skill)
+    return matched, missing
+
+
+def _build_evaluate_response(
+    job_id: int | None,
+    ai_text: str,
+    jd_skills_text: str | None,
+    user_skills: list[Skill],
+) -> JobEvaluateResponse:
+    ai_data = _parse_json_field(ai_text) or {}
+    fit_score = _parse_fit_score(ai_text)
+    matched_skills, missing_skills = _match_skills(jd_skills_text, user_skills)
+
+    return JobEvaluateResponse(
+        job_id=job_id,
+        fit_score=fit_score,
+        recommendation=ai_data.get("recommendation"),
+        matched_skills=matched_skills,
+        missing_skills=missing_skills,
+        experience_match=ai_data.get("experience_match", ""),
+        location_match=ai_data.get("location_match", ""),
+        summary=ai_data.get("summary", ""),
+        risks=ai_data.get("risks", []),
+        resume_suggestions=ai_data.get("resume_suggestions", []),
+    )
 
 
 class JobService:
@@ -111,10 +198,14 @@ class JobService:
         self,
         job_repository: JobRepository,
         profile_repository: ProfileRepository | None = None,
+        skill_repository: SkillRepository | None = None,
+        experience_repository: ExperienceRepository | None = None,
         ai_service: AIService | None = None,
     ) -> None:
         self._job_repo = job_repository
         self._profile_repo = profile_repository
+        self._skill_repo = skill_repository
+        self._experience_repo = experience_repository
         self._ai_service = ai_service
 
     def list_all(self) -> list[Job]:
@@ -191,25 +282,33 @@ class JobService:
         job.updated_at = datetime.now(timezone.utc)
         return self._job_repo.update(job)
 
-    async def evaluate(self, job_id: int) -> Job | None:
+    async def evaluate(self, job_id: int) -> dict | None:
         job = self._job_repo.get_by_id(job_id)
         if job is None:
             return None
         if self._profile_repo is None or self._ai_service is None:
-            return job
+            return None
         if not job.jd_text:
-            return job
+            return None
 
         profile = self._profile_repo.get()
         if profile is None:
-            return job
+            return None
 
-        prompt = _build_evaluate_prompt(profile, job.jd_text, job.url)
+        user_skills = self._skill_repo.list_all() if self._skill_repo else []
+        user_experiences = self._experience_repo.list_all() if self._experience_repo else []
+
+        prompt = _build_evaluate_prompt(profile, job.jd_text, job.url, user_skills, user_experiences)
         result = await self._ai_service.generate(prompt, task_type="reasoning")
+
+        response = _build_evaluate_response(job_id, result, job.skills, user_skills)
+
         job.evaluation_json = result.strip()
-        job.fit_score = _parse_fit_score(result)
+        job.fit_score = int(response.fit_score) if response.fit_score is not None else None
         job.updated_at = datetime.now(timezone.utc)
-        return self._job_repo.update(job)
+        self._job_repo.update(job)
+
+        return response.model_dump()
 
     async def evaluate_text(self, data: JobEvaluateTextRequest) -> dict:
         if self._profile_repo is None:
@@ -221,9 +320,12 @@ class JobService:
         if profile is None:
             raise ValueError("No profile found. Create a profile first.")
 
-        prompt = _build_evaluate_prompt(profile, data.description, data.url)
+        user_skills = self._skill_repo.list_all() if self._skill_repo else []
+        user_experiences = self._experience_repo.list_all() if self._experience_repo else []
+
+        prompt = _build_evaluate_prompt(profile, data.description, data.url, user_skills, user_experiences)
         result = await self._ai_service.generate(prompt, task_type="reasoning")
-        return {
-            "evaluation_json": result.strip(),
-            "fit_score": _parse_fit_score(result),
-        }
+
+        response = _build_evaluate_response(None, result, None, user_skills)
+
+        return response.model_dump()

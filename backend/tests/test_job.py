@@ -10,27 +10,44 @@ from fastapi.testclient import TestClient
 from sqlalchemy.pool import StaticPool
 from sqlmodel import SQLModel, Session, create_engine
 
+from app.api.application import router as application_router
 from app.api.document import router as document_router
+from app.api.experience import router as experience_router
 from app.api.health import router as health_router
 from app.api.job import router as job_router
 from app.api.profile import router as profile_router
 from app.api.resume import router as resume_router
+from app.api.skill import router as skill_router
 from app.config import settings
 from app.core.database import get_session
+from app.models.application import Application  # noqa: F401
 from app.models.document import Document  # noqa: F401
+from app.models.experience import Experience  # noqa: F401
 from app.models.job import Job  # noqa: F401
 from app.models.profile import Profile  # noqa: F401
 from app.models.resume import Resume  # noqa: F401
+from app.models.skill import Skill  # noqa: F401
+from app.repositories.experience import ExperienceRepository
 from app.repositories.job import JobRepository
-from app.schemas.job import JobCreate, JobUpdate
+from app.repositories.skill import SkillRepository
+from app.schemas.job import JobCreate, JobEvaluateResponse, JobUpdate
 from app.services.ai_service import AIService
-from app.services.job_service import JobService
+from app.services.job_service import (
+    JobService,
+    _build_evaluate_response,
+    _match_skills,
+    _parse_fit_score,
+    _parse_skills_from_text,
+)
 
 _test_app = FastAPI(title=settings.app_name, version=settings.version)
 _test_app.include_router(health_router)
 _test_app.include_router(profile_router)
 _test_app.include_router(resume_router)
 _test_app.include_router(document_router)
+_test_app.include_router(experience_router)
+_test_app.include_router(skill_router)
+_test_app.include_router(application_router)
 _test_app.include_router(job_router)
 
 
@@ -180,13 +197,15 @@ class TestJobAPI:
         assert response.status_code == 400
         assert "profile" in response.json()["detail"].lower()
 
-    def test_evaluate_text_with_ai(self, _session):
+    def test_evaluate_text_returns_structured_response(self, _session):
         client = TestClient(_test_app)
         client.put("/profile", json={"summary": "Experienced Python developer"})
         fake_result = (
             '{"fit_score": 85, "summary": "Great match", '
             '"strengths": ["Python"], "gaps": ["No management exp"], '
-            '"risks": [], "recommendation": "apply", "reasoning": "Strong skill match"}'
+            '"risks": [], "recommendation": "apply", "reasoning": "Strong skill match", '
+            '"experience_match": "5 years aligns", "location_match": "Remote possible", '
+            '"resume_suggestions": ["Highlight Python projects"]}'
         )
         with patch.object(AIService, "generate", new_callable=AsyncMock) as mock_gen:
             mock_gen.return_value = fake_result
@@ -195,10 +214,18 @@ class TestJobAPI:
             })
         assert resp.status_code == 200
         data = resp.json()
-        assert data["fit_score"] == 85
-        assert "apply" in data["evaluation_json"]
+        assert data["fit_score"] == 85.0
+        assert data["recommendation"] == "apply"
+        assert data["summary"] == "Great match"
+        assert data["experience_match"] == "5 years aligns"
+        assert data["location_match"] == "Remote possible"
+        assert data["resume_suggestions"] == ["Highlight Python projects"]
+        assert isinstance(data["matched_skills"], list)
+        assert isinstance(data["missing_skills"], list)
+        assert isinstance(data["risks"], list)
+        assert data["job_id"] is None
 
-    def test_evaluate_existing_job(self, _session):
+    def test_evaluate_existing_job_returns_structured(self, _session):
         client = TestClient(_test_app)
         client.put("/profile", json={"summary": "Dev"})
         create_resp = client.post("/jobs", json={
@@ -208,21 +235,69 @@ class TestJobAPI:
         fake_result = (
             '{"fit_score": 70, "summary": "Decent match", '
             '"strengths": [], "gaps": [], '
-            '"risks": [], "recommendation": "consider", "reasoning": "Ok fit"}'
+            '"risks": [], "recommendation": "consider", "reasoning": "Ok fit", '
+            '"experience_match": "", "location_match": "", '
+            '"resume_suggestions": []}'
         )
         with patch.object(AIService, "generate", new_callable=AsyncMock) as mock_gen:
             mock_gen.return_value = fake_result
             resp = client.post(f"/jobs/{job_id}/evaluate")
         assert resp.status_code == 200
         data = resp.json()
-        assert data["fit_score"] == 70
-        assert data["evaluation_json"] == fake_result
+        assert data["fit_score"] == 70.0
+        assert data["recommendation"] == "consider"
+        assert data["job_id"] == job_id
+
+    def test_evaluate_saves_to_job_record(self, _session):
+        client = TestClient(_test_app)
+        client.put("/profile", json={"summary": "Dev"})
+        create_resp = client.post("/jobs", json={
+            "jd_text": "Senior engineer needed",
+        })
+        job_id = create_resp.json()["id"]
+        fake_result = (
+            '{"fit_score": 75, "summary": "Good", "strengths": [], '
+            '"gaps": [], "risks": [], "recommendation": "consider", "reasoning": "Ok"}'
+        )
+        with patch.object(AIService, "generate", new_callable=AsyncMock) as mock_gen:
+            mock_gen.return_value = fake_result
+            client.post(f"/jobs/{job_id}/evaluate")
+        get_resp = client.get(f"/jobs/{job_id}")
+        job_data = get_resp.json()
+        assert job_data["fit_score"] == 75
+        assert job_data["evaluation_json"] == fake_result
 
     def test_evaluate_existing_returns_404(self, _session):
         client = TestClient(_test_app)
         with patch.object(AIService, "generate", new_callable=AsyncMock):
             response = client.post("/jobs/999/evaluate")
         assert response.status_code == 404
+
+    def test_evaluate_with_skills_matching(self, _session):
+        client = TestClient(_test_app)
+        client.put("/profile", json={"summary": "Dev"})
+        client.post("/skills", json={"name": "Python", "category": "Language"})
+        client.post("/skills", json={"name": "Django", "category": "Framework"})
+        create_resp = client.post("/jobs", json={
+            "jd_text": "Python Django developer needed",
+            "skills": "['Python', 'Django', 'Kubernetes']",
+        })
+        job_id = create_resp.json()["id"]
+        fake_result = (
+            '{"fit_score": 80, "summary": "Good fit", "strengths": ["Python"], '
+            '"gaps": ["No Kubernetes"], "risks": [], '
+            '"recommendation": "consider", "reasoning": "Core skills match", '
+            '"experience_match": "", "location_match": "", '
+            '"resume_suggestions": []}'
+        )
+        with patch.object(AIService, "generate", new_callable=AsyncMock) as mock_gen:
+            mock_gen.return_value = fake_result
+            resp = client.post(f"/jobs/{job_id}/evaluate")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert "Python" in data["matched_skills"]
+        assert "Django" in data["matched_skills"]
+        assert "Kubernetes" in data["missing_skills"]
 
 
 class TestJobService:
@@ -329,8 +404,7 @@ class TestJobService:
         job = svc.create(JobCreate(jd_text="Engineer needed"))
         import asyncio
         result = asyncio.run(svc.evaluate(job.id))
-        assert result is not None
-        assert result.evaluation_json is None
+        assert result is None
 
     def test_evaluate_without_ai_unchanged(self, _session):
         from app.repositories.profile import ProfileRepository
@@ -340,8 +414,7 @@ class TestJobService:
         job = svc.create(JobCreate(jd_text="Engineer needed"))
         import asyncio
         result = asyncio.run(svc.evaluate(job.id))
-        assert result is not None
-        assert result.evaluation_json is None
+        assert result is None
 
     def test_evaluate_with_ai(self, _session):
         from app.repositories.profile import ProfileRepository
@@ -357,8 +430,9 @@ class TestJobService:
         import asyncio
         result = asyncio.run(svc.evaluate(job.id))
         assert result is not None
-        assert result.fit_score == 90
-        assert result.evaluation_json is not None
+        assert result["fit_score"] == 90.0
+        assert result["recommendation"] == "apply"
+        assert result["job_id"] == job.id
 
     def test_evaluate_no_jd_text(self, _session):
         from app.repositories.profile import ProfileRepository
@@ -369,8 +443,7 @@ class TestJobService:
         job = svc.create(JobCreate(title="No JD"))
         import asyncio
         result = asyncio.run(svc.evaluate(job.id))
-        assert result is not None
-        assert result.evaluation_json is None
+        assert result is None
         mock_ai.generate.assert_not_called()
 
     def test_evaluate_returns_none_for_missing(self, _session):
@@ -418,8 +491,8 @@ class TestJobService:
         from app.schemas.job import JobEvaluateTextRequest
         import asyncio
         result = asyncio.run(svc.evaluate_text(JobEvaluateTextRequest(description="Engineer role")))
-        assert result["fit_score"] == 75
-        assert "consider" in result["evaluation_json"]
+        assert result["fit_score"] == 75.0
+        assert result["recommendation"] == "consider"
 
     def test_evaluate_text_fit_score_none_on_bad_json(self, _session):
         from app.repositories.profile import ProfileRepository
@@ -432,7 +505,7 @@ class TestJobService:
         import asyncio
         result = asyncio.run(svc.evaluate_text(JobEvaluateTextRequest(description="Engineer role")))
         assert result["fit_score"] is None
-        assert result["evaluation_json"] == "not valid json"
+        assert result["summary"] == ""
 
     def test_analyze_handles_non_remote_null(self, _session):
         repo = JobRepository(_session)
@@ -455,6 +528,177 @@ class TestJobService:
         result = asyncio.run(svc.analyze(job.id))
         assert result is not None
         assert result.remote is None
+
+    def test_evaluate_with_skill_matching_detects_matched(self, _session):
+        from app.repositories.profile import ProfileRepository
+        ProfileRepository(_session).upsert(Profile(summary="Dev", user_id=1))
+        SkillRepository(_session).create(Skill(name="Python", category="Language", profile_id=1))
+        SkillRepository(_session).create(Skill(name="Django", category="Framework", profile_id=1))
+        repo = JobRepository(_session)
+        mock_ai = AsyncMock(spec=AIService)
+        mock_ai.generate.return_value = (
+            '{"fit_score": 80, "summary": "Good", "strengths": [], '
+            '"gaps": [], "risks": [], "recommendation": "apply", "reasoning": "Match"}'
+        )
+        svc = JobService(
+            repo,
+            profile_repository=ProfileRepository(_session),
+            skill_repository=SkillRepository(_session),
+            ai_service=mock_ai,
+        )
+        job = svc.create(JobCreate(jd_text="Python dev", skills="['Python', 'Django', 'Kubernetes']"))
+        import asyncio
+        result = asyncio.run(svc.evaluate(job.id))
+        assert result is not None
+        assert "Python" in result["matched_skills"]
+        assert "Django" in result["matched_skills"]
+        assert "Kubernetes" in result["missing_skills"]
+
+    def test_evaluate_with_empty_skills(self, _session):
+        from app.repositories.profile import ProfileRepository
+        ProfileRepository(_session).upsert(Profile(summary="Dev", user_id=1))
+        repo = JobRepository(_session)
+        mock_ai = AsyncMock(spec=AIService)
+        mock_ai.generate.return_value = (
+            '{"fit_score": 50, "summary": "Okay", "strengths": [], '
+            '"gaps": [], "risks": [], "recommendation": "consider", "reasoning": "Neutral"}'
+        )
+        svc = JobService(
+            repo,
+            profile_repository=ProfileRepository(_session),
+            skill_repository=SkillRepository(_session),
+            ai_service=mock_ai,
+        )
+        job = svc.create(JobCreate(jd_text="Some job"))
+        import asyncio
+        result = asyncio.run(svc.evaluate(job.id))
+        assert result is not None
+        assert result["matched_skills"] == []
+        assert result["missing_skills"] == []
+
+    def test_evaluate_prompt_includes_skills_and_experience(self, _session):
+        from app.repositories.profile import ProfileRepository
+        ProfileRepository(_session).upsert(Profile(summary="Dev", user_id=1))
+        SkillRepository(_session).create(Skill(name="Python", category="Language", profile_id=1))
+        ExperienceRepository(_session).create(
+            Experience(company="Acme", title="Engineer", description="Built apps", profile_id=1)
+        )
+        repo = JobRepository(_session)
+        mock_ai = AsyncMock(spec=AIService)
+        mock_ai.generate.return_value = (
+            '{"fit_score": 85, "summary": "Good", "strengths": [], '
+            '"gaps": [], "risks": [], "recommendation": "apply", "reasoning": "Match"}'
+        )
+        svc = JobService(
+            repo,
+            profile_repository=ProfileRepository(_session),
+            skill_repository=SkillRepository(_session),
+            experience_repository=ExperienceRepository(_session),
+            ai_service=mock_ai,
+        )
+        job = svc.create(JobCreate(jd_text="Python dev needed"))
+        import asyncio
+        result = asyncio.run(svc.evaluate(job.id))
+        assert result is not None
+        assert result["fit_score"] == 85.0
+        mock_ai.generate.assert_called_once()
+        prompt = mock_ai.generate.call_args[0][0]
+        assert "Python" in prompt
+        assert "Acme" in prompt
+        assert "Engineer" in prompt
+
+
+class TestSkillMatching:
+    def test_match_skills_finds_matches(self):
+        user_skills = [
+            Skill(name="Python", category="Language", profile_id=1),
+            Skill(name="SQL", category="Language", profile_id=1),
+        ]
+        matched, missing = _match_skills("['Python', 'Java', 'SQL']", user_skills)
+        assert sorted(matched) == sorted(["Python", "SQL"])
+        assert missing == ["Java"]
+
+    def test_match_skills_no_jd_skills(self):
+        user_skills = [Skill(name="Python", category="Language", profile_id=1)]
+        matched, missing = _match_skills(None, user_skills)
+        assert matched == []
+        assert missing == []
+
+    def test_match_skills_empty_jd_skills(self):
+        user_skills = [Skill(name="Python", category="Language", profile_id=1)]
+        matched, missing = _match_skills("", user_skills)
+        assert matched == []
+        assert missing == []
+
+    def test_match_skills_no_user_skills(self):
+        matched, missing = _match_skills("['Python']", [])
+        assert matched == []
+        assert missing == ["Python"]
+
+    def test_match_skills_case_insensitive(self):
+        user_skills = [Skill(name="python", category="Language", profile_id=1)]
+        matched, missing = _match_skills("['Python']", user_skills)
+        assert matched == ["Python"]
+        assert missing == []
+
+    def test_parse_skills_from_text_list(self):
+        result = _parse_skills_from_text("['Python', 'SQL']")
+        assert result == ["Python", "SQL"]
+
+    def test_parse_skills_from_text_comma_string(self):
+        result = _parse_skills_from_text("Python, SQL")
+        assert result == ["Python", "SQL"]
+
+    def test_parse_skills_from_text_none(self):
+        assert _parse_skills_from_text(None) == []
+
+    def test_parse_skills_from_text_empty(self):
+        assert _parse_skills_from_text("") == []
+
+
+class TestFitScoreParsing:
+    def test_parse_fit_score_float(self):
+        assert _parse_fit_score('{"fit_score": 85.5}') == 85.5
+
+    def test_parse_fit_score_int(self):
+        assert _parse_fit_score('{"fit_score": 85}') == 85.0
+
+    def test_parse_fit_score_none_on_missing(self):
+        assert _parse_fit_score('{"other": 1}') is None
+
+    def test_parse_fit_score_none_on_invalid_json(self):
+        assert _parse_fit_score("not json") is None
+
+    def test_parse_fit_score_none_on_none_value(self):
+        assert _parse_fit_score('{"fit_score": null}') is None
+
+
+class TestBuildEvaluateResponse:
+    def test_build_from_ai_result(self):
+        ai_text = (
+            '{"fit_score": 80, "summary": "Good", "recommendation": "apply", '
+            '"experience_match": "Matches", "location_match": "Remote OK", '
+            '"risks": ["Risk1"], "resume_suggestions": ["Suggestion1"]}'
+        )
+        result = _build_evaluate_response(1, ai_text, "['Python']", [Skill(name="Python", category="Lang", profile_id=1)])
+        assert isinstance(result, JobEvaluateResponse)
+        assert result.fit_score == 80.0
+        assert result.recommendation == "apply"
+        assert result.matched_skills == ["Python"]
+        assert result.missing_skills == []
+        assert result.experience_match == "Matches"
+        assert result.location_match == "Remote OK"
+        assert result.risks == ["Risk1"]
+        assert result.resume_suggestions == ["Suggestion1"]
+        assert result.job_id == 1
+
+    def test_build_from_ai_result_with_gaps(self):
+        ai_text = '{"fit_score": 60, "recommendation": "consider"}'
+        result = _build_evaluate_response(None, ai_text, "['Python', 'K8s']", [Skill(name="Python", category="Lang", profile_id=1)])
+        assert result.fit_score == 60.0
+        assert result.matched_skills == ["Python"]
+        assert result.missing_skills == ["K8s"]
+        assert result.job_id is None
 
 
 class TestJobNoRegression:
@@ -486,17 +730,57 @@ class TestJobNoRegression:
         resp = client.post("/documents", json={"filename": "test.pdf"})
         assert resp.status_code == 201
 
+    def test_experience_still_works(self, _session):
+        client = TestClient(_test_app)
+        resp = client.post("/experiences", json={"title": "Engineer", "company": "Acme"})
+        assert resp.status_code == 201
+
+    def test_skill_still_works(self, _session):
+        client = TestClient(_test_app)
+        resp = client.post("/skills", json={"name": "Python", "category": "Language"})
+        assert resp.status_code == 201
+
     def test_all_modules_together(self, _session):
         client = TestClient(_test_app)
         client.put("/profile", json={"summary": "Dev"})
         client.post("/documents", json={"filename": "doc.pdf"})
         client.post("/resumes", json={"title": "My Resume"})
+        client.post("/experiences", json={"title": "Exp 1"})
+        client.post("/skills", json={"name": "Python"})
         client.post("/jobs", json={"title": "New Job"})
         assert client.get("/health").status_code == 200
         assert client.get("/profile").status_code == 200
         assert client.get("/resumes").status_code == 200
         assert client.get("/documents").status_code == 200
+        assert client.get("/experiences").status_code == 200
+        assert client.get("/skills").status_code == 200
         assert client.get("/jobs").status_code == 200
+        assert client.get("/applications").status_code == 200
+
+    def test_job_evaluate_swagger_response_model(self, _session):
+        client = TestClient(_test_app)
+        client.put("/profile", json={"summary": "Dev"})
+        create_resp = client.post("/jobs", json={"jd_text": "Engineer role"})
+        job_id = create_resp.json()["id"]
+        fake = (
+            '{"fit_score": 60, "summary": "Ok", "strengths": [], '
+            '"gaps": [], "risks": [], "recommendation": "consider", "reasoning": "Neutral"}'
+        )
+        with patch.object(AIService, "generate", new_callable=AsyncMock) as mock_gen:
+            mock_gen.return_value = fake
+            resp = client.post(f"/jobs/{job_id}/evaluate")
+        assert resp.status_code == 200
+        body = resp.json()
+        assert "job_id" in body
+        assert "fit_score" in body
+        assert "recommendation" in body
+        assert "matched_skills" in body
+        assert "missing_skills" in body
+        assert "experience_match" in body
+        assert "location_match" in body
+        assert "summary" in body
+        assert "risks" in body
+        assert "resume_suggestions" in body
 
 
 class TestJobRepository:

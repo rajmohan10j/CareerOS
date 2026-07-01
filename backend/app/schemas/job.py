@@ -66,3 +66,16 @@ class JobResponse(BaseModel):
 class JobEvaluateTextRequest(BaseModel):
     description: str
     url: str | None = None
+
+
+class JobEvaluateResponse(BaseModel):
+    job_id: int | None = None
+    fit_score: float | None = None
+    recommendation: str | None = None
+    matched_skills: list[str] = []
+    missing_skills: list[str] = []
+    experience_match: str | None = None
+    location_match: str | None = None
+    summary: str | None = None
+    risks: list[str] = []
+    resume_suggestions: list[str] = []
