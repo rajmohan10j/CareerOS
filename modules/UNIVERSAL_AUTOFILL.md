@@ -1,8 +1,8 @@
 # UNIVERSAL_AUTOFILL
 
 Document ID: DOC-048  
-Version: 0.4.0  
-Status: Implemented (Milestone 09N)
+Version: 0.5.0  
+Status: Implemented (Milestone 09O)
 
 ## Purpose
 
@@ -11,7 +11,7 @@ The mapping engine proposes values but never writes to fields directly.
 Fill execution is handled separately by autofillExecutor.js + content.js
 with safety guards and only after explicit user approval.
 
-## Supported Field Types (20)
+## Supported Field Types (22)
 
 | Intent | Mapping Source | Status |
 |--------|---------------|--------|
@@ -35,6 +35,8 @@ with safety guards and only after explicit user approval.
 | salary_expectation | Profile salary_expectations (sensitive) | available/manual_review |
 | work_authorization | Requires manual input (sensitive) | manual_review |
 | notice_period | Requires manual input (sensitive) | manual_review |
+| diversity | Requires manual input (sensitive) | manual_review |
+| equal_opportunity | Requires manual input (sensitive) | manual_review |
 
 ## Mapping Status Levels
 
@@ -98,8 +100,8 @@ Display fill result in popup (filled/skipped/failed with details)
 
 ## Sensitive Fields
 
-Phone, address, salary expectation, work authorization, and notice period are
-classified as sensitive. Sensitive fields:
+Phone, address, salary expectation, work authorization, notice period, diversity,
+and equal opportunity are classified as sensitive. Sensitive fields:
 - Always show a "sensitive" tag in the mapping table
 - Are never auto-filled in the current implementation
 - Always require manual_review for fields without profile data

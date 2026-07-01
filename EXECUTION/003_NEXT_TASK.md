@@ -1,7 +1,7 @@
 # Next Task
 
 Current:
-Milestone 09N — Controlled Autofill Execution
+Milestone 09O — Browser Extension v2 Refinements
 
 Completed:
 - Milestone 09A – Backend Skeleton
@@ -63,7 +63,19 @@ Completed:
   - 31 autofillExecutor tests, 53 controlledFill tests, 22 safetyGuards tests
   - extension.test.js updated to 155 tests
   - All 531 extension tests passing
+- Milestone 09O – Browser Extension v2 Refinements:
+  - Added diversity and equal_opportunity field types (22 total field types)
+  - Added remove() and clear() methods to approvalState.js
+  - Confidence displayed as percentage across all UI
+  - Low-confidence fields show orange badge with explanation
+  - Sensitive fields show purple warning section
+  - Backend connection errors show actionable messages with hints
+  - Fill results show field names in all breakdown categories
+  - Options page connection test shows response time in ms
+  - Better error display with icon prefixes
+  - 39 new/updated tests across 6 test files
+  - All 570 extension tests passing (172+51+46+23+64+46+59+31+56+22)
 
 Next:
-- Extension v2 refinements (Milestone 09O) — not started
+- Mobile (Milestone 09P) — not started
 - Await user instructions

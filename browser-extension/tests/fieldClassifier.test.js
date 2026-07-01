@@ -53,6 +53,8 @@ const typePatterns = [
   { type: "salary_expectation", patterns: ["salary", "compensation", "\\\\bpay\\\\b"] },
   { type: "work_authorization", patterns: ["authorization", "\\\\bvisa\\\\b", "work\\\\s*\\\\*permit", "sponsor", "work\\\\s*\\\\*author", "citizenship"] },
   { type: "notice_period", patterns: ["notice\\\\s*\\\\*period", "available.*start", "start.*date", "earliest.*start"] },
+  { type: "diversity", patterns: ["diversity", "demographic", "gender", "ethnicity", "race", "veteran", "disability"] },
+  { type: "equal_opportunity", patterns: ["equal opportunity", "eeo", "affirmative action", "equal employment", "eoe", "equal employer"] },
 ];
 
 // For source-level validation, check that the type name appears in an object literal
@@ -103,7 +105,7 @@ for (const [pattern, label] of signalPatterns) {
 
 console.log("\n[sensitive fields]");
 
-const sensitiveTypes = ["phone", "address", "salary_expectation", "work_authorization"];
+const sensitiveTypes = ["phone", "address", "salary_expectation", "work_authorization", "diversity", "equal_opportunity"];
 for (const st of sensitiveTypes) {
   assert(
     classifierSrc.includes(`"${st}"`),

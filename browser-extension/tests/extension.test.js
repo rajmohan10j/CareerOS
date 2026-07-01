@@ -415,6 +415,31 @@ assert(popupCSS.length > 0, "popup.css is not empty");
 assert(popupCSS.includes("fill-btn"), "popup.css has fill button styles");
 assert(popupCSS.includes("fill-result"), "popup.css has fill result styles");
 assert(popupCSS.includes("fill-stats"), "popup.css has fill stats styles");
+assert(popupCSS.includes("low-conf-badge"), "popup.css has low confidence badge styles");
+assert(popupCSS.includes("sensitive-warning"), "popup.css has sensitive warning styles");
+assert(popupCSS.includes("success-detail"), "popup.css has success message styles");
+
+const optionsJS = readFile("src/options.js");
+assert(
+  optionsJS.includes("checkHealth"),
+  "options.js uses checkHealth"
+);
+assert(
+  optionsJS.includes("getStoredBackendUrl"),
+  "options.js uses getStoredBackendUrl"
+);
+assert(
+  optionsJS.includes("testBtn"),
+  "options.js has test connection button handler"
+);
+assert(
+  optionsJS.includes("saveBtn"),
+  "options.js has save button handler"
+);
+assert(
+  !optionsJS.includes("apiKey") && !optionsJS.includes("api_key") && !optionsJS.includes("secret"),
+  "options.js does not contain secrets"
+);
 
 const detector = readFile("src/fieldDetector.js");
 assert(
@@ -438,6 +463,14 @@ const classifier = readFile("src/fieldClassifier.js");
 assert(
   classifier.includes("SENSITIVE_TYPES"),
   "fieldClassifier.js defines SENSITIVE_TYPES"
+);
+assert(
+  classifier.includes('"diversity"'),
+  "fieldClassifier.js includes diversity in sensitive types"
+);
+assert(
+  classifier.includes('"equal_opportunity"'),
+  "fieldClassifier.js includes equal_opportunity in sensitive types"
 );
 assert(
   classifier.includes("sensitive"),
@@ -488,6 +521,14 @@ assert(
   "autofillMapper.js defines SENSITIVE_TYPES"
 );
 assert(
+  autofillMapper.includes('"diversity"'),
+  "autofillMapper.js includes diversity in SENSITIVE_TYPES"
+);
+assert(
+  autofillMapper.includes('"equal_opportunity"'),
+  "autofillMapper.js includes equal_opportunity in SENSITIVE_TYPES"
+);
+assert(
   autofillMapper.includes("getLatestExperience"),
   "autofillMapper.js has getLatestExperience"
 );
@@ -512,6 +553,14 @@ assert(
 assert(
   approvalState.includes("selectAllSafe"),
   "approvalState.js has selectAllSafe"
+);
+assert(
+  approvalState.includes("remove"),
+  "approvalState.js has remove method"
+);
+assert(
+  approvalState.includes("clear"),
+  "approvalState.js has clear method"
 );
 assert(
   approvalState.includes("getSummary"),
@@ -554,6 +603,18 @@ assert(
 assert(
   mappingPreview.includes("toggle-disabled"),
   "mappingPreview.js disables sensitive field approve"
+);
+assert(
+  mappingPreview.includes("low-conf-badge"),
+  "mappingPreview.js has low confidence badge"
+);
+assert(
+  mappingPreview.includes("sensitive-warning"),
+  "mappingPreview.js has sensitive field warning"
+);
+assert(
+  mappingPreview.includes("Math.round(preview.confidence * 100"),
+  "mappingPreview.js shows confidence as percentage"
 );
 assert(
   !mappingPreview.includes(".value ="),

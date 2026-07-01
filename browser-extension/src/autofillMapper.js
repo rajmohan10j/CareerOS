@@ -3,6 +3,8 @@ const SENSITIVE_TYPES = new Set([
   "address",
   "salary_expectation",
   "work_authorization",
+  "diversity",
+  "equal_opportunity",
 ]);
 
 function getLatestExperience(experiences) {
@@ -328,6 +330,24 @@ function mapIntentToValue(intent, profile, skills, experiences) {
         sensitive: true,
         confidence: 0,
         message: "Notice period requires manual input (sensitive field)",
+      };
+
+    case "diversity":
+      return {
+        value: null,
+        status: "manual_review",
+        sensitive: true,
+        confidence: 0,
+        message: "Diversity question requires manual input (sensitive field)",
+      };
+
+    case "equal_opportunity":
+      return {
+        value: null,
+        status: "manual_review",
+        sensitive: true,
+        confidence: 0,
+        message: "EEO question requires manual input (sensitive field)",
       };
 
     default:

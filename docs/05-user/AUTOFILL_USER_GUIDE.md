@@ -1,8 +1,8 @@
 # AUTOFILL_USER_GUIDE
 
 Document ID: DOC-112  
-Version: 0.3.0  
-Status: Implemented (Milestone 09N)
+Version: 0.4.0  
+Status: Implemented (Milestone 09O)
 
 ## Purpose
 
@@ -24,7 +24,9 @@ Explains how users safely use Universal Autofill.
 ## Approval Rules
 
 - Each field has Approve / Reject / Skip radio toggles.
-- Sensitive fields (phone, address, salary, work authorization) have their Approve option disabled — they cannot be auto-selected.
+- Sensitive fields (phone, address, salary, work authorization, diversity, equal opportunity) have their Approve option disabled — they cannot be auto-selected. Sensitive fields show a purple warning section explaining they require careful review.
+- Low-confidence fields (confidence < 0.6) show an orange "low confidence" badge and should be verified before filling.
+- Confidence scores are displayed as percentages (0-100%) across detection, mapping, and approval views.
 - "Select All Safe" approves only non-sensitive fields with confidence >= 0.6 and available/derived status.
 - Approval state is in-memory only — it is not saved when the popup closes.
 - No field values are written to the page during approval.
@@ -34,7 +36,7 @@ Explains how users safely use Universal Autofill.
 - Only explicitly approved fields with non-null/non-empty values are filled.
 - File upload, password, hidden, disabled, readonly, submit, button, reset, image, radio, and checkbox fields are never filled.
 - The "Fill Approved Fields" button is disabled until at least one field is approved.
-- Fill results show filled / skipped (with reason) / failed counts with per-field detail.
+- Fill results show filled / skipped (with reason) / failed counts with per-field detail, including field names for each skipped category.
 - Successfully filled fields are highlighted with a green outline for 2 seconds.
 - Fill state is not persisted — each popup session requires fresh approval.
 
@@ -43,4 +45,5 @@ Explains how users safely use Universal Autofill.
 - CareerOS never submits a form or clicks a button.
 - CareerOS never fills a field without explicit user approval.
 - CareerOS never fills password, hidden, or file fields.
+- CareerOS never fills diversity, equal opportunity, or other sensitive fields without explicit manual review.
 - CareerOS never stores fill data or field values outside the browser.

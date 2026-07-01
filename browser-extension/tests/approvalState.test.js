@@ -49,7 +49,7 @@ assert(src.includes("return {"), "approvalState.js returns an object");
 
 console.log("\n[state methods]");
 const expectedMethods = [
-  "approve", "reject", "reset",
+  "approve", "reject", "remove", "clear", "reset",
   "isApproved", "isRejected", "isPending",
   "getApproved", "getRejected",
   "selectAllSafe", "getSummary",
@@ -75,6 +75,13 @@ assert(src.includes("mappingConfidence"), "selectAllSafe checks confidence");
 assert(src.includes("\"available\""), "selectAllSafe checks available status");
 assert(src.includes("\"derived\""), "selectAllSafe checks derived status");
 assert(src.includes("mapping.intent"), "selectAllSafe uses intent from mapping");
+
+// ── Remove method ─────────────────────────────────────────────────
+
+console.log("\n[remove method]");
+assert(src.includes("store.delete"), "remove uses store.delete");
+assert(src.includes("function remove"), "approvalState.js defines remove");
+assert(src.includes("function clear"), "approvalState.js defines clear");
 
 // ── Summary ───────────────────────────────────────────────────────
 

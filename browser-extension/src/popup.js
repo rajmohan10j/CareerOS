@@ -38,12 +38,19 @@ let lastMappedFields = null;
 let approvalStore = null;
 
 function showError(message) {
-  errorDetailEl.textContent = message;
+  errorDetailEl.textContent = "⚠ " + message;
+  errorDetailEl.classList.remove("hidden");
+}
+
+function showSuccess(message) {
+  errorDetailEl.textContent = "✓ " + message;
+  errorDetailEl.className = "error-detail success-detail";
   errorDetailEl.classList.remove("hidden");
 }
 
 function hideError() {
   errorDetailEl.classList.add("hidden");
+  errorDetailEl.className = "error-detail";
 }
 
 function updateStatus(online, data) {
@@ -89,16 +96,19 @@ function renderDebugTable(fields) {
     <tbody>
       ${fields
         .map(
-          (f, i) => `
-        <tr>
+          (f, i) => {
+            const confidencePct = f.confidence != null ? (f.confidence * 100).toFixed(0) + "%" : "—";
+            const lowConf = f.confidence != null && f.confidence < 0.6;
+            return `
+        <tr class="${lowConf ? "row-low-confidence" : ""}">
           <td>${i + 1}</td>
           <td>${f.fieldType || f.inputType || "—"}</td>
-          <td>${f.intent || "unknown"}</td>
-          <td>${f.confidence != null ? f.confidence.toFixed(2) : "—"}</td>
+          <td>${f.intent || "unknown"}${lowConf ? ' <span class="low-conf-indicator" title="Low confidence — verify intent">⚠</span>' : ""}</td>
+          <td class="${lowConf ? "conf-low" : "conf-ok"}">${confidencePct}</td>
           <td class="${f.sensitive ? "sensitive-yes" : "sensitive-no"}">${f.sensitive ? "Yes" : "No"}</td>
           <td class="debug-signal">${f.label || f.placeholder || f.ariaLabel || f.name || "—"}</td>
-        </tr>`
-        )
+        </tr>`;
+        })
         .join("")}
     </tbody>
   `;
@@ -181,16 +191,18 @@ function renderMappingTable(mappedFields) {
     <tbody>
       ${mappedFields
         .map(
-          (f, i) => `
+          (f, i) => {
+            const confidencePct = f.mappingConfidence != null ? (f.mappingConfidence * 100).toFixed(0) + "%" : "—";
+            return `
         <tr class="mapping-row-${f.mappingStatus}">
           <td>${i + 1}</td>
           <td>${f.intent || "unknown"}</td>
           <td class="mapping-value">${f.mappedValue != null ? escapeHtml(String(f.mappedValue)) : "—"}</td>
           <td><span class="status-badge badge-${f.mappingStatus}">${f.mappingStatus}</span></td>
-          <td>${f.mappingConfidence != null ? f.mappingConfidence.toFixed(2) : "—"}</td>
+          <td>${confidencePct}</td>
           <td class="debug-signal">${f.mappingMessage || "—"}${f.sensitive ? ' <span class="sensitive-tag">sensitive</span>' : ""}</td>
-        </tr>`
-        )
+        </tr>`;
+        })
         .join("")}
     </tbody>
   `;
@@ -276,9 +288,21 @@ function renderFillResult(result) {
   html += `</div>`;
   if (result.details) {
     html += `<div class="fill-details">`;
-    if (result.details.skippedNotFound > 0) html += `<span class="fill-detail">${result.details.skippedNotFound} not found</span>`;
-    if (result.details.skippedUnfillable > 0) html += `<span class="fill-detail">${result.details.skippedUnfillable} unfillable</span>`;
-    if (result.details.skippedMissing > 0) html += `<span class="fill-detail">${result.details.skippedMissing} missing</span>`;
+    if (result.filled > 0 && result.details.filledFields) {
+      html += `<div class="fill-detail-list"><strong>Filled:</strong> ${result.details.filledFields.join(", ")}</div>`;
+    }
+    if (result.details.skippedNotFound > 0) {
+      const fields = result.details.skippedNotFoundFields ? result.details.skippedNotFoundFields.join(", ") : "";
+      html += `<div class="fill-detail"><span class="fill-detail-label">Not found:</span> ${result.details.skippedNotFound}${fields ? " (" + fields + ")" : ""}</div>`;
+    }
+    if (result.details.skippedUnfillable > 0) {
+      const fields = result.details.skippedUnfillableFields ? result.details.skippedUnfillableFields.join(", ") : "";
+      html += `<div class="fill-detail"><span class="fill-detail-label">Unfillable:</span> ${result.details.skippedUnfillable}${fields ? " (" + fields + ")" : ""}</div>`;
+    }
+    if (result.details.skippedMissing > 0) {
+      const fields = result.details.skippedMissingFields ? result.details.skippedMissingFields.join(", ") : "";
+      html += `<div class="fill-detail"><span class="fill-detail-label">Missing value:</span> ${result.details.skippedMissing}${fields ? " (" + fields + ")" : ""}</div>`;
+    }
     html += `</div>`;
   }
   if (!result.success) {

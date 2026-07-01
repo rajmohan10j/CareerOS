@@ -1,9 +1,9 @@
 # EXTENSION_SECURITY_MODEL
 
 Document ID: DOC-107  
-Version: 0.2.0  
+Version: 0.3.0  
 Status: Implemented  
-Milestone: 09N
+Milestone: 09O
 
 ## Purpose
 
@@ -71,11 +71,12 @@ Require explicit manual confirmation (approve radio disabled by default):
 - personal address
 - phone number
 - notice period
-- diversity/equal opportunity questions
+- diversity questions
+- equal opportunity / EEO questions
 
 ## Verification
 
 All rules are enforced by automated tests:
 - `safetyGuards.test.js` (22 tests) — no submit, no click, no file upload, only approved fills, no bypass, no external calls, no dangerous permissions, no persistence
-- `controlledFill.test.js` (53 tests) — FILL_FIELDS handler, fillability checks, event dispatch, highlight, result tracking, background forwarding, popup integration, CSS styles
-- `extension.test.js` (155 tests) — source validation checks across all files for prohibited patterns
+- `controlledFill.test.js` (56 tests) — FILL_FIELDS handler, fillability checks, event dispatch, highlight, result tracking, field name tracking, background forwarding, popup integration, CSS styles
+- `extension.test.js` (172 tests) — source validation checks across all files for prohibited patterns, sensitive field type coverage, new method validation

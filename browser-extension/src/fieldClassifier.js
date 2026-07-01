@@ -3,6 +3,8 @@ const SENSITIVE_TYPES = new Set([
   "address",
   "salary_expectation",
   "work_authorization",
+  "diversity",
+  "equal_opportunity",
 ]);
 
 const FIELD_PATTERNS = [
@@ -26,6 +28,8 @@ const FIELD_PATTERNS = [
   { type: "salary_expectation", patterns: [/salary/i, /compensation/i, /\bpay\b/i, /expected.*salary/i, /desired.*salary/i], not: [] },
   { type: "work_authorization", patterns: [/authorization/i, /\bvisa\b/i, /work\s*permit/i, /sponsor/i, /work\s*author/i, /citizenship/, /eligible.*work/i], not: [] },
   { type: "notice_period", patterns: [/notice\s*period/i, /available.*start/i, /start.*date/i, /earliest.*start/i, /notice\s*time/i], not: [] },
+  { type: "diversity", patterns: [/diversity/i, /demographic/i, /gender/i, /ethnicity/i, /race/i, /veteran/i, /disability/i], not: [/skills/i] },
+  { type: "equal_opportunity", patterns: [/equal opportunity/i, /eeo/i, /affirmative action/i, /equal employment/i, /eoe/i, /equal employer/i], not: [] },
 ];
 
 function classifyField(field) {

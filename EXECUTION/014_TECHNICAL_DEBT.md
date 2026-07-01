@@ -20,8 +20,10 @@ Capture shortcuts and future improvements.
 
 ## Milestone 09M Follow-up
 - Approval state is ephemeral and lost when popup closes. Future milestone may use chrome.storage.session if needed.
-- Actual controlled autofill execution is intentionally deferred to the next milestone.
-- Diversity/equal opportunity questions are not yet classified as sensitive field intents.
+- Diversity/equal opportunity questions are now classified as sensitive field intents (resolved in 09O).
 - Low-confidence fields are excluded from Select All Safe but can still be manually approved by the user.
-- Skip action currently uses reject+approve clearing behavior. Consider adding a remove() method to approval store.
+- Skip action now uses reject+approve clearing behavior. A remove() method has been added to approvalStore (resolved in 09O).
+- Low-confidence fields now show orange badge + warning (resolved in 09O).
+- Sensitive fields now show purple warning section (resolved in 09O).
+
 

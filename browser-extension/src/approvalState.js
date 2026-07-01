@@ -9,6 +9,14 @@ function createApprovalStore() {
     store.set(fieldIntent, false);
   }
 
+  function remove(fieldIntent) {
+    store.delete(fieldIntent);
+  }
+
+  function clear() {
+    store.clear();
+  }
+
   function reset() {
     store.clear();
   }
@@ -62,7 +70,7 @@ function createApprovalStore() {
     return { approved, rejected, pending, total: allMappings.length };
   }
 
-  return { approve, reject, reset, isApproved, isRejected, isPending, getApproved, getRejected, selectAllSafe, getSummary };
+  return { approve, reject, remove, clear, reset, isApproved, isRejected, isPending, getApproved, getRejected, selectAllSafe, getSummary };
 }
 
 export { createApprovalStore };

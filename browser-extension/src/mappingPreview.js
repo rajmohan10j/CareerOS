@@ -29,10 +29,13 @@ function buildItemHTML(mapping, approvalStore) {
   const isRejected = preview.rejected;
 
   const valueDisplay = preview.value != null ? escapeHtml(String(preview.value)) : "<span class='preview-empty'>—</span>";
-  const sensitiveBadge = preview.sensitive ? '<span class="sensitive-tag">sensitive</span>' : "";
+  const sensitiveBadge = preview.sensitive ? '<span class="sensitive-tag">sensitive — requires manual review</span>' : "";
   const messageHtml = preview.message ? escapeHtml(preview.message) : "—";
-  const confidenceDisplay = preview.confidence != null ? preview.confidence.toFixed(2) : "—";
+  const confidencePct = preview.confidence != null ? Math.round(preview.confidence * 100) : null;
+  const confidenceDisplay = confidencePct != null ? `${confidencePct}%` : "—";
+  const lowConfBadge = preview.confidence != null && preview.confidence < 0.6 ? '<span class="low-conf-badge" title="Low confidence — verify value before filling">low confidence</span>' : "";
   const statusBadge = `<span class="status-badge badge-${preview.status}">${preview.status}</span>`;
+  const sensitiveWarning = preview.sensitive ? '<div class="sensitive-warning">This field contains personal or regulated information. Review carefully before filling.</div>' : "";
 
   const approvedChecked = isApproved ? "checked" : "";
   const rejectedChecked = isRejected ? "checked" : "";
@@ -43,14 +46,16 @@ function buildItemHTML(mapping, approvalStore) {
         <span class="preview-intent">${escapeHtml(preview.intent)}</span>
         ${statusBadge}
         ${sensitiveBadge}
+        ${lowConfBadge}
       </div>
       <div class="preview-value">${valueDisplay}</div>
+      ${sensitiveWarning}
       <div class="preview-details">
-        <span class="preview-confidence">Confidence: ${confidenceDisplay}</span>
+        <span class="preview-confidence" title="Confidence score: how reliably the field intent was identified">Confidence: ${confidenceDisplay}</span>
         <span class="preview-msg">${messageHtml}</span>
       </div>
       <div class="preview-actions">
-        <label class="preview-toggle ${!preview.sensitive ? "" : "toggle-disabled"}">
+        <label class="preview-toggle ${!preview.sensitive ? "" : "toggle-disabled"}" title="${preview.sensitive ? "Sensitive field — cannot be auto-approved" : "Approve this field for filling"}">
           <input type="radio" name="action_${preview.intent}" value="approve" class="preview-approve" ${approvedChecked} ${preview.sensitive ? "disabled" : ""}>
           Approve
         </label>

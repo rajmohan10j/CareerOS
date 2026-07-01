@@ -74,7 +74,7 @@ for (const s of statusValues) {
 console.log("\n[sensitive fields]");
 
 assert(src.includes("SENSITIVE_TYPES"), "autofillMapper.js defines SENSITIVE_TYPES");
-const sensitiveTypes = ["phone", "address", "salary_expectation", "work_authorization"];
+const sensitiveTypes = ["phone", "address", "salary_expectation", "work_authorization", "diversity", "equal_opportunity"];
 for (const t of sensitiveTypes) {
   assert(src.includes(t), `autofillMapper.js SENSITIVE_TYPES includes "${t}"`);
 }

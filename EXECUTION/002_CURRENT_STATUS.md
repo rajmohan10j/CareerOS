@@ -1,6 +1,6 @@
 # Current Status
 
-Current Milestone: 09N – Controlled Autofill Execution
+Current Milestone: 09O – Browser Extension v2 Refinements
 
 Completed:
 - Milestone 09A: Backend skeleton
@@ -84,9 +84,26 @@ Completed:
   - 22 safetyGuards tests (no form.submit, no .click(), no file upload, only approved fills, no bypass, no external calls, no dangerous permissions, no persistence)
   - extension.test.js updated: 155 tests (+35) covering autofillExecutor.js, test files, FILL_FIELDS handler, fill UI elements, fill source validations, CSS fill styles
   - All 531 extension tests passing (155+51+42+23+62+41+51+31+53+22)
+- Milestone 09O: Browser Extension v2 Refinements
+  - Added diversity and equal_opportunity field types to fieldClassifier.js (22 total types); both marked sensitive
+  - Added diversity and equal_opportunity mapping cases to autofillMapper.js (manual_review, sensitive)
+  - Added remove(intent) and clear() methods to approvalState.js for individual entry removal
+  - Improved mappingPreview.js: confidence displayed as percentage (0-100%), low-confidence fields show orange badge with explanation tooltip, sensitive fields show purple warning section, tooltips on all action toggles
+  - Improved popup.js: enhanced error display with icon prefixes, success messages supported, debug table shows confidence % with low-confidence warning indicators, mapping table shows confidence %, fill result shows field names for filled/skipped-not-found/skipped-unfillable breakdowns
+  - Improved popup.css: new styles for low-conf-badge, sensitive-warning, success-detail, conf-low/conf-ok, low-conf-indicator, row-low-confidence, fill-detail-label, fill-detail-list
+  - Improved apiClient.js: detailed error messages with actionable hints ("is your backend running?"), elapsed time tracking per request, specific fetch error handling
+  - Improved options.js: connection test shows elapsed time in ms, button text updates during test, better error messages
+  - Updated popup.html version to v0.2.0
+  - Updated extension tests: 172 tests (+17) covering new source validations, options.js checks, new sensitive types, remove/clear methods, confidence display, low-confidence badges, sensitive warnings, CSS additions
+  - Updated fieldClassifier tests: 46 tests (+4) for diversity/equal_opportunity patterns and sensitive types
+  - Updated autofillMapper tests: 64 tests (+2) for new SENSITIVE_TYPES entries
+  - Updated approvalState tests: 46 tests (+5) for remove() and clear() methods
+  - Updated mappingPreview tests: 59 tests (+8) for low-conf-badge, sensitive-warning, confidence %, tooltips
+  - Updated controlledFill tests: 56 tests (+3) for field name tracking in fill results
+  - All 570 extension tests passing (172+51+46+23+64+46+59+31+56+22)
+  - Permissions unchanged (storage + localhost:8000)
 
 Remaining Milestones (from ROADMAP.md):
-- 09O Desktop App
 - 09P Mobile
 - 09Q Plugin SDK
 - 09R RAG

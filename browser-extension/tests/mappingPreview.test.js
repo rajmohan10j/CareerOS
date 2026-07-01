@@ -100,6 +100,26 @@ assert(src.includes("sensitive-tag"), "sensitive fields get a sensitive-tag");
 assert(src.includes("toggle-disabled"), "sensitive radios are disabled");
 assert(src.includes("\"disabled\""), "sensitive approve radio is disabled");
 
+// ── Low confidence handling ───────────────────────────────────────
+
+console.log("\n[low confidence handling]");
+assert(src.includes("low-conf-badge"), "mappingPreview.js has low-conf-badge");
+assert(src.includes("confidence < 0.6"), "mappingPreview.js checks low confidence");
+assert(src.includes("low confidence"), "mappingPreview.js shows low confidence warning");
+
+// ── Sensitive warning language ────────────────────────────────────
+
+console.log("\n[sensitive warning]");
+assert(src.includes("sensitive-warning"), "mappingPreview.js has sensitive warning section");
+assert(src.includes("requires manual review"), "sensitive warning mentions manual review");
+
+// ── Confidence display ────────────────────────────────────────────
+
+console.log("\n[confidence display]");
+assert(src.includes("Math.round(preview.confidence * 100"), "mappingPreview.js formats confidence as percentage");
+assert(src.includes("title="), "mappingPreview.js uses title attributes for tooltips");
+assert(src.includes("Confidence score"), "mappingPreview.js explains confidence in tooltip");
+
 // ── Empty state ───────────────────────────────────────────────────
 
 console.log("\n[empty state]");

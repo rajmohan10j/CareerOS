@@ -124,6 +124,10 @@ import { classifyFields } from "./fieldClassifier.js";
       skippedMissing: 0,
       skippedUnfillable: 0,
       skippedNotFound: 0,
+      filledFields: [],
+      skippedNotFoundFields: [],
+      skippedUnfillableFields: [],
+      skippedMissingFields: [],
     };
 
     for (const field of fields) {
@@ -131,16 +135,19 @@ import { classifyFields } from "./fieldClassifier.js";
       if (!el) {
         skipped++;
         details.skippedNotFound++;
+        details.skippedNotFoundFields.push(field.intent);
         continue;
       }
       if (!isFillableElement(el)) {
         skipped++;
         details.skippedUnfillable++;
+        details.skippedUnfillableFields.push(field.intent);
         continue;
       }
       const ok = fillElement(el, field.value);
       if (ok) {
         filled++;
+        details.filledFields.push(field.intent);
         highlightFilled(el);
       } else {
         failed++;

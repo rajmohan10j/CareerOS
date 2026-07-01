@@ -90,6 +90,9 @@ assert(contentSrc.includes("skipped++"), "fillApprovedFields counts skipped");
 assert(contentSrc.includes("failed++"), "fillApprovedFields counts failed");
 assert(contentSrc.includes("skippedNotFound"), "tracks not-found skips");
 assert(contentSrc.includes("skippedUnfillable"), "tracks unfillable skips");
+assert(contentSrc.includes("filledFields"), "tracks filled field names");
+assert(contentSrc.includes("skippedNotFoundFields"), "tracks not-found field names");
+assert(contentSrc.includes("skippedUnfillableFields"), "tracks unfillable field names");
 
 // ── Background script: FILL_FIELDS forwarding ─────────────────────
 

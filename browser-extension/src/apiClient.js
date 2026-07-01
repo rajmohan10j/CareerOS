@@ -16,22 +16,28 @@ async function checkHealth() {
   const baseUrl = await getStoredBackendUrl();
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 5000);
+  const startTime = Date.now();
   try {
     const resp = await fetch(`${baseUrl}/health`, {
       signal: controller.signal,
     });
+    const elapsed = Date.now() - startTime;
     clearTimeout(timeout);
     if (!resp.ok) {
-      return { status: "error", message: `HTTP ${resp.status}` };
+      return { status: "error", message: `Backend returned HTTP ${resp.status} — check that the server is running correctly`, elapsed };
     }
     const data = await resp.json();
-    return { status: "ok", data };
+    return { status: "ok", data, elapsed };
   } catch (err) {
+    const elapsed = Date.now() - startTime;
     clearTimeout(timeout);
     if (err.name === "AbortError") {
-      return { status: "error", message: "Connection timed out" };
+      return { status: "error", message: `Connection timed out after 5s — is your backend running at ${baseUrl}?`, elapsed };
     }
-    return { status: "error", message: err.message };
+    if (err.message.includes("fetch")) {
+      return { status: "error", message: `Could not reach backend at ${baseUrl} — ensure the server is started and the URL is correct`, elapsed };
+    }
+    return { status: "error", message: `Connection error: ${err.message}`, elapsed };
   }
 }
 

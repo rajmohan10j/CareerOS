@@ -32,24 +32,28 @@ async function saveSettings() {
 
 async function testConnection() {
   const currentUrl = backendUrlInput.value.trim() || DEFAULT_BACKEND_URL;
-  /* Temporarily override stored URL for the test */
-  const originalGet = getStoredBackendUrl;
   backendUrlInput.disabled = true;
   testBtn.disabled = true;
-  setStatus("Testing connection...", false);
+  testBtn.textContent = "Testing...";
+  setStatus("Connecting...", false);
 
   const result = await checkHealth();
 
   backendUrlInput.disabled = false;
   testBtn.disabled = false;
+  testBtn.textContent = "Test Connection";
 
   if (result.status === "ok") {
+    const elapsed = result.elapsed != null ? ` (${result.elapsed}ms)` : "";
     setStatus(
-      `Connected — version ${result.data.version || "?"}, mode ${result.data.mode || "?"}`,
+      `Connected — version ${result.data.version || "?"}, mode ${result.data.mode || "?"}${elapsed}`,
       false
     );
   } else {
-    setStatus("Connection failed: " + (result.message || "Unknown error"), true);
+    setStatus(
+      "Connection failed: " + (result.message || "Unknown error") + ". Verify the backend is running.",
+      true
+    );
   }
 }
 

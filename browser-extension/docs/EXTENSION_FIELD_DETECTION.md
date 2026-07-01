@@ -1,9 +1,9 @@
 # EXTENSION_FIELD_DETECTION
 
 Document ID: DOC-106  
-Version: 0.1.0  
+Version: 0.2.0  
 Status: Implemented  
-Milestone: 09K
+Milestone: 09O
 
 ## Purpose
 
@@ -48,12 +48,13 @@ A normalized field map (implemented in `src/fieldDetector.js` + `src/fieldClassi
 }
 ```
 
-## Classified Field Types (20)
+## Classified Field Types (22)
 
 `full_name`, `first_name`, `last_name`, `email`, `phone`, `address`, `city`,
 `state`, `country`, `postal_code`, `current_company`, `current_title`,
 `education`, `experience`, `skills`, `resume_upload`, `cover_letter`,
-`salary_expectation`, `work_authorization`, `notice_period`, `unknown`
+`salary_expectation`, `work_authorization`, `notice_period`, `diversity`,
+`equal_opportunity`, `unknown`
 
 ## Sensitive Fields
 
@@ -61,6 +62,8 @@ A normalized field map (implemented in `src/fieldDetector.js` + `src/fieldClassi
 - address
 - salary_expectation
 - work_authorization
+- diversity
+- equal_opportunity
 
 ## Rule
 

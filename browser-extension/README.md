@@ -2,7 +2,7 @@
 
 Document ID: DOC-046
 Version: 0.2.0
-Status: Implemented (Milestone 09N — Controlled Autofill Execution)
+Status: Implemented (Milestone 09O — Browser Extension v2 Refinements)
 
 ## Purpose
 
@@ -44,15 +44,15 @@ browser-extension/
 ├── styles/
 │   └── popup.css              # Popup styling
 └── tests/
-    ├── extension.test.js      # 155 tests — manifest, structure, source validation, security
+    ├── extension.test.js      # 172 tests — manifest, structure, source validation, security
     ├── fieldDetector.test.js  # 51 tests — detector source validation
-    ├── fieldClassifier.test.js # 42 tests — classifier patterns & security
+    ├── fieldClassifier.test.js # 46 tests — classifier patterns & security
     ├── profileClient.test.js  # 23 tests — exports, fetch patterns, normalize
-    ├── autofillMapper.test.js # 62 tests — intent mapping, status, security
-    ├── approvalState.test.js  # 41 tests — store creation, approve/reject, selectAllSafe
-    ├── mappingPreview.test.js # 51 tests — preview rendering, safe detection, sensitive handling
+    ├── autofillMapper.test.js # 64 tests — intent mapping, status, security
+    ├── approvalState.test.js  # 46 tests — store creation, approve/reject, remove, selectAllSafe
+    ├── mappingPreview.test.js # 59 tests — preview rendering, safe detection, sensitive handling, low-confidence badges
     ├── autofillExecutor.test.js # 31 tests — buildApprovedFillFields, executeFill, security
-    ├── controlledFill.test.js # 53 tests — FILL_FIELDS handler, fillability, events, highlight
+    ├── controlledFill.test.js # 56 tests — FILL_FIELDS handler, fillability, events, highlight, field name tracking
     └── safetyGuards.test.js   # 22 tests — no submit, no click, no bypass, no persistence
 ```
 
@@ -80,18 +80,19 @@ detects:
 | Section heading | Preceding `<h1>`–`<h6>` or `<legend>` |
 | Options | `<select>` options |
 
-### Classified Field Types (20)
+### Classified Field Types (22)
 
 `full_name`, `first_name`, `last_name`, `email`, `phone`, `address`, `city`,
 `state`, `country`, `postal_code`, `current_company`, `current_title`,
 `education`, `experience`, `skills`, `resume_upload`, `cover_letter`,
-`salary_expectation`, `work_authorization`, `notice_period`, `unknown`
+`salary_expectation`, `work_authorization`, `notice_period`, `diversity`,
+`equal_opportunity`, `unknown`
 
 ### Sensitive Fields
 
-Phone, address, salary expectation, and work authorization fields are marked
-sensitive. Their approve radio button is disabled — they cannot be auto-selected
-and always require manual review.
+Phone, address, salary expectation, work authorization, diversity, and equal
+opportunity fields are marked sensitive. Their approve radio button is disabled
+— they cannot be auto-selected and always require manual review.
 
 ## Profile Mapping
 
@@ -120,6 +121,7 @@ uses four status levels:
 | resume_upload / cover_letter | manual_review — cannot auto-populate |
 | salary_expectation | From profile salary expectations |
 | work_authorization / notice_period | manual_review — sensitive |
+| diversity / equal_opportunity | manual_review — sensitive — requires manual input |
 
 ## Approval Preview
 
@@ -130,6 +132,9 @@ After mapping, the popup shows an "Approve Mappings" section with:
 - **Per-field radio toggles** — Approve / Reject / Skip for each field.
 - **Sensitive badge** on fields that require extra caution.
 - **Disabled approve radio** on sensitive fields — they cannot be auto-approved.
+- **Sensitive warning section** — Purple background warning explaining the field contains personal or regulated information.
+- **Low-confidence badge** — Orange badge on fields with confidence < 0.6, with tooltip explaining to verify before filling.
+- **Confidence as percentage** — All confidence scores displayed as 0-100% with tooltip explanation.
 - **Approval summary** showing approved / rejected / pending / total counts.
 - **Visual states** — approved rows get a green background, rejected rows get dimmed.
 
@@ -148,7 +153,7 @@ The extension:
    - Checks fillability: skips password, hidden, disabled, readonly, file, submit, button, reset, image, radio, checkbox fields.
    - Assigns the value and dispatches `input` + `change` events.
    - Highlights the field with a green outline for 2 seconds.
-4. **Result** — Returns counts of filled, skipped, and failed fields (with per-field breakdown).
+4. **Result** — Returns counts of filled, skipped, and failed fields (with per-field breakdown including field names).
 
 ### Fill Safety Guarantees
 
@@ -202,4 +207,5 @@ node tests/safetyGuards.test.js
 - 09L — Universal Autofill Mapping Engine ✅
 - 09M — Safe Autofill Preview + User Approval ✅
 - 09N — Controlled Autofill Execution ✅
-- 09O — Extension v2 improvements ⏳
+- 09O — Extension v2 Refinements ✅
+- 09P — Mobile ⏳
