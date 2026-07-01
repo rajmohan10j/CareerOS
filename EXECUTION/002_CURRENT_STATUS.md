@@ -1,6 +1,6 @@
 # Current Status
 
-Current Milestone: 09I – ATS Optimization Engine (verified)
+Current Milestone: 09J – Browser Extension Skeleton
 
 Completed:
 - Milestone 09A: Backend skeleton
@@ -32,11 +32,21 @@ Completed:
   - AI prompts include actual skills & experience data; AI failures fall back gracefully
   - 66 new tests (380 total), all passing, ruff clean
   - ATS_ENGINE.md spec updated to v0.2.0
+- Milestone 09J: Browser Extension Skeleton
+  - Manifest V3 extension for Chrome/Edge/Firefox
+  - Popup UI with backend health check (status, version, mode)
+  - Content script placeholder for future field detection
+  - Background service worker with health check message handler
+  - Options page to configure backend URL
+  - Only permission: storage; host_permission: localhost:8000
+  - No browsing history, tabs, cookies, or credentials collected
+  - No autofill or submit behavior implemented
+  - 37 extension structure/permission tests, all passing
 
 Remaining Milestones (from ROADMAP.md):
-- 09J Browser Extension
 - 09K Desktop App
-- 09L Plugin SDK
-- 09M RAG
-- 09N Analytics
-- 09O Production
+- 09L Mobile
+- 09M Plugin SDK
+- 09N RAG
+- 09O Analytics
+- 09P Production

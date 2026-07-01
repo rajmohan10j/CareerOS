@@ -13,3 +13,4 @@
 - Milestone 09G: Job Intelligence Engine (CRUD, AI analyze/evaluate, structured evaluation with skill matching/gap analysis/recommendation, experience/location matching, resume suggestions)
 - Milestone 09H: Additional Domain Models (Experience, Skill, Application CRUD with filtering)
 - Milestone 09I: ATS Optimization Engine (score/analyze/optimize, keyword matching, formatting analysis, ATS-optimized resume generation, 66 tests)
+- Milestone 09J: Browser Extension Skeleton (Manifest V3, popup health check, content script placeholder, options page, minimal permissions, 37 tests)

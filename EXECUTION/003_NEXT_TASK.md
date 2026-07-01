@@ -1,7 +1,7 @@
 # Next Task
 
 Current:
-Milestone 09I – ATS Optimization Engine
+Milestone 09J – Browser Extension Skeleton
 
 Completed:
 - Milestone 09A – Backend Skeleton
@@ -25,7 +25,15 @@ Completed:
   - POST /ats/optimize: ATS-optimized resume generation as new versioned record
   - AtsService with score/analyze/optimize methods, wired to all repositories + AI
   - 66 new tests (380 total), all passing, ruff clean
+- Milestone 09J – Browser Extension Skeleton:
+  - Manifest V3 extension for Chrome/Edge/Firefox
+  - Popup UI with backend health check
+  - Content script placeholder for future field detection
+  - Background service worker
+  - Options page (backend URL configuration)
+  - Minimal permissions (storage only)
+  - 37 extension structure/permission tests
 
 Next:
-- No remaining intelligence milestones to implement
-- Await user instructions for next milestone
+- Desktop App (Milestone 09K) — not started
+- Await user instructions

@@ -1,0 +1,34 @@
+{
+  "manifest_version": 3,
+  "name": "CareerOS",
+  "version": "0.1.0",
+  "description": "Local-first career management assistant. Extracts job descriptions and assists with application form autofill.",
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "action": {
+    "default_popup": "src/popup.html",
+    "default_title": "CareerOS"
+  },
+  "options_ui": {
+    "page": "src/options.html",
+    "open_in_tab": false
+  },
+  "background": {
+    "service_worker": "src/background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["src/content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "permissions": ["storage"],
+  "host_permissions": ["http://localhost:8000/*"],
+  "author": "CareerOS",
+  "homepage_url": "https://careeros.local"
+}

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CareerOS — Settings</title>
+    <link rel="stylesheet" href="../styles/popup.css" />
+    <style>
+      body {
+        width: 400px;
+        padding: 20px;
+      }
+      .option-group {
+        margin-bottom: 16px;
+      }
+      .option-group label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 4px;
+        color: #333;
+      }
+      .option-group input {
+        width: 100%;
+        padding: 8px 10px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        font-size: 14px;
+        font-family: "SF Mono", "Fira Code", monospace;
+      }
+      .option-group .hint {
+        font-size: 12px;
+        color: #777;
+        margin-top: 4px;
+      }
+      .actions {
+        display: flex;
+        gap: 8px;
+        margin-top: 16px;
+      }
+      .actions button {
+        flex: 1;
+        padding: 8px 16px;
+        border: none;
+        border-radius: 6px;
+        font-size: 14px;
+        cursor: pointer;
+      }
+      .btn-primary {
+        background: #1565c0;
+        color: #fff;
+      }
+      .btn-primary:hover {
+        background: #0d47a1;
+      }
+      .btn-secondary {
+        background: #e0e0e0;
+        color: #333;
+      }
+      .btn-secondary:hover {
+        background: #ccc;
+      }
+      #saveStatus {
+        margin-top: 8px;
+        font-size: 13px;
+      }
+      .save-success {
+        color: #2e7d32;
+      }
+      .save-error {
+        color: #c62828;
+      }
+    </style>
+  </head>
+  <body>
+    <h1 class="title" style="margin-bottom: 16px">CareerOS Settings</h1>
+
+    <div class="option-group">
+      <label for="backendUrl">Backend URL</label>
+      <input type="url" id="backendUrl" placeholder="http://localhost:8000" />
+      <div class="hint">
+        The URL of your local CareerOS backend server.
+      </div>
+    </div>
+
+    <div class="actions">
+      <button id="saveBtn" class="btn-primary">Save</button>
+      <button id="testBtn" class="btn-secondary">Test Connection</button>
+    </div>
+
+    <div id="saveStatus"></div>
+
+    <script type="module" src="options.js"></script>
+  </body>
+</html>

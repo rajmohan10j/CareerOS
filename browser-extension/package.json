@@ -1,0 +1,13 @@
+{
+  "name": "careeros-browser-extension",
+  "version": "0.1.0",
+  "private": true,
+  "description": "CareerOS browser extension — local-first career management assistant",
+  "scripts": {
+    "test": "node --experimental-vm-modules tests/extension.test.js",
+    "test:verbose": "node --experimental-vm-modules tests/extension.test.js verbose"
+  },
+  "type": "module",
+  "author": "CareerOS",
+  "license": "MIT"
+}

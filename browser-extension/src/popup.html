@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CareerOS</title>
+    <link rel="stylesheet" href="../styles/popup.css" />
+  </head>
+  <body>
+    <div class="container">
+      <header class="header">
+        <h1 class="title">CareerOS</h1>
+        <span class="version">v0.1.0</span>
+      </header>
+      <section class="status-section">
+        <div class="status-row">
+          <span class="label">Backend</span>
+          <span id="backendStatus" class="status-indicator checking">Checking...</span>
+        </div>
+        <div class="status-row">
+          <span class="label">Version</span>
+          <span id="backendVersion" class="value">—</span>
+        </div>
+        <div class="status-row">
+          <span class="label">Mode</span>
+          <span id="backendMode" class="value">—</span>
+        </div>
+      </section>
+      <div id="errorDetail" class="error-detail hidden"></div>
+      <footer class="footer">
+        <a href="#" id="openOptionsLink">Settings</a>
+      </footer>
+    </div>
+    <script type="module" src="popup.js"></script>
+  </body>
+</html>
