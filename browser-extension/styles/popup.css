@@ -362,6 +362,183 @@ body {
   text-transform: uppercase;
 }
 
+.approval-section {
+  margin-bottom: 12px;
+}
+
+.approval-section.hidden {
+  display: none;
+}
+
+.approval-title {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.safe-btn,
+.reset-btn {
+  padding: 6px 10px;
+  border: none;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  margin-right: 6px;
+  margin-bottom: 8px;
+}
+
+.safe-btn {
+  background: #1565c0;
+  color: #fff;
+}
+
+.safe-btn:hover {
+  background: #0d47a1;
+}
+
+.reset-btn {
+  background: #f5f5f5;
+  color: #555;
+  border: 1px solid #ddd;
+}
+
+.reset-btn:hover {
+  background: #e0e0e0;
+}
+
+.approval-summary-area {
+  margin-bottom: 8px;
+}
+
+.approval-summary-area.hidden {
+  display: none;
+}
+
+.approval-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px 10px;
+  background: #f5f5f5;
+  border-radius: 6px;
+}
+
+.approval-stat {
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-weight: 500;
+}
+
+.stat-total {
+  background: #e0e0e0;
+  color: #555;
+}
+
+.preview-content {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.preview-row {
+  padding: 8px 10px;
+  margin-bottom: 6px;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  background: #fff;
+  transition: background 0.15s;
+}
+
+.preview-row.preview-approved {
+  background: #f1f8e9;
+  border-color: #aed581;
+}
+
+.preview-row.preview-rejected {
+  background: #fafafa;
+  border-color: #e0e0e0;
+  opacity: 0.7;
+}
+
+.preview-row.preview-sensitive {
+  border-left: 3px solid #ce93d8;
+}
+
+.preview-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.preview-intent {
+  font-weight: 600;
+  font-size: 13px;
+  text-transform: lowercase;
+}
+
+.preview-value {
+  font-family: "SF Mono", "Fira Code", monospace;
+  font-size: 12px;
+  color: #333;
+  margin-bottom: 4px;
+  word-break: break-all;
+}
+
+.preview-empty {
+  color: #bbb;
+  font-style: italic;
+}
+
+.preview-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 11px;
+  color: #777;
+  margin-bottom: 6px;
+}
+
+.preview-confidence {
+  font-family: "SF Mono", "Fira Code", monospace;
+}
+
+.preview-msg {
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.preview-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.preview-toggle {
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  cursor: pointer;
+  color: #555;
+}
+
+.preview-toggle input[type="radio"] {
+  margin: 0;
+  cursor: pointer;
+}
+
+.preview-toggle.toggle-disabled {
+  color: #bbb;
+  cursor: not-allowed;
+}
+
+.preview-toggle.toggle-disabled input[type="radio"] {
+  cursor: not-allowed;
+}
+
 .footer {
   text-align: center;
   padding-top: 12px;

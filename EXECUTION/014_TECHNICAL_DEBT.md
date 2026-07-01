@@ -17,3 +17,11 @@ Capture shortcuts and future improvements.
 - Some unusual form layouts may produce false positives.
 - Field label matching currently supports English patterns only. Add i18n later.
 
+
+## Milestone 09M Follow-up
+- Approval state is ephemeral and lost when popup closes. Future milestone may use chrome.storage.session if needed.
+- Actual controlled autofill execution is intentionally deferred to the next milestone.
+- Diversity/equal opportunity questions are not yet classified as sensitive field intents.
+- Low-confidence fields are excluded from Select All Safe but can still be manually approved by the user.
+- Skip action currently uses reject+approve clearing behavior. Consider adding a remove() method to approval store.
+

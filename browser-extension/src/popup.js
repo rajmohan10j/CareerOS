@@ -1,6 +1,8 @@
 import { checkHealth } from "./apiClient.js";
 import { fetchAllProfileData } from "./profileClient.js";
 import { mapFields, summarizeMappings } from "./autofillMapper.js";
+import { createApprovalStore } from "./approvalState.js";
+import { buildPreviewContainerHTML, buildApprovalSummaryHTML } from "./mappingPreview.js";
 
 const statusEl = document.getElementById("backendStatus");
 const versionEl = document.getElementById("backendVersion");
@@ -21,9 +23,16 @@ const mappingDebug = document.getElementById("mappingDebug");
 const toggleMappingBtn = document.getElementById("toggleMappingBtn");
 const mappingContent = document.getElementById("mappingContent");
 
+const approvalSection = document.getElementById("approvalSection");
+const selectAllSafeBtn = document.getElementById("selectAllSafeBtn");
+const resetApprovalsBtn = document.getElementById("resetApprovalsBtn");
+const approvalSummaryEl = document.getElementById("approvalSummary");
+const previewContent = document.getElementById("previewContent");
+
 let lastDetectedFields = null;
 let lastProfileData = null;
 let lastMappedFields = null;
+let approvalStore = null;
 
 function showError(message) {
   errorDetailEl.textContent = message;
@@ -100,6 +109,7 @@ detectBtn.addEventListener("click", async () => {
   fieldSummary.classList.add("hidden");
   fieldDebug.classList.add("hidden");
   mappingSection.classList.add("hidden");
+  approvalSection.classList.add("hidden");
   lastDetectedFields = null;
 
   try {
@@ -190,6 +200,60 @@ function escapeHtml(str) {
   return div.innerHTML;
 }
 
+// ── Approval Preview ─────────────────────────────────────────────
+
+function renderApprovalUI(mappedFields) {
+  if (!approvalStore) approvalStore = createApprovalStore();
+
+  approvalSection.classList.remove("hidden");
+  const html = buildPreviewContainerHTML(mappedFields, approvalStore);
+  previewContent.innerHTML = html;
+
+  renderApprovalSummary();
+
+  // Wire up radio button changes
+  const radios = previewContent.querySelectorAll("input[type=radio]");
+  for (const radio of radios) {
+    radio.addEventListener("change", (e) => {
+      const row = e.target.closest("[data-intent]");
+      if (!row) return;
+      const intent = row.getAttribute("data-intent");
+      if (e.target.value === "approve") {
+        approvalStore.approve(intent);
+      } else if (e.target.value === "reject") {
+        approvalStore.reject(intent);
+      } else {
+        // pending — reset
+        approvalStore.reject(intent);
+        approvalStore.approve(intent);
+      }
+      renderApprovalSummary();
+    });
+  }
+}
+
+function renderApprovalSummary() {
+  if (!lastMappedFields || !approvalStore) return;
+  const summary = approvalStore.getSummary(lastMappedFields);
+  approvalSummaryEl.classList.remove("hidden");
+  approvalSummaryEl.innerHTML = buildApprovalSummaryHTML(summary);
+}
+
+selectAllSafeBtn.addEventListener("click", () => {
+  if (!lastMappedFields || !approvalStore) return;
+  approvalStore.reset();
+  approvalStore.selectAllSafe(lastMappedFields);
+  renderApprovalUI(lastMappedFields);
+});
+
+resetApprovalsBtn.addEventListener("click", () => {
+  if (!approvalStore) return;
+  approvalStore.reset();
+  if (lastMappedFields) renderApprovalUI(lastMappedFields);
+});
+
+// ── Map Fields ─────────────────────────────────────────────────────
+
 mapBtn.addEventListener("click", async () => {
   if (!lastDetectedFields || lastDetectedFields.length === 0) {
     showError("No fields detected. Click 'Detect Form Fields' first.");
@@ -200,6 +264,7 @@ mapBtn.addEventListener("click", async () => {
   mapBtn.textContent = "Mapping...";
   mappingSummary.classList.add("hidden");
   mappingDebug.classList.add("hidden");
+  approvalSection.classList.add("hidden");
 
   try {
     const profileData = await fetchAllProfileData();
@@ -216,10 +281,13 @@ mapBtn.addEventListener("click", async () => {
     lastMappedFields = mapped;
     const summary = summarizeMappings(mapped);
 
+    approvalStore = createApprovalStore();
+
     renderMappingSummary(summary);
     if (mapped.length > 0) {
       mappingDebug.classList.remove("hidden");
       renderMappingTable(mapped);
+      renderApprovalUI(mapped);
     }
   } catch (err) {
     showError("Mapping error: " + err.message);

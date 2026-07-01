@@ -1,8 +1,8 @@
 # UNIVERSAL_AUTOFILL
 
 Document ID: DOC-048  
-Version: 0.2.0  
-Status: Implemented (Milestone 09L)
+Version: 0.3.0  
+Status: Implemented (Milestone 09M)
 
 ## Purpose
 
@@ -59,7 +59,12 @@ Map to profile data (autofillMapper.js — read-only, proposals only)
   ↓
 Show mapping summary + detail table in popup
   ↓
-[Future] Ask user for confirmation
+Render approval preview (mappingPreview.js + approvalState.js)
+  │   - Per-field approve/reject/skip radio toggles
+  │   - Select All Safe (excludes sensitive + low-confidence)
+  │   - Sensitive field approve buttons disabled
+  │   - Visual states: approved (green), rejected (dimmed), sensitive (border)
+  │   - Approval summary bar (approved/rejected/pending/total)
   ↓
 [Future] Fill selected fields
 ```
@@ -68,8 +73,10 @@ Show mapping summary + detail table in popup
 
 - `browser-extension/src/profileClient.js` — Fetches profile, skills, experiences from local backend in parallel. Normalizes JSON-stringified fields (locations, target_roles, salary_expectations, industries). 5s timeout per fetch via AbortController.
 - `browser-extension/src/autofillMapper.js` — Maps each detected field intent to a proposed value using profile data. Uses deriveFirstLastFromSummary for name fields, getLatestExperience (sorted by start_date) for company/title, profile.locations for address/city/state/country, skills concatenation for skills field. Marks phone/address/salary/work_auth/notice_period as sensitive. Never assigns values to DOM elements.
-- `browser-extension/src/popup.js` — "Map Fields to Profile" button after field detection. Collapsible mapping summary with available/derived/missing/manual/sensitive counts. Mapping detail table with proposed value, status badge, confidence score, and message.
-- `browser-extension/styles/popup.css` — Styling for mapping UI: status badges (6 variants), mapping stats row, sensitive tags, alternate row backgrounds by status.
+- `browser-extension/src/approvalState.js` — In-memory approval store for the active popup session. Uses Map internally. Methods: approve, reject, reset, isApproved, isRejected, isPending, getApproved, getRejected, selectAllSafe (auto-approves non-sensitive, confidence >= 0.6, available/derived), getSummary. No persistence (no chrome.storage, no localStorage).
+- `browser-extension/src/mappingPreview.js` — HTML rendering helpers for the approval UI. buildPreviewItem extracts visible state per mapping. buildItemHTML renders a preview row with intent, value, status badge, confidence, message, sensitive tag, and approve/reject/skip radio toggles. Sensitive fields get disabled approve radio (toggle-disabled class). buildPreviewContainerHTML renders all rows. buildApprovalSummaryHTML renders the approval counts bar. buildPreviewList returns preview item data for all mappings.
+- `browser-extension/src/popup.js` — "Map Fields to Profile" button after field detection. Collapsible mapping summary with available/derived/missing/manual/sensitive counts. After mapping, renders approval preview with Select All Safe and Reset All buttons, per-field radio toggles, and approval summary bar.
+- `browser-extension/styles/popup.css` — Styling for mapping UI: status badges (6 variants), mapping stats row, sensitive tags, alternate row backgrounds by status. Approval UI: .approval-section, .safe-btn, .reset-btn, .approval-summary, .preview-row (with .preview-approved / .preview-rejected / .preview-sensitive states), .preview-toggle (with .toggle-disabled), .preview-actions.
 
 ## Sensitive Fields
 

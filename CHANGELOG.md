@@ -16,3 +16,4 @@
 - Milestone 09J: Browser Extension Skeleton (Manifest V3, popup health check, content script placeholder, options page, minimal permissions, 37 tests)
 - Milestone 09K: Browser Field Detection Engine (fieldDetector.js, fieldClassifier.js, 20 field types, confidence scoring, sensitive field tagging, debug table, 93 tests)
 - Milestone 09L: Universal Autofill Mapping Engine (profileClient.js, autofillMapper.js, 20-intent mapping with 5 status levels, sensitive field tagging, name/experience derivation, popup Map Fields UI, collapsible mapping summary + detail table, 85 new tests, all 266 extension tests passing)
+- Milestone 09M: Safe Autofill Preview + User Approval (approvalState.js, mappingPreview.js, in-memory approve/reject store, per-field radio toggles, Select All Safe button (excludes sensitive + low-confidence), Reset All button, approval summary bar, visual state backgrounds, 92 new tests (41+51), all 390 extension tests passing)

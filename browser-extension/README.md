@@ -2,13 +2,14 @@
 
 Document ID: DOC-046
 Version: 0.1.0
-Status: Implemented (Milestone 09L — Universal Autofill Mapping Engine)
+Status: Implemented (Milestone 09M — Safe Autofill Preview + User Approval)
 
 ## Purpose
 
 The browser extension supports job page extraction and form autofill assistance.
-It can detect, classify, and map form fields to profile data. No autofill or
-submission is implemented yet — mapping is read-only and requires human approval.
+It can detect, classify, map, and preview mapped fields. Users can approve or
+reject individual field mappings. No autofill or submission is implemented yet —
+all approvals are stored in memory for the active session only.
 
 ## Target Browsers
 
@@ -32,6 +33,8 @@ browser-extension/
 │   ├── fieldClassifier.js     # Field intent classifier (20 types)
 │   ├── profileClient.js       # Fetches profile/skills/experiences from backend
 │   ├── autofillMapper.js      # Maps field intents to profile data (read-only)
+│   ├── approvalState.js       # In-memory approval store for active tab
+│   ├── mappingPreview.js      # Preview/approval HTML rendering helpers
 │   ├── popup.html             # Popup UI
 │   ├── popup.js               # Popup logic
 │   ├── options.html           # Settings page
@@ -39,11 +42,13 @@ browser-extension/
 ├── styles/
 │   └── popup.css              # Popup styling
 └── tests/
-    ├── extension.test.js      # 88 tests — manifest, structure, security
+    ├── extension.test.js      # 120 tests — manifest, structure, security
     ├── fieldDetector.test.js  # 51 tests — detector source validation
     ├── fieldClassifier.test.js # 42 tests — classifier patterns & security
     ├── profileClient.test.js  # 23 tests — exports, fetch patterns, normalize
-    └── autofillMapper.test.js # 62 tests — intent mapping, status, security
+    ├── autofillMapper.test.js # 62 tests — intent mapping, status, security
+    ├── approvalState.test.js  # 41 tests — store creation, approve/reject, selectAllSafe
+    └── mappingPreview.test.js # 51 tests — preview rendering, safe detection, sensitive handling
 ```
 
 ## Permissions
@@ -80,8 +85,8 @@ detects:
 ### Sensitive Fields
 
 Phone, address, salary expectation, and work authorization fields are marked
-sensitive and highlighted in the debug view. Sensitive field mappings always
-require manual review.
+sensitive. Their approve radio button is disabled — they cannot be auto-selected
+and always require manual review.
 
 ## Profile Mapping
 
@@ -111,6 +116,21 @@ uses four status levels:
 | salary_expectation | From profile salary expectations |
 | work_authorization / notice_period | manual_review — sensitive |
 
+## Approval Preview
+
+After mapping, the popup shows an "Approve Mappings" section with:
+
+- **Select All Safe** — Auto-approves all non-sensitive fields with confidence >= 0.6 and status "available" or "derived". Sensitive fields are excluded.
+- **Reset All** — Clears all approvals/rejections.
+- **Per-field radio toggles** — Approve / Reject / Skip for each field.
+- **Sensitive badge** on fields that require extra caution.
+- **Disabled approve radio** on sensitive fields — they cannot be auto-approved.
+- **Approval summary** showing approved / rejected / pending / total counts.
+- **Visual states** — approved rows get a green background, rejected rows get dimmed.
+
+Approval state is stored in memory only (no chrome.storage) and is scoped to the
+current popup session. When the popup closes, all approvals are discarded.
+
 ## Backend Connection
 
 The extension calls `GET /health` on the local backend and displays the result
@@ -121,12 +141,13 @@ The extension calls `GET /health` on the local backend and displays the result
 ## Development
 
 ```bash
-# Run all tests
 npm test
 node tests/fieldDetector.test.js
 node tests/fieldClassifier.test.js
 node tests/profileClient.test.js
 node tests/autofillMapper.test.js
+node tests/approvalState.test.js
+node tests/mappingPreview.test.js
 ```
 
 ## Security
@@ -136,6 +157,8 @@ node tests/autofillMapper.test.js
 - No forms are filled or submitted without explicit user approval.
 - Field detection runs entirely in-page — no network calls.
 - Autofill mapper proposes values but never writes to fields.
+- Approval state is temporary (in-memory, never persisted).
+- Sensitive fields cannot be auto-approved.
 - All autofill actions require human confirmation (future milestone).
 
 ## Roadmap
@@ -143,5 +166,5 @@ node tests/autofillMapper.test.js
 - 09J — Browser Extension Skeleton ✅
 - 09K — Browser Field Detection Engine ✅
 - 09L — Universal Autofill Mapping Engine ✅
-- Future — Job description extraction
+- 09M — Safe Autofill Preview + User Approval ✅
 - Future — Autofill with user confirmation

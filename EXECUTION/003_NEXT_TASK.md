@@ -1,7 +1,7 @@
 # Next Task
 
 Current:
-Milestone 09L – Universal Autofill Mapping Engine
+Milestone 09M — Safe Autofill Preview + User Approval
 
 Completed:
 - Milestone 09A – Backend Skeleton
@@ -44,10 +44,17 @@ Completed:
   - profileClient.js: fetches profile/skills/experiences, normalizes JSON fields
   - autofillMapper.js: maps 20 field intents to profile data — 5 status levels, sensitive tagging, name derivation, latest experience lookup, skills concatenation
   - Popup UI: "Map Fields to Profile" button, collapsible mapping summary + detail table
-  - 23 profileClient tests, 62 autofillMapper tests, extension.test.js updated to 88 tests
+  - 23 profileClient tests, 62 autofillMapper tests, extension.test.js at 88 tests
   - All 266 extension tests passing
   - No value assignments — mapping is read-only proposal
+- Milestone 09M – Safe Autofill Preview + User Approval:
+  - approvalState.js: in-memory approval store (Map-based, session-scoped, no persistence)
+  - mappingPreview.js: HTML rendering for per-field approve/reject/skip toggles, safe auto-select, sensitive field disable
+  - Popup: "Select All Safe" + "Reset All" buttons, approval summary bar, visual states for approved/rejected/sensitive rows
+  - 41 approvalState tests, 51 mappingPreview tests, extension.test.js updated to 120 tests
+  - All 390 extension tests passing
+  - No value assignments, no form submission, no persistence
 
 Next:
-- Desktop App (Milestone 09M) — not started
+- Desktop App (Milestone 09N) — not started
 - Await user instructions

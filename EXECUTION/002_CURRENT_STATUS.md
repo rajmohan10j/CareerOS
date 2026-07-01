@@ -1,6 +1,6 @@
 # Current Status
 
-Current Milestone: 09L – Universal Autofill Mapping Engine
+Current Milestone: 09M – Safe Autofill Preview + User Approval
 
 Completed:
 - Milestone 09A: Backend skeleton
@@ -55,17 +55,28 @@ Completed:
   - profileClient.js: fetches profile/skills/experiences from local backend in parallel, normalizes JSON fields (locations, target_roles, salary_expectations, industries), 5s timeout per fetch
   - autofillMapper.js: maps 20 field intents to profile data with 5 status levels (available/derived/missing/manual_review/unknown), sensitive field tagging (phone/address/salary/work_auth), deriveFirstLastFromSummary heuristic for name fields, getLatestExperience sorted by start_date for company/title, skills concatenation, salary expectations from profile
   - Popup UI: "Map Fields to Profile" button after detection, collapsible mapping summary (available/derived/missing/manual/sensitive counts), mapping detail table with proposed values, status badges, confidence scores, sensitive tags
-  - 23 profileClient tests (exports, fetch patterns, normalizeProfile, parseJsonField, security)
-  - 62 autofillMapper tests (all 20 intents, status values, sensitive fields, derivation logic, no value assignment, security)
-  - extension.test.js updated: 88 tests (+25) covering new files and mapping UI elements
-  - All 266 extension tests passing (88+51+42+23+62)
+  - 23 profileClient tests, 62 autofillMapper tests, extension.test.js at 88 tests
+  - All 266 extension tests passing
   - No value assignments to DOM — mapping is read-only/proposal only
   - UNIVERSAL_AUTOFILL.md updated to Implemented
+- Milestone 09M: Safe Autofill Preview + User Approval
+  - approvalState.js: in-memory approval store scoped to active popup session, Map-based state, methods: approve/reject/reset/isApproved/isRejected/isPending/getApproved/getRejected/selectAllSafe/getSummary
+  - mappingPreview.js: HTML rendering helpers — buildPreviewItem, buildPreviewList, buildItemHTML, buildPreviewContainerHTML, buildApprovalSummaryHTML; per-field approve/reject/skip radio toggles; safe field auto-detection (non-sensitive, confidence >= 0.6, available/derived); sensitive fields get disabled approve radio + toggle-disabled class; visual states: approved=green, rejected=dimmed, sensitive=purple left border
+  - Popup "Select All Safe" button: auto-approves all non-sensitive high-confidence available/derived fields
+  - Popup "Reset All" button: clears all approvals
+  - Approval summary bar showing approved/rejected/pending/total counts
+  - No chrome.storage, no localStorage, no persistence of approval state
+  - No value assignments, no form submission, no network calls from approval/preview modules
+  - 41 approvalState tests (exports, store creation, state methods, approve/reject logic, selectAllSafe checks, summary counting, no persistence, security)
+  - 51 mappingPreview tests (exports, preview item logic, safe detection, HTML generation, summary HTML, sensitive handling, empty state, security)
+  - extension.test.js updated: 120 tests (+32) covering new files, popup approval/preview elements, approval imports, approval+preview source validation
+  - All 390 extension tests passing (120+51+42+23+62+41+51)
+  - No value assignments to DOM — preview and approval only
 
 Remaining Milestones (from ROADMAP.md):
-- 09M Desktop App
-- 09N Mobile
-- 09O Plugin SDK
-- 09P RAG
-- 09Q Analytics
-- 09R Production
+- 09N Desktop App
+- 09O Mobile
+- 09P Plugin SDK
+- 09Q RAG
+- 09R Analytics
+- 09S Production

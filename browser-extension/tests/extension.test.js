@@ -113,6 +113,8 @@ const expectedFiles = [
   "src/apiClient.js",
   "src/profileClient.js",
   "src/autofillMapper.js",
+  "src/approvalState.js",
+  "src/mappingPreview.js",
   "styles/popup.css",
   "icons/icon16.png",
   "icons/icon48.png",
@@ -122,6 +124,8 @@ const expectedFiles = [
   "tests/fieldClassifier.test.js",
   "tests/profileClient.test.js",
   "tests/autofillMapper.test.js",
+  "tests/approvalState.test.js",
+  "tests/mappingPreview.test.js",
 ];
 
 for (const f of expectedFiles) {
@@ -209,6 +213,26 @@ assert(
   popupHTML.includes("mappingContent"),
   "popup.html has mapping content area"
 );
+assert(
+  popupHTML.includes("approvalSection"),
+  "popup.html has approval section"
+);
+assert(
+  popupHTML.includes("selectAllSafeBtn"),
+  "popup.html has select all safe button"
+);
+assert(
+  popupHTML.includes("resetApprovalsBtn"),
+  "popup.html has reset approvals button"
+);
+assert(
+  popupHTML.includes("approvalSummary"),
+  "popup.html has approval summary area"
+);
+assert(
+  popupHTML.includes("previewContent"),
+  "popup.html has preview content area"
+);
 
 const popupJS = readFile("src/popup.js");
 assert(
@@ -254,6 +278,42 @@ assert(
 assert(
   popupJS.includes("renderMappingTable"),
   "popup.js has renderMappingTable function"
+);
+assert(
+  popupJS.includes("createApprovalStore"),
+  "popup.js imports createApprovalStore"
+);
+assert(
+  popupJS.includes("buildPreviewContainerHTML"),
+  "popup.js imports buildPreviewContainerHTML"
+);
+assert(
+  popupJS.includes("buildApprovalSummaryHTML"),
+  "popup.js imports buildApprovalSummaryHTML"
+);
+assert(
+  popupJS.includes("renderApprovalUI"),
+  "popup.js has renderApprovalUI function"
+);
+assert(
+  popupJS.includes("renderApprovalSummary"),
+  "popup.js has renderApprovalSummary function"
+);
+assert(
+  popupJS.includes("selectAllSafeBtn"),
+  "popup.js references selectAllSafeBtn"
+);
+assert(
+  popupJS.includes("resetApprovalsBtn"),
+  "popup.js references resetApprovalsBtn"
+);
+assert(
+  popupJS.includes("selectAllSafe"),
+  "popup.js calls approvalStore.selectAllSafe"
+);
+assert(
+  popupJS.includes("approvalStore.reset"),
+  "popup.js calls approvalStore.reset"
 );
 
 const apiClient = readFile("src/apiClient.js");
@@ -359,6 +419,66 @@ assert(
 assert(
   !autofillMapper.includes("fetch("),
   "autofillMapper.js does not make network calls"
+);
+
+const approvalState = readFile("src/approvalState.js");
+assert(
+  approvalState.includes("createApprovalStore"),
+  "approvalState.js exports createApprovalStore"
+);
+assert(
+  approvalState.includes("selectAllSafe"),
+  "approvalState.js has selectAllSafe"
+);
+assert(
+  approvalState.includes("getSummary"),
+  "approvalState.js has getSummary"
+);
+assert(
+  approvalState.includes("Map()"),
+  "approvalState.js uses Map for state"
+);
+assert(
+  !approvalState.includes("chrome.storage"),
+  "approvalState.js does not use chrome.storage"
+);
+assert(
+  !approvalState.includes(".value ="),
+  "approvalState.js does not assign values"
+);
+
+const mappingPreview = readFile("src/mappingPreview.js");
+assert(
+  mappingPreview.includes("buildPreviewItem"),
+  "mappingPreview.js exports buildPreviewItem"
+);
+assert(
+  mappingPreview.includes("buildPreviewContainerHTML"),
+  "mappingPreview.js exports buildPreviewContainerHTML"
+);
+assert(
+  mappingPreview.includes("buildApprovalSummaryHTML"),
+  "mappingPreview.js exports buildApprovalSummaryHTML"
+);
+assert(
+  mappingPreview.includes("preview-row"),
+  "mappingPreview.js renders preview rows"
+);
+assert(
+  mappingPreview.includes("preview-actions"),
+  "mappingPreview.js renders action toggles"
+);
+assert(
+  mappingPreview.includes("toggle-disabled"),
+  "mappingPreview.js disables sensitive field approve"
+);
+assert(
+  !mappingPreview.includes(".value ="),
+  "mappingPreview.js does not assign values"
+);
+assert(
+  !mappingPreview.includes(".submit("),
+  "mappingPreview.js does not submit forms"
 );
 
 // ── Summary ───────────────────────────────────────────────────────
