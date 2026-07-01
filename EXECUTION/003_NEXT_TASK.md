@@ -1,7 +1,7 @@
 # Next Task
 
 Current:
-Milestone 09S — Analytics Dashboard Foundation
+Milestone 09T — Production Readiness Foundation
 
 Completed:
 - Milestone 09A – Backend Skeleton
@@ -107,11 +107,16 @@ Completed:
   - 506 total backend tests passing, 108 desktop tests passing, Ruff clean
   - No paid APIs, no cloud, no telemetry
 
+- Milestone 09T – Production Readiness Foundation:
+  - 7 PowerShell scripts: start-backend.ps1, test-backend.ps1, test-extension.ps1, test-desktop.ps1, verify-all.ps1, doctor.ps1, release-check.ps1
+  - 4 documentation files: LOCAL_STARTUP_GUIDE.md, TROUBLESHOOTING.md, DEVELOPER_PREVIEW_CHECKLIST.md, MILESTONE_09_COMPLETION_REPORT.md
+  - doctor.ps1: checks Python, Node.js, folders, pyproject.toml, key docs (read-only)
+  - release-check.ps1: verifies tests, changelog, roadmap, status, no paid deps, no telemetry, Ruff clean
+  - verify-all.ps1: runs all test suites (backend + extension + desktop)
+  - All 506 backend tests, 570 extension tests, 108 desktop tests pass, Ruff clean
+  - No paid APIs, no cloud, no telemetry added
+
+All Milestone 09 milestones completed.
+
 Next:
-- Production hardening (Milestone 09T) — not started
-  - Error handling review
-  - Logging review
-  - Configuration review
-  - Startup scripts
-  - Documentation finalization
-- Await user instructions
+- Await user instructions for Milestone 10+ planning
