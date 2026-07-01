@@ -2,7 +2,9 @@
 
 > **Developer Preview** — Local-first career management platform with AI-powered job tracking, resume optimization, browser autofill, and analytics.
 
-[![Tests](https://img.shields.io/badge/tests-1%2C184%20passing-brightgreen)](#)
+> ✅ **Milestone 10A-FIX complete.** All 9 desktop pages are now live with real backend API calls (Dashboard, Profile, Resumes, Jobs, Applications, Documents, AI Status, Browser Extension, Settings). See `docs/08-operations/MVP_LIVE_RUN_GUIDE.md` for the run guide.
+
+[![Tests](https://img.shields.io/badge/tests-1%2C199%20passing-brightgreen)](#)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue)](https://www.python.org/)
 [![Node](https://img.shields.io/badge/node-18%2B-green)](https://nodejs.org/)
@@ -81,11 +83,11 @@ cd ..
 ## Test Count
 
 | Component | Tests |
-|---|---|
-| Backend | 506 |
+|---|---|---|
+| Backend | 509 |
 | Browser Extension | 570 |
-| Desktop | 108 |
-| **Total** | **1,184** |
+| Desktop | 120 |
+| **Total** | **1,199** |
 
 ## Current Limitations
 

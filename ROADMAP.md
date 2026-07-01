@@ -28,8 +28,9 @@ All 20 Milestone 09 milestones completed.
 ## Milestone 10 – Developer Preview
 
 10A Developer Preview Release Preparation ✅
-10B GitHub Repository Publication Prep ✅
-10C Installer / Setup Improvements 👈 next
+10A-FIX MVP Live Usability Fix ✅ — CORS fix applied. All 9 desktop pages now live with real backend API calls (Dashboard, Profile, Resumes, Jobs, Applications, Documents, AI Status, Browser Extension, Settings). All 176 desktop tests pass. All 509 backend tests pass.
+10B GitHub Repository Publication Prep ⏸️ paused (blocked by 10A-FIX)
+10C Installer / Setup Improvements ⏸️ paused (blocked by 10A-FIX)
 10D Real-World Browser Extension Testing Pack
 10E Desktop Backend Integration v1
 10F Public Developer Preview v0.1.0

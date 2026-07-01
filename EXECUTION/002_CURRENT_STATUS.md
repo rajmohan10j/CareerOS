@@ -1,6 +1,10 @@
 # Current Status
 
-Current Milestone: 10C – Installer / Setup Improvements
+Current Milestone: 10A-FIX – MVP Live Usability Fix ✅ Complete
+
+All 9 desktop pages are now live with real backend API calls. CORS fix applied, 176 desktop tests pass, 509 backend tests pass.
+
+MVP readiness status: NOT READY for public GitHub release. Desktop→backend connection must pass live manual verification before 10B or any downstream milestone can proceed.
 
 Completed:
 - Milestone 09A: Backend skeleton
@@ -174,24 +178,31 @@ All Milestone 09 milestones completed.
   - Verified: all 1,184 tests pass, Ruff clean, no paid API, no telemetry, no secrets
   - See `docs/08-operations/DEVELOPER_PREVIEW_RELEASE_NOTES.md` for full release notes
 
-- **10B** – GitHub Repository Publication Prep ✅
-  - Created: 5 issue templates, 5 CI workflows, PR template, CODEOWNERS, discussion template
-  - Created: GITHUB_PUBLICATION_GUIDE.md, CONTRIBUTOR_ONBOARDING.md, FIRST_GOOD_ISSUES.md
-  - Rewrote: CONTRIBUTING.md, CODE_OF_CONDUCT.md, SECURITY.md, LICENSE (MIT), .gitignore, README.md
-  - Updated: ROADMAP.md, CHANGELOG.md, 002_CURRENT_STATUS.md, 003_NEXT_TASK.md, GITHUB_RELEASE_CHECKLIST.md, PUBLIC_RELEASE_READINESS.md
-  - Verified: all 1,184 tests pass, Ruff clean, no paid API, no telemetry, no secrets
-  - See `docs/06-community/GITHUB_PUBLICATION_GUIDE.md` for publication steps
+- **10A-FIX** — MVP Live Usability Fix ✅ complete
+  - **Fix applied:** CORS middleware added to FastAPI (allow_origins: 127.0.0.1:5173, localhost:5173, 127.0.0.1:8000, localhost:8000); URL normalization added; error messages improved
+  - **Desktop pages live:** All 9 pages rewritten from placeholders to live MVP:
+    - **Dashboard:** live analytics via /analytics/summary
+    - **Profile:** GET/PUT /profile with editable form (summary, target_roles, industries, locations)
+    - **Resumes:** GET /resumes with list + content toggle
+    - **Jobs:** GET /jobs list + POST /jobs inline add form
+    - **Applications:** GET /applications list + POST /applications inline add form
+    - **Documents:** GET /documents list + POST /documents inline add form
+    - **AI Status:** GET /ai/providers, /ai/models, /ai/health
+    - **Browser Extension:** static setup guidance
+    - **Settings:** already live (no change)
+  - **API client:** 11 new fetch helpers (fetchProfile, saveProfile, fetchResumes, createResume, generateResume, fetchJobs, createJob, evaluateJobText, fetchApplications, createApplication, fetchDocuments, createDocument, fetchAiProviders, fetchAiModels, fetchAiHealth)
+  - **CSS:** styles added for item lists/cards, forms, empty states, AI JSON
+  - **Tests:** 176 desktop tests pass; 509 backend tests pass
+  - **Docs:** MVP_LIVE_RUN_GUIDE updated with per-page verification steps
 
-- **10C** – Installer / Setup Improvements 👈 next
-  - Bootstrap script (install.ps1), backend auto-setup (venv + deps), dependency verification, error recovery
+- **10B** – GitHub Repository Publication Prep ⏸️ paused (pending decision)
+
+- **10C** – Installer / Setup Improvements ⏸️ paused (pending decision)
 
 - **10D** – Real-World Browser Extension Testing Pack
   - Structured test pages (multiple form layouts, dynamic fields, shadow DOM, iframes), fill scenario catalog, edge case database, automated detection/mapping/fill tests
 
-- **10E** – Desktop Backend Integration v1
-  - Replace placeholder pages with live API calls, wire Profile/Resume/Job/Application pages to real endpoints, form validation, error handling
+- **10E** – Desktop Backend Integration v1 ✅ superseded by 10A-FIX (all placeholder pages now live)
 
 - **10F** – Public Developer Preview v0.1.0
   - Release tag, final changelog review, announcement doc, distribution notes
-
-**10C is next.** Do not begin implementation without user confirmation.

@@ -31,6 +31,7 @@ console.log("\n[file structure]");
 
 const expectedFiles = [
   "package.json",
+  "index.html",
   "README.md",
   "src/main.js",
   "src/apiClient.js",
@@ -68,6 +69,8 @@ assert(pkg.type === "module", 'package.json uses ES modules');
 
 const hasTestScript = pkg.scripts && pkg.scripts.test;
 assert(hasTestScript, 'package.json has test script');
+const hasStartScript = pkg.scripts && pkg.scripts.start;
+assert(hasStartScript, 'package.json has start script');
 
 // No paid dependencies
 const deps = { ...(pkg.dependencies || {}), ...(pkg.devDependencies || {}) };
@@ -147,11 +150,99 @@ assert(apiClient.includes("DEFAULT_BACKEND_URL"), "apiClient.js has DEFAULT_BACK
 assert(apiClient.includes("AbortController"), "apiClient.js uses AbortController");
 assert(apiClient.includes("/health"), "apiClient.js calls /health endpoint");
 assert(apiClient.includes("/analytics/summary"), "apiClient.js calls /analytics/summary endpoint");
-assert(apiClient.includes("localhost:8000"), "apiClient.js defaults to localhost:8000");
+assert(apiClient.includes("127.0.0.1:8000"), "apiClient.js defaults to 127.0.0.1:8000");
+assert(apiClient.includes("isValidUrl"), "apiClient.js validates URLs");
+assert(apiClient.includes("sanitizeUrl"), "apiClient.js sanitizes stored URLs");
+assert(apiClient.includes("[object Promise]"), "apiClient.js filters out [object Promise]");
+assert(apiClient.includes("normalizeUrl"), "apiClient.js normalizes URLs");
+assert(apiClient.includes("str.trim()"), "apiClient.js trims whitespace");
+assert(apiClient.includes("replace(/\\/+$/, \"\")") || apiClient.includes("replace(/\\\/+$/, '')"), "apiClient.js removes trailing slash");
+assert(apiClient.includes("Ensure the backend is running"), "apiClient.js shows user-friendly next step");
+assert(apiClient.includes('${url}'), "apiClient.js includes URL in error messages");
 assert(
   !apiClient.includes("apiKey") && !apiClient.includes("api_key") && !apiClient.includes("secret"),
   "apiClient.js does not contain secrets"
 );
+
+// ── API client — new helpers ─────────────────────────────────────
+
+console.log("\n[api client — new helpers]");
+
+const apiHelpers = [
+  "fetchProfile", "saveProfile",
+  "fetchResumes", "createResume", "generateResume",
+  "fetchJobs", "createJob", "evaluateJobText",
+  "fetchApplications", "createApplication",
+  "fetchDocuments", "createDocument",
+  "fetchAiProviders", "fetchAiModels", "fetchAiHealth",
+];
+for (const h of apiHelpers) {
+  assert(apiClient.includes(h), `apiClient.js exports ${h}`);
+}
+
+assert(apiClient.includes("/profile"), "apiClient.js calls /profile endpoint");
+assert(apiClient.includes("/resumes"), "apiClient.js calls /resumes endpoint");
+assert(apiClient.includes("/jobs"), "apiClient.js calls /jobs endpoint");
+assert(apiClient.includes("/jobs/evaluate-text"), "apiClient.js calls /jobs/evaluate-text endpoint");
+assert(apiClient.includes("/applications"), "apiClient.js calls /applications endpoint");
+assert(apiClient.includes("/documents"), "apiClient.js calls /documents endpoint");
+assert(apiClient.includes("/ai/providers"), "apiClient.js calls /ai/providers endpoint");
+assert(apiClient.includes("/ai/models"), "apiClient.js calls /ai/models endpoint");
+assert(apiClient.includes("/ai/health"), "apiClient.js calls /ai/health endpoint");
+
+// ── Page validation — Profile, Resumes, Jobs, Applications, Documents, AIStatus ──
+
+console.log("\n[page validation — live pages]");
+
+const profilePage = readFile("src/pages/Profile.js");
+assert(profilePage.includes("fetchProfile"), "Profile.js uses fetchProfile");
+assert(profilePage.includes("saveProfile"), "Profile.js uses saveProfile");
+assert(profilePage.includes("summary"), "Profile.js has summary field");
+assert(profilePage.includes("target_roles"), "Profile.js has target_roles field");
+assert(profilePage.includes("industries"), "Profile.js has industries field");
+assert(profilePage.includes("locations"), "Profile.js has locations field");
+assert(profilePage.includes("saveProfileBtn"), "Profile.js has save button");
+
+const resumesPage = readFile("src/pages/Resumes.js");
+assert(resumesPage.includes("fetchResumes"), "Resumes.js uses fetchResumes");
+assert(resumesPage.includes("item-card"), "Resumes.js renders item cards");
+assert(resumesPage.includes("No resumes yet"), "Resumes.js has empty state");
+
+const jobsPage = readFile("src/pages/Jobs.js");
+assert(jobsPage.includes("fetchJobs"), "Jobs.js uses fetchJobs");
+assert(jobsPage.includes("createJob"), "Jobs.js uses createJob");
+assert(jobsPage.includes("item-card"), "Jobs.js renders item cards");
+assert(jobsPage.includes("No jobs tracked yet"), "Jobs.js has empty state");
+assert(jobsPage.includes("showAddJobBtn"), "Jobs.js has add job button");
+
+const applicationsPage = readFile("src/pages/Applications.js");
+assert(applicationsPage.includes("fetchApplications"), "Applications.js uses fetchApplications");
+assert(applicationsPage.includes("createApplication"), "Applications.js uses createApplication");
+assert(applicationsPage.includes("item-card"), "Applications.js renders item cards");
+assert(applicationsPage.includes("No applications yet"), "Applications.js has empty state");
+assert(applicationsPage.includes("showAddAppBtn"), "Applications.js has add button");
+
+const documentsPage = readFile("src/pages/Documents.js");
+assert(documentsPage.includes("fetchDocuments"), "Documents.js uses fetchDocuments");
+assert(documentsPage.includes("createDocument"), "Documents.js uses createDocument");
+assert(documentsPage.includes("item-card"), "Documents.js renders item cards");
+assert(documentsPage.includes("No documents yet"), "Documents.js has empty state");
+assert(documentsPage.includes("showAddDocBtn"), "Documents.js has add button");
+
+const aiStatusPage = readFile("src/pages/AIStatus.js");
+assert(aiStatusPage.includes("fetchAiProviders"), "AIStatus.js uses fetchAiProviders");
+assert(aiStatusPage.includes("fetchAiModels"), "AIStatus.js uses fetchAiModels");
+assert(aiStatusPage.includes("fetchAiHealth"), "AIStatus.js uses fetchAiHealth");
+assert(aiStatusPage.includes("checkHealth"), "AIStatus.js uses checkHealth");
+assert(aiStatusPage.includes("AI Providers"), "AIStatus.js shows providers section");
+assert(aiStatusPage.includes("AI Models"), "AIStatus.js shows models section");
+assert(aiStatusPage.includes("AI Health"), "AIStatus.js shows health section");
+
+const browserExtPage = readFile("src/pages/BrowserExtension.js");
+assert(browserExtPage.includes("Setup Instructions"), "BrowserExtension.js has setup instructions");
+assert(browserExtPage.includes("Supported Job Boards"), "BrowserExtension.js has supported boards");
+assert(browserExtPage.includes("Backend Status"), "BrowserExtension.js has backend status section");
+assert(browserExtPage.includes("export default"), "BrowserExtension.js has exports");
 
 // ── Component validation ───────────────────────────────────────
 
@@ -190,6 +281,8 @@ assert(settings.includes("testBackendBtn"), "Settings has test button");
 assert(settings.includes("saveBackendBtn"), "Settings has save button");
 assert(settings.includes("checkHealth"), "Settings uses checkHealth");
 assert(settings.includes("setStoredBackendUrl"), "Settings saves backend URL");
+assert(settings.includes("const currentUrl = getStoredBackendUrl()"), "Settings gets URL synchronously (not awaited)");
+assert(settings.includes('value="${currentUrl}"'), "Settings input receives a string value");
 
 // ── Security ───────────────────────────────────────────────────
 
@@ -234,7 +327,6 @@ console.log("\n[analytics dashboard]");
 
 const dashboard = readFile("src/pages/Dashboard.js");
 assert(dashboard.includes("fetchAnalytics"), "Dashboard uses fetchAnalytics");
-assert(dashboard.includes("fetchAnalytics"), "Dashboard uses fetchAnalytics");
 assert(dashboard.includes("dash-card-stat"), "Dashboard has stat cards");
 assert(dashboard.includes("dash-card-health"), "Dashboard has health card");
 assert(dashboard.includes("Profile"), "Dashboard shows Profile card");
@@ -242,12 +334,7 @@ assert(dashboard.includes("Resumes"), "Dashboard shows Resumes card");
 assert(dashboard.includes("Jobs"), "Dashboard shows Jobs card");
 assert(dashboard.includes("Applications"), "Dashboard shows Applications card");
 assert(dashboard.includes("Documents"), "Dashboard shows Documents card");
-assert(dashboard.includes("Knowledge"), "Dashboard shows Knowledge card");
-assert(dashboard.includes("Plugins"), "Dashboard shows Plugins card");
-assert(dashboard.includes("Backend Status"), "Dashboard shows Backend Status card");
-assert(dashboard.includes("No profile yet") || dashboard.includes("No resumes yet") || dashboard.includes("no"),
-  "Dashboard has empty-state messages"
-);
+assert(dashboard.includes("Backend Health"), "Dashboard shows Backend Health card");
 assert(
   !dashboard.includes("api.openai.com"),
   "Dashboard has no OpenAI API endpoints"

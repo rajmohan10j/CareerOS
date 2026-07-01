@@ -4,9 +4,10 @@
 
 All 20 Milestone 09 sub-milestones (09A–09T) are implemented.  
 Milestone 10A (Developer Preview Release Preparation) is complete.  
-**Next:** Milestone 10B – GitHub Repository Publication Prep.
+Milestone 10A-FIX (MVP Live Usability Fix) is complete — all 9 desktop pages now live with real backend API calls.
 
 See `EXECUTION/003_NEXT_TASK.md` for detailed milestone plan.
+See `docs/08-operations/MVP_LIVE_RUN_GUIDE.md` for the live run guide.
 
 ### Getting Started
 

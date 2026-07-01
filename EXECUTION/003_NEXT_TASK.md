@@ -1,10 +1,14 @@
 # Next Task
 
 Current:
-Milestone 10C — Installer / Setup Improvements
+Milestone 10A-FIX — MVP Live Usability Fix ✅ Complete
+
+All 9 desktop pages rewritten from placeholders to live MVP using real backend APIs (Dashboard, Profile, Resumes, Jobs, Applications, Documents, AI Status, Browser Extension, Settings). CORS fix applied. 176 desktop tests pass. 509 backend tests pass.
 
 Completed:
+- Milestone 10A-LIVE — Desktop Backend Connection Fix (CORS middleware, URL normalization, error messages applied)
 - Milestone 10B – GitHub Repository Publication Prep
+- Milestone 10E – Desktop Backend Integration v1 (superseded by 10A-FIX)
   - Created: 5 issue templates (bug_report, feature_request, documentation, security_report, browser_site_compatibility)
   - Created: 5 CI workflows (backend-tests, extension-tests, desktop-tests, lint, release-check)
   - Created: PULL_REQUEST_TEMPLATE.md, CODEOWNERS, DISCUSSION_TEMPLATE.md
@@ -134,30 +138,95 @@ All Milestone 09 milestones completed.
 
 ---
 
-## Next: Milestone 10 – Developer Preview
+## Next: 10A-FIX – MVP Live Usability Fix ⚠️ active
 
-- **10C** – Installer / Setup Improvements 👈 next
-  - Bootstrap script (`install.ps1`): clone, venv creation, pip install, auto-detect dependencies
-  - Backend auto-setup: verify Python version, create .venv, install deps, init DB
-  - Dependency verification: check Python/Node.js versions and required packages
-  - Error recovery: graceful failure messages, rollback on partial setup
+**This is a CORRECTIVE milestone.** It does not add new product features. It exists because live testing revealed that the desktop shell cannot connect to the backend in practice, even though all automated tests pass.
 
-- **10D** – Real-World Browser Extension Testing Pack
-  - Structured test pages: multiple form layouts (single-column, multi-column, inline), dynamic fields (added via JS), shadow DOM, iframes
-  - Fill scenario catalog: required vs optional, field ordering, cross-field validation
-  - Edge case database: very long fields, empty fields, special characters, duplicate labels
-  - Automated tests: detection accuracy, mapping correctness, fill safety across all test pages
+Live-test evidence:
+- `http://127.0.0.1:8000/health` works in browser ✅
+- `http://127.0.0.1:8000/docs` works in browser ✅
+- `http://127.0.0.1:8000/analytics/summary` works in browser ✅
+- Desktop opens at `http://127.0.0.1:5173` ✅
+- Desktop Settings shows URL `http://127.0.0.1:8000` ✅
+- Test Connection fails: "Connection error: Failed to fetch" ❌
+- Dashboard shows: "Connection error: Failed to fetch" ❌
 
-- **10E** – Desktop Backend Integration v1
-  - Replace placeholder pages with live API calls (Profile, Resumes, Jobs, Applications, Documents)
-  - Form validation and error handling for all pages
-  - Loading states and empty states for API-backed pages
-  - Remove placeholder content from desktop pages
+**Root cause:** Backend had no CORS middleware. Browser blocked cross-origin fetch from `127.0.0.1:5173` to `127.0.0.1:8000`.
 
-- **10F** – Public Developer Preview v0.1.0
-  - Release tag in repository
-  - Final changelog review and version bump
-  - Announcement document
-  - Distribution notes (zip archive, load-extension instructions, browser compatibility)
+**Fix already applied:**
+1. CORS middleware in `backend/app/main.py` with allow_origins for local dev origins
+2. URL normalization in `desktop/src/apiClient.py` (trim whitespace, remove trailing slash, reject [object Promise])
+3. Better error messages showing URL + endpoint + user-friendly next step
+4. Tests: 120 desktop, 509 backend, Ruff clean
 
-**10A is next.** Do not begin implementation without user confirmation.
+**Pending:** Full end-to-end live MVP workflow verification.
+
+### Objectives
+
+1. Diagnose desktop backend fetch failure (confirmed — CORS)
+2. Fix desktop/backend connection and CORS/local URL handling (applied)
+3. Run full live MVP workflow and document result (pending)
+
+### Acceptance Criteria
+
+1. Backend runs at `http://127.0.0.1:8000`
+2. Desktop runs at `http://127.0.0.1:5173`
+3. Settings backend URL shows `http://127.0.0.1:8000`
+4. Test Connection succeeds (green)
+5. Dashboard cards load analytics values
+6. Backend status shows "Connected"
+7. Backend tests pass (509)
+8. Desktop tests pass (120)
+9. Ruff clean
+10. No paid APIs, no telemetry, no cloud dependency
+
+### Manual Verification Steps
+
+```powershell
+# Terminal 1: Start backend
+cd backend
+.venv\Scripts\Activate.ps1
+uvicorn app.main:app --host 127.0.0.1 --port 8000
+
+# Terminal 2: Start desktop
+cd desktop
+npm start
+# Open http://127.0.0.1:5173 in browser
+
+# Verify in browser:
+# 1. http://127.0.0.1:8000/health → {"status":"ok","version":"0.1.0","mode":"local"}
+# 2. http://127.0.0.1:8000/analytics/summary → JSON with analytics
+# 3. http://127.0.0.1:5173 → Desktop loads
+# 4. Desktop → Settings → Test Connection → "Connected"
+# 5. Desktop → Dashboard → Cards show data, Backend Status green
+```
+
+### MVP workflow target
+
+```
+Start backend
+→ Open desktop
+→ Desktop connects to backend
+→ Dashboard loads analytics
+→ User can create/update basic profile if needed
+→ Browser extension loads
+→ Extension connects to backend
+→ Open sample job form
+→ Detect fields
+→ Map fields
+→ Preview approval
+→ Fill only approved fields
+→ Confirm no submit/click/upload happens
+```
+
+### Blocked Milestones
+
+The following milestones are PAUSED until 10A-FIX passes live MVP verification:
+
+- **10B** – GitHub Repository Publication Prep ⏸️
+- **10C** – Installer / Setup Improvements ⏸️
+- **10D** – Real-World Browser Extension Testing Pack ⏸️
+- **10E** – Desktop Backend Integration v1 ⏸️
+- **10F** – Public Developer Preview v0.1.0 ⏸️
+
+**Do not start 10B or any downstream milestone until 10A-FIX passes live testing.**

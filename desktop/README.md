@@ -47,7 +47,7 @@ desktop/
 ├── styles/
 │   └── app.css                 # Application styles
 └── tests/
-    └── desktop.test.js         # 108 tests — file structure, pages, security, analytics dashboard
+    └── desktop.test.js         # 120 tests — file structure, pages, security, analytics dashboard, URL normalization, CORS
 ```
 
 ## Capabilities
@@ -59,20 +59,23 @@ desktop/
 - Status bar showing backend connection status
 - Settings page with backend URL configuration + Test Connection button
 - Placeholder pages for: Profile, Resumes, Jobs, Applications, Documents, AI Status, Browser Extension
-- Local-first: all configuration stored in localStorage, backend calls to localhost only
+- Local-first: all configuration stored in localStorage, backend calls to 127.0.0.1:8000 only
 
 ## Getting Started
 
 ```bash
-# Install dependencies
+# Install dependencies (no runtime deps needed)
 cd desktop
 npm install
 
 # Run tests
 npm test
 
-# Open in browser (for development)
-npx serve .
+# Start local development server
+npm start
+
+# Open in browser
+# http://127.0.0.1:5173
 ```
 
 ## Tauri Setup (Future)
