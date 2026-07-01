@@ -1,8 +1,8 @@
 # AUTOFILL_USER_GUIDE
 
 Document ID: DOC-112  
-Version: 0.2.0  
-Status: Implemented (Milestone 09M)
+Version: 0.3.0  
+Status: Implemented (Milestone 09N)
 
 ## Purpose
 
@@ -17,8 +17,9 @@ Explains how users safely use Universal Autofill.
 5. Approve or reject each field mapping.
 6. Use "Select All Safe" to auto-approve non-sensitive, high-confidence fields.
 7. Review approval summary (approved / rejected / pending counts).
-8. Fill form (future milestone).
-9. Manually review before submission.
+8. Click "Fill Approved Fields" to execute autofill.
+9. Review fill results (filled / skipped / failed counts).
+10. Manually review filled fields before submission.
 
 ## Approval Rules
 
@@ -28,7 +29,18 @@ Explains how users safely use Universal Autofill.
 - Approval state is in-memory only — it is not saved when the popup closes.
 - No field values are written to the page during approval.
 
-## Rule
+## Fill Rules
 
-CareerOS never submits without approval.
-CareerOS never fills a field without explicit user approval.
+- Only explicitly approved fields with non-null/non-empty values are filled.
+- File upload, password, hidden, disabled, readonly, submit, button, reset, image, radio, and checkbox fields are never filled.
+- The "Fill Approved Fields" button is disabled until at least one field is approved.
+- Fill results show filled / skipped (with reason) / failed counts with per-field detail.
+- Successfully filled fields are highlighted with a green outline for 2 seconds.
+- Fill state is not persisted — each popup session requires fresh approval.
+
+## Rules
+
+- CareerOS never submits a form or clicks a button.
+- CareerOS never fills a field without explicit user approval.
+- CareerOS never fills password, hidden, or file fields.
+- CareerOS never stores fill data or field values outside the browser.

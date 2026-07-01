@@ -1,7 +1,7 @@
 # Next Task
 
 Current:
-Milestone 09M — Safe Autofill Preview + User Approval
+Milestone 09N — Controlled Autofill Execution
 
 Completed:
 - Milestone 09A – Backend Skeleton
@@ -54,7 +54,16 @@ Completed:
   - 41 approvalState tests, 51 mappingPreview tests, extension.test.js updated to 120 tests
   - All 390 extension tests passing
   - No value assignments, no form submission, no persistence
+- Milestone 09N – Controlled Autofill Execution:
+  - autofillExecutor.js: buildApprovedFillFields (filters approved intents, non-null values, excludes file inputs) + executeFill (sends FILL_FIELDS message)
+  - content.js FILL_FIELDS handler: findFieldElement, isFillableElement (rejects password/hidden/disabled/readonly/file/submit/button/radio/checkbox), fillElement (value + input/change events), highlightFilled, fillApprovedFields (tracks filled/skipped/failed)
+  - background.js: FILL_FIELDS forwarding to active tab
+  - Popup: "Fill Approved Fields" button + fill result summary
+  - Strict safety guards: no form.submit, no .click(), no file upload, no external calls, no persistence in content/executor
+  - 31 autofillExecutor tests, 53 controlledFill tests, 22 safetyGuards tests
+  - extension.test.js updated to 155 tests
+  - All 531 extension tests passing
 
 Next:
-- Desktop App (Milestone 09N) — not started
+- Extension v2 refinements (Milestone 09O) — not started
 - Await user instructions

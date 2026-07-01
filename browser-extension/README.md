@@ -1,15 +1,16 @@
 # CareerOS Browser Extension
 
 Document ID: DOC-046
-Version: 0.1.0
-Status: Implemented (Milestone 09M — Safe Autofill Preview + User Approval)
+Version: 0.2.0
+Status: Implemented (Milestone 09N — Controlled Autofill Execution)
 
 ## Purpose
 
 The browser extension supports job page extraction and form autofill assistance.
-It can detect, classify, map, and preview mapped fields. Users can approve or
-reject individual field mappings. No autofill or submission is implemented yet —
-all approvals are stored in memory for the active session only.
+Users can detect, classify, map, preview, approve, and fill form fields using
+profile data from the local CareerOS backend. All fill operations require explicit
+user approval per field and run only after safety checks pass. No data leaves
+your machine.
 
 ## Target Browsers
 
@@ -35,6 +36,7 @@ browser-extension/
 │   ├── autofillMapper.js      # Maps field intents to profile data (read-only)
 │   ├── approvalState.js       # In-memory approval store for active tab
 │   ├── mappingPreview.js      # Preview/approval HTML rendering helpers
+│   ├── autofillExecutor.js    # Fill orchestrator — build approved fields, execute fill
 │   ├── popup.html             # Popup UI
 │   ├── popup.js               # Popup logic
 │   ├── options.html           # Settings page
@@ -42,13 +44,16 @@ browser-extension/
 ├── styles/
 │   └── popup.css              # Popup styling
 └── tests/
-    ├── extension.test.js      # 120 tests — manifest, structure, security
+    ├── extension.test.js      # 155 tests — manifest, structure, source validation, security
     ├── fieldDetector.test.js  # 51 tests — detector source validation
     ├── fieldClassifier.test.js # 42 tests — classifier patterns & security
     ├── profileClient.test.js  # 23 tests — exports, fetch patterns, normalize
     ├── autofillMapper.test.js # 62 tests — intent mapping, status, security
     ├── approvalState.test.js  # 41 tests — store creation, approve/reject, selectAllSafe
-    └── mappingPreview.test.js # 51 tests — preview rendering, safe detection, sensitive handling
+    ├── mappingPreview.test.js # 51 tests — preview rendering, safe detection, sensitive handling
+    ├── autofillExecutor.test.js # 31 tests — buildApprovedFillFields, executeFill, security
+    ├── controlledFill.test.js # 53 tests — FILL_FIELDS handler, fillability, events, highlight
+    └── safetyGuards.test.js   # 22 tests — no submit, no click, no bypass, no persistence
 ```
 
 ## Permissions
@@ -131,6 +136,30 @@ After mapping, the popup shows an "Approve Mappings" section with:
 Approval state is stored in memory only (no chrome.storage) and is scoped to the
 current popup session. When the popup closes, all approvals are discarded.
 
+## Fill Execution
+
+After approving field mappings, click "Fill Approved Fields" to execute the fill.
+The extension:
+
+1. **buildApprovedFillFields** — Collects all approved intents with non-null values, excluding file inputs.
+2. **executeFill** — Sends a `FILL_FIELDS` message to the active tab via the background script.
+3. **Content script handler** — For each field:
+   - Finds the element by `id` then `name`.
+   - Checks fillability: skips password, hidden, disabled, readonly, file, submit, button, reset, image, radio, checkbox fields.
+   - Assigns the value and dispatches `input` + `change` events.
+   - Highlights the field with a green outline for 2 seconds.
+4. **Result** — Returns counts of filled, skipped, and failed fields (with per-field breakdown).
+
+### Fill Safety Guarantees
+
+- No `form.submit()` or `.click()` calls anywhere in the extension.
+- Password, hidden, disabled, readonly, and file fields are never filled.
+- Only explicitly approved fields are filled — pending, rejected, or missing fields are skipped.
+- File upload, radio, checkbox, and button elements are excluded.
+- Fill is performed by the content script (the only script with DOM access).
+- No chrome.storage, fetch, or XMLHttpRequest calls in fill-related code.
+- No new permissions beyond the original `storage` + `localhost:8000`.
+
 ## Backend Connection
 
 The extension calls `GET /health` on the local backend and displays the result
@@ -148,18 +177,23 @@ node tests/profileClient.test.js
 node tests/autofillMapper.test.js
 node tests/approvalState.test.js
 node tests/mappingPreview.test.js
+node tests/autofillExecutor.test.js
+node tests/controlledFill.test.js
+node tests/safetyGuards.test.js
 ```
 
 ## Security
 
 - Local-first only — no data leaves your machine.
 - No credentials are stored in the extension.
-- No forms are filled or submitted without explicit user approval.
+- No forms are submitted or buttons clicked under any circumstance.
 - Field detection runs entirely in-page — no network calls.
 - Autofill mapper proposes values but never writes to fields.
 - Approval state is temporary (in-memory, never persisted).
 - Sensitive fields cannot be auto-approved.
-- All autofill actions require human confirmation (future milestone).
+- Fill execution only happens after explicit user approval per field.
+- Fill execution is performed by the content script with safety guards: password, hidden, disabled, readonly, file, button, radio, and checkbox fields are always skipped.
+- Fill operations are tracked with filled/skipped/failed counts and reported back to the popup.
 
 ## Roadmap
 
@@ -167,4 +201,5 @@ node tests/mappingPreview.test.js
 - 09K — Browser Field Detection Engine ✅
 - 09L — Universal Autofill Mapping Engine ✅
 - 09M — Safe Autofill Preview + User Approval ✅
-- Future — Autofill with user confirmation
+- 09N — Controlled Autofill Execution ✅
+- 09O — Extension v2 improvements ⏳

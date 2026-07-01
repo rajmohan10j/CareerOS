@@ -3,6 +3,7 @@ import { fetchAllProfileData } from "./profileClient.js";
 import { mapFields, summarizeMappings } from "./autofillMapper.js";
 import { createApprovalStore } from "./approvalState.js";
 import { buildPreviewContainerHTML, buildApprovalSummaryHTML } from "./mappingPreview.js";
+import { buildApprovedFillFields, executeFill } from "./autofillExecutor.js";
 
 const statusEl = document.getElementById("backendStatus");
 const versionEl = document.getElementById("backendVersion");
@@ -28,6 +29,8 @@ const selectAllSafeBtn = document.getElementById("selectAllSafeBtn");
 const resetApprovalsBtn = document.getElementById("resetApprovalsBtn");
 const approvalSummaryEl = document.getElementById("approvalSummary");
 const previewContent = document.getElementById("previewContent");
+const fillBtn = document.getElementById("fillFieldsBtn");
+const fillResultEl = document.getElementById("fillResult");
 
 let lastDetectedFields = null;
 let lastProfileData = null;
@@ -110,6 +113,7 @@ detectBtn.addEventListener("click", async () => {
   fieldDebug.classList.add("hidden");
   mappingSection.classList.add("hidden");
   approvalSection.classList.add("hidden");
+  fillResultEl.classList.add("hidden");
   lastDetectedFields = null;
 
   try {
@@ -202,6 +206,15 @@ function escapeHtml(str) {
 
 // ── Approval Preview ─────────────────────────────────────────────
 
+function updateFillButton() {
+  if (!lastMappedFields || !approvalStore) {
+    fillBtn.disabled = true;
+    return;
+  }
+  const approved = buildApprovedFillFields(approvalStore, lastMappedFields);
+  fillBtn.disabled = approved.length === 0;
+}
+
 function renderApprovalUI(mappedFields) {
   if (!approvalStore) approvalStore = createApprovalStore();
 
@@ -210,8 +223,8 @@ function renderApprovalUI(mappedFields) {
   previewContent.innerHTML = html;
 
   renderApprovalSummary();
+  updateFillButton();
 
-  // Wire up radio button changes
   const radios = previewContent.querySelectorAll("input[type=radio]");
   for (const radio of radios) {
     radio.addEventListener("change", (e) => {
@@ -223,11 +236,11 @@ function renderApprovalUI(mappedFields) {
       } else if (e.target.value === "reject") {
         approvalStore.reject(intent);
       } else {
-        // pending — reset
         approvalStore.reject(intent);
         approvalStore.approve(intent);
       }
       renderApprovalSummary();
+      updateFillButton();
     });
   }
 }
@@ -252,6 +265,53 @@ resetApprovalsBtn.addEventListener("click", () => {
   if (lastMappedFields) renderApprovalUI(lastMappedFields);
 });
 
+// ── Fill Approved Fields ──────────────────────────────────────────
+
+function renderFillResult(result) {
+  fillResultEl.classList.remove("hidden");
+  let html = `<div class="fill-stats">`;
+  html += `<span class="fill-stat stat-ok">${result.filled} filled</span>`;
+  html += `<span class="fill-stat stat-missing">${result.skipped} skipped</span>`;
+  if (result.failed > 0) html += `<span class="fill-stat stat-review">${result.failed} failed</span>`;
+  html += `</div>`;
+  if (result.details) {
+    html += `<div class="fill-details">`;
+    if (result.details.skippedNotFound > 0) html += `<span class="fill-detail">${result.details.skippedNotFound} not found</span>`;
+    if (result.details.skippedUnfillable > 0) html += `<span class="fill-detail">${result.details.skippedUnfillable} unfillable</span>`;
+    if (result.details.skippedMissing > 0) html += `<span class="fill-detail">${result.details.skippedMissing} missing</span>`;
+    html += `</div>`;
+  }
+  if (!result.success) {
+    html += `<div class="fill-error">${escapeHtml(result.error || "Unknown error")}</div>`;
+  }
+  fillResultEl.innerHTML = html;
+}
+
+fillBtn.addEventListener("click", async () => {
+  if (!lastMappedFields || !approvalStore) return;
+
+  fillBtn.disabled = true;
+  fillBtn.textContent = "Filling...";
+  fillResultEl.classList.add("hidden");
+
+  try {
+    const approvedFields = buildApprovedFillFields(approvalStore, lastMappedFields);
+    if (approvedFields.length === 0) {
+      showError("No approved fields to fill.");
+      fillBtn.disabled = false;
+      fillBtn.textContent = "Fill Approved Fields";
+      return;
+    }
+    const result = await executeFill(approvedFields);
+    renderFillResult(result);
+  } catch (err) {
+    showError("Fill error: " + err.message);
+  } finally {
+    fillBtn.disabled = false;
+    fillBtn.textContent = "Fill Approved Fields";
+  }
+});
+
 // ── Map Fields ─────────────────────────────────────────────────────
 
 mapBtn.addEventListener("click", async () => {
@@ -265,6 +325,7 @@ mapBtn.addEventListener("click", async () => {
   mappingSummary.classList.add("hidden");
   mappingDebug.classList.add("hidden");
   approvalSection.classList.add("hidden");
+  fillResultEl.classList.add("hidden");
 
   try {
     const profileData = await fetchAllProfileData();

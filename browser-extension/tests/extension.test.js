@@ -115,6 +115,7 @@ const expectedFiles = [
   "src/autofillMapper.js",
   "src/approvalState.js",
   "src/mappingPreview.js",
+  "src/autofillExecutor.js",
   "styles/popup.css",
   "icons/icon16.png",
   "icons/icon48.png",
@@ -126,6 +127,9 @@ const expectedFiles = [
   "tests/autofillMapper.test.js",
   "tests/approvalState.test.js",
   "tests/mappingPreview.test.js",
+  "tests/autofillExecutor.test.js",
+  "tests/controlledFill.test.js",
+  "tests/safetyGuards.test.js",
 ];
 
 for (const f of expectedFiles) {
@@ -144,6 +148,10 @@ assert(
 assert(
   background.includes("DETECT_FIELDS"),
   "background.js handles DETECT_FIELDS message"
+);
+assert(
+  background.includes("FILL_FIELDS"),
+  "background.js handles FILL_FIELDS message"
 );
 assert(
   background.includes("tabs.sendMessage"),
@@ -178,6 +186,42 @@ assert(
 assert(
   content.includes("classifyFields"),
   "content.js imports classifyFields"
+);
+assert(
+  content.includes("FILL_FIELDS"),
+  "content.js handles FILL_FIELDS message"
+);
+assert(
+  content.includes("fillApprovedFields"),
+  "content.js defines fillApprovedFields"
+);
+assert(
+  content.includes("isFillableElement"),
+  "content.js has isFillableElement safety check"
+);
+assert(
+  content.includes("findFieldElement"),
+  "content.js has findFieldElement"
+);
+assert(
+  content.includes("fillElement"),
+  "content.js has fillElement"
+);
+assert(
+  content.includes("highlightFilled"),
+  "content.js has highlightFilled"
+);
+assert(
+  content.includes("dispatchEvent"),
+  "content.js dispatches input/change events"
+);
+assert(
+  !content.includes(".submit("),
+  "content.js does not call form.submit"
+);
+assert(
+  !content.includes(".click("),
+  "content.js does not click elements"
 );
 
 const popupHTML = readFile("src/popup.html");
@@ -232,6 +276,14 @@ assert(
 assert(
   popupHTML.includes("previewContent"),
   "popup.html has preview content area"
+);
+assert(
+  popupHTML.includes("fillFieldsBtn"),
+  "popup.html has fill approved fields button"
+);
+assert(
+  popupHTML.includes("fillResult"),
+  "popup.html has fill result area"
 );
 
 const popupJS = readFile("src/popup.js");
@@ -315,6 +367,34 @@ assert(
   popupJS.includes("approvalStore.reset"),
   "popup.js calls approvalStore.reset"
 );
+assert(
+  popupJS.includes("buildApprovedFillFields"),
+  "popup.js imports buildApprovedFillFields"
+);
+assert(
+  popupJS.includes("executeFill"),
+  "popup.js imports executeFill"
+);
+assert(
+  popupJS.includes("fillFieldsBtn"),
+  "popup.js references fill button"
+);
+assert(
+  popupJS.includes("renderFillResult"),
+  "popup.js has renderFillResult function"
+);
+assert(
+  popupJS.includes("updateFillButton"),
+  "popup.js has updateFillButton function"
+);
+assert(
+  popupJS.includes("fillBtn.disabled"),
+  "popup.js controls fill button enabled state"
+);
+assert(
+  popupJS.includes("fillResultEl"),
+  "popup.js references fill result element"
+);
 
 const apiClient = readFile("src/apiClient.js");
 assert(
@@ -332,6 +412,9 @@ assert(
 
 const popupCSS = readFile("styles/popup.css");
 assert(popupCSS.length > 0, "popup.css is not empty");
+assert(popupCSS.includes("fill-btn"), "popup.css has fill button styles");
+assert(popupCSS.includes("fill-result"), "popup.css has fill result styles");
+assert(popupCSS.includes("fill-stats"), "popup.css has fill stats styles");
 
 const detector = readFile("src/fieldDetector.js");
 assert(
@@ -479,6 +562,44 @@ assert(
 assert(
   !mappingPreview.includes(".submit("),
   "mappingPreview.js does not submit forms"
+);
+
+const autofillExecutor = readFile("src/autofillExecutor.js");
+assert(
+  autofillExecutor.includes("buildApprovedFillFields"),
+  "autofillExecutor.js exports buildApprovedFillFields"
+);
+assert(
+  autofillExecutor.includes("executeFill"),
+  "autofillExecutor.js exports executeFill"
+);
+assert(
+  autofillExecutor.includes("FILL_FIELDS"),
+  "autofillExecutor.js sends FILL_FIELDS message"
+);
+assert(
+  autofillExecutor.includes("approvedIntents.includes"),
+  "autofillExecutor.js filters by approved intents"
+);
+assert(
+  autofillExecutor.includes("mappedValue != null"),
+  "autofillExecutor.js filters non-null values"
+);
+assert(
+  autofillExecutor.includes("\"file\""),
+  "autofillExecutor.js excludes file inputs"
+);
+assert(
+  !autofillExecutor.includes(".value ="),
+  "autofillExecutor.js does not assign values"
+);
+assert(
+  !autofillExecutor.includes(".submit("),
+  "autofillExecutor.js does not submit forms"
+);
+assert(
+  !autofillExecutor.includes("chrome.storage"),
+  "autofillExecutor.js does not use chrome.storage"
 );
 
 // ── Summary ───────────────────────────────────────────────────────

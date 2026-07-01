@@ -1,6 +1,6 @@
 # Current Status
 
-Current Milestone: 09M – Safe Autofill Preview + User Approval
+Current Milestone: 09N – Controlled Autofill Execution
 
 Completed:
 - Milestone 09A: Backend skeleton
@@ -72,11 +72,23 @@ Completed:
   - extension.test.js updated: 120 tests (+32) covering new files, popup approval/preview elements, approval imports, approval+preview source validation
   - All 390 extension tests passing (120+51+42+23+62+41+51)
   - No value assignments to DOM — preview and approval only
+- Milestone 09N: Controlled Autofill Execution
+  - autofillExecutor.js (popup-side): buildApprovedFillFields — filters approved intents by non-null/non-empty values, excludes file inputs; executeFill — sends FILL_FIELDS message via chrome.runtime.sendMessage, returns result summary
+  - content.js: FILL_FIELDS message handler — findFieldElement (by id then name), isFillableElement (rejects password/hidden/disabled/readonly/file/submit/button/reset/image/radio/checkbox), fillElement (value assignment + input/change dispatch), highlightFilled (green outline 2s), fillApprovedFields (tracks filled/skipped/failed with per-field detail)
+  - background.js: FILL_FIELDS forwarding to active tab via chrome.tabs.sendMessage
+  - Popup: "Fill Approved Fields" button with enabled/disabled state (# of approved fields), fill result section showing filled/skipped/failed counts and breakdown details
+  - Strict safety: no form.submit, no .click(), no file upload, no password/hidden/disabled/readonly fill, no chrome.storage in content/executor, no fetch/http in content/executor, no new permissions
+  - Value assignment only in content.js fillElement after safety checks pass — never in popup/background/executor
+  - 31 autofillExecutor tests (exports, buildApprovedFillFields logic, executeFill messaging, security — no value assignments, no chrome.storage)
+  - 53 controlledFill tests (FILL_FIELDS handler, field finding, isFillableElement, fillElement event dispatch, highlight, result tracking, background forwarding, popup fill button/styles)
+  - 22 safetyGuards tests (no form.submit, no .click(), no file upload, only approved fills, no bypass, no external calls, no dangerous permissions, no persistence)
+  - extension.test.js updated: 155 tests (+35) covering autofillExecutor.js, test files, FILL_FIELDS handler, fill UI elements, fill source validations, CSS fill styles
+  - All 531 extension tests passing (155+51+42+23+62+41+51+31+53+22)
 
 Remaining Milestones (from ROADMAP.md):
-- 09N Desktop App
-- 09O Mobile
-- 09P Plugin SDK
-- 09Q RAG
-- 09R Analytics
-- 09S Production
+- 09O Desktop App
+- 09P Mobile
+- 09Q Plugin SDK
+- 09R RAG
+- 09S Analytics
+- 09T Production
