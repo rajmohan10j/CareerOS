@@ -8,30 +8,19 @@ function render() {
         <h2>Setup Instructions</h2>
         <p>The CareerOS browser extension helps you autofill job application forms with your profile data.</p>
         <ol style="margin: 12px 0 0 20px; line-height: 1.8;">
-          <li>Install the extension from the Chrome Web Store or Firefox Add-ons marketplace.</li>
+          <li>Open <code>chrome://extensions</code> in Chrome (or <code>about:debugging</code> in Firefox).</li>
+          <li>Enable <strong>Developer mode</strong> (toggle in top-right corner on Chrome).</li>
+          <li>Click <strong>Load unpacked</strong> and select the <code>browser-extension/</code> folder inside the CareerOS project directory.</li>
           <li>Ensure your CareerOS backend is running at <code>http://127.0.0.1:8000</code>.</li>
-          <li>Open a job application page and click the CareerOS icon in your browser toolbar.</li>
-          <li>Select the form fields you want to autofill and click "Apply".</li>
+          <li>Open a job application page and click the CareerOS icon in your browser toolbar to open the popup.</li>
         </ol>
-        <p style="margin-top: 12px;" class="placeholder-hint">The extension runs independently in your browser. No cloud services required.</p>
+        <p style="margin-top: 12px;" class="placeholder-hint">The extension runs entirely in your browser. No cloud services required. All data stays on your machine.</p>
       </div>
 
       <div class="settings-section">
-        <h2>Backend Status</h2>
-        <p>Your backend must be running and accessible for the extension to work.</p>
-        <p style="margin-top: 8px;">Go to <strong>Settings</strong> to verify your backend URL and connection status.</p>
-      </div>
-
-      <div class="settings-section">
-        <h2>Supported Job Boards</h2>
-        <ul style="margin: 8px 0 0 20px; line-height: 1.8;">
-          <li>LinkedIn</li>
-          <li>Indeed</li>
-          <li>Glassdoor</li>
-          <li>Monster</li>
-          <li>ZipRecruiter</li>
-        </ul>
-        <p style="margin-top: 12px;" class="placeholder-hint">Additional boards can be supported via community-contributed adapters.</p>
+        <h2>Backend Connection</h2>
+        <p>Your local CareerOS backend must be running for the extension to fetch your profile data.</p>
+        <p style="margin-top: 8px;">Go to <strong>Settings</strong> to verify your backend URL and test the connection.</p>
       </div>
     </div>
   `;

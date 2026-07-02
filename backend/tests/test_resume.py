@@ -66,6 +66,16 @@ class TestResumeAPI:
         assert get_resp.status_code == 200
         assert get_resp.json() == data
 
+    def test_create_with_content(self, _session):
+        client = TestClient(_test_app)
+        payload = {"title": "My Resume", "content": "# Resume\n\nSome content here"}
+        create_resp = client.post("/resumes", json=payload)
+        assert create_resp.status_code == 201
+        data = create_resp.json()
+        assert data["title"] == "My Resume"
+        assert data["content"] == "# Resume\n\nSome content here"
+        assert data["version"] == 1
+
     def test_get_returns_404(self, _session):
         client = TestClient(_test_app)
         response = client.get("/resumes/999")

@@ -173,6 +173,36 @@ async function createResume(data) {
   return apiPost("/resumes", data);
 }
 
+async function fetchResume(resumeId) {
+  return apiFetch(`/resumes/${resumeId}`);
+}
+
+async function importResumeText(data) {
+  return apiPost("/resumes", data);
+}
+
+async function uploadResumeFile(data) {
+  return apiPost("/resumes", data);
+}
+
+async function uploadResumeTextFile(data) {
+  return apiPost("/resumes", data);
+}
+
+function downloadResumeText(filename, content, extension) {
+  const ext = extension || "txt";
+  const mime = ext === "md" ? "text/markdown" : "text/plain";
+  const blob = new Blob([content], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `${filename}.${ext}`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
 async function generateResume(data) {
   return apiPost("/resumes/generate", data);
 }
@@ -247,7 +277,12 @@ export {
   fetchProfile,
   saveProfile,
   fetchResumes,
+  fetchResume,
   createResume,
+  importResumeText,
+  uploadResumeFile,
+  uploadResumeTextFile,
+  downloadResumeText,
   generateResume,
   fetchJobs,
   createJob,

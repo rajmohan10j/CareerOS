@@ -82,6 +82,7 @@ class ResumeService:
         resume = Resume(
             profile_id=1,
             title=data.title,
+            content=data.content,
             target_role=data.target_role,
             job_description=data.job_description,
             version=1,

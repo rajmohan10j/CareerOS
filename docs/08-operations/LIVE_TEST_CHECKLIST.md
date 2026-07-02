@@ -66,6 +66,28 @@ Use this checklist to verify the full MVP workflow manually.
 - [ ] No data sent to external servers
 - [ ] No credentials stored in extension
 
+## Resumes
+
+- [ ] Resumes page shows action buttons: Upload Resume, Paste Resume Text, Create Blank Resume
+- [ ] Upload Resume with .txt file creates resume with file content
+- [ ] Upload Resume with .md file creates resume with file content
+- [ ] Upload Resume with .pdf shows guidance message (no silent failure)
+- [ ] Upload Resume with .doc shows guidance message (no silent failure)
+- [ ] Upload Resume with .docx shows guidance message (no silent failure)
+- [ ] Paste Resume Text form has title input and content textarea
+- [ ] Paste Resume Text form has optional target role input
+- [ ] Saving pasted content creates resume and shows in list
+- [ ] Resume list shows title, version badge, latest status, created date, updated date
+- [ ] Click resume card to view stored content with metadata (target role, job description)
+- [ ] Download .txt button downloads resume content as text file
+- [ ] Download .md button downloads resume content as markdown file
+- [ ] Empty state shows Upload / Paste / Create Blank buttons (not just passive text)
+- [ ] Success message appears after creating/uploading/pasting resume
+- [ ] Error message appears if backend rejects request (no raw technical errors)
+- [ ] Create Blank Resume creates resume immediately
+- [ ] Resume list refreshes after any save operation
+- [ ] Folder import limitation message visible in upload form
+
 ## Final
 
 - [ ] All automated tests pass (backend + extension + desktop)

@@ -1,8 +1,8 @@
 # Current Status
 
-Current Milestone: 10A-FIX – MVP Live Usability Fix ✅ Complete
+Current Milestone: 10A-FIX-4 – Resume Upload / Download / Import MVP ✅ Complete
 
-All 9 desktop pages are now live with real backend API calls. CORS fix applied, 176 desktop tests pass, 509 backend tests pass.
+Resumes page now supports upload, paste, create, view (with metadata), and download (.txt/.md). Folder import limitation noted. ResumeCreate schema includes content. Desktop tests: 258 passed. Backend tests: 33 resume tests pass (1 new). Ruff clean.
 
 MVP readiness status: NOT READY for public GitHub release. Desktop→backend connection must pass live manual verification before 10B or any downstream milestone can proceed.
 
@@ -194,6 +194,19 @@ All Milestone 09 milestones completed.
   - **CSS:** styles added for item lists/cards, forms, empty states, AI JSON
   - **Tests:** 176 desktop tests pass; 509 backend tests pass
   - **Docs:** MVP_LIVE_RUN_GUIDE updated with per-page verification steps
+
+- **10A-FIX-4** — Resume Upload / Download / Import MVP ✅ complete
+  - **Resumes page actions:** Upload Resume (file picker for .txt/.md, PDF/DOC/DOCX warning), Paste Resume Text (textarea + title + target role), Create Blank Resume
+  - **Download:** Download as .txt and .md buttons for each resume with content; uses Blob/object URL (local, no cloud)
+  - **Metadata view:** Expanded content view shows target role, job description presence
+  - **Folder import:** Clear message: "Folder import is not supported in MVP. Please upload one resume file at a time."
+  - **Backend:** ResumeCreate schema now includes content field; ResumeService.create() passes content through
+  - **API client:** Added fetchResume(id), importResumeText(data), uploadResumeFile(data), uploadResumeTextFile(data), downloadResumeText(content)
+  - **Empty state:** Replaced passive message with actionable Upload / Paste / Create buttons
+  - **Resume list:** Shows title, version, latest badge, created date, updated date, target role; click to view content (lazy fetch if needed)
+  - **Error handling:** Success messages, useful error messages, PDF/DOC/DOCX warning with guidance text
+  - **Tests:** 258 desktop tests pass; 33 resume backend tests pass (1 new), Ruff clean
+  - **No paid APIs, no telemetry, no cloud dependency added**
 
 - **10B** – GitHub Repository Publication Prep ⏸️ paused (pending decision)
 

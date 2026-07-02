@@ -5,6 +5,7 @@ from pydantic import BaseModel
 
 class ResumeCreate(BaseModel):
     title: str = "Untitled Resume"
+    content: str | None = None
     target_role: str | None = None
     job_description: str | None = None
 

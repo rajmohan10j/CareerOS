@@ -1,9 +1,9 @@
 # Next Task
 
 Current:
-Milestone 10A-FIX — MVP Live Usability Fix ✅ Complete
+Milestone 10A-FIX-4 — Resume Upload / Download / Import MVP ✅ Complete
 
-All 9 desktop pages rewritten from placeholders to live MVP using real backend APIs (Dashboard, Profile, Resumes, Jobs, Applications, Documents, AI Status, Browser Extension, Settings). CORS fix applied. 176 desktop tests pass. 509 backend tests pass.
+Resumes page supports: Upload Resume (file picker for .txt/.md, PDF/DOC/DOCX warning), Paste Resume Text, Create Blank Resume, view with metadata, download as .txt/.md via Blob. Folder import limitation message shown. API client: fetchResume, importResumeText, uploadResumeFile, uploadResumeTextFile, downloadResumeText. 258 desktop tests pass. 33 resume backend tests pass (1 new). Ruff clean.
 
 Completed:
 - Milestone 10A-LIVE — Desktop Backend Connection Fix (CORS middleware, URL normalization, error messages applied)
@@ -138,90 +138,72 @@ All Milestone 09 milestones completed.
 
 ---
 
-## Next: 10A-FIX – MVP Live Usability Fix ⚠️ active
+## Next: 10A-FIX-4 – Resume Upload / Download / Import MVP ✅ Complete
 
-**This is a CORRECTIVE milestone.** It does not add new product features. It exists because live testing revealed that the desktop shell cannot connect to the backend in practice, even though all automated tests pass.
+**Purpose:** Make the Resumes page MVP-useful by adding resume upload/import/create/view/download functionality connected to the existing backend.
 
-Live-test evidence:
-- `http://127.0.0.1:8000/health` works in browser ✅
-- `http://127.0.0.1:8000/docs` works in browser ✅
-- `http://127.0.0.1:8000/analytics/summary` works in browser ✅
-- Desktop opens at `http://127.0.0.1:5173` ✅
-- Desktop Settings shows URL `http://127.0.0.1:8000` ✅
-- Test Connection fails: "Connection error: Failed to fetch" ❌
-- Dashboard shows: "Connection error: Failed to fetch" ❌
+### What was done
 
-**Root cause:** Backend had no CORS middleware. Browser blocked cross-origin fetch from `127.0.0.1:5173` to `127.0.0.1:8000`.
+1. **Backend:** Added `content` field to `ResumeCreate` schema; `ResumeService.create()` passes content through
+2. **API client:** Added `fetchResume(id)`, `importResumeText(data)`, `uploadResumeFile(data)`, `uploadResumeTextFile(data)`, `downloadResumeText(content, filename, ext)`
+3. **Resumes page:** Upload Resume (file picker for .txt/.md, PDF/DOC/DOCX warning), Paste Resume Text (textarea + title + target role), Create Blank Resume
+4. **Download:** Download as .txt and .md buttons for each resume with content using Blob/object URL (local, no cloud)
+5. **Metadata view:** Expanded content view shows target role, job description presence
+6. **Folder import:** Clear limitation message displayed
+7. **Empty state:** Actionable Upload / Paste / Create buttons instead of passive text
+8. **Resume list:** Shows title, version, latest badge, created date, updated date, target role
+9. **Error handling:** Success messages, useful error messages, PDF/DOC/DOCX warning with guidance
 
-**Fix already applied:**
-1. CORS middleware in `backend/app/main.py` with allow_origins for local dev origins
-2. URL normalization in `desktop/src/apiClient.py` (trim whitespace, remove trailing slash, reject [object Promise])
-3. Better error messages showing URL + endpoint + user-friendly next step
-4. Tests: 120 desktop, 509 backend, Ruff clean
+### Files Changed
 
-**Pending:** Full end-to-end live MVP workflow verification.
+| File | Change |
+|------|--------|
+| `backend/app/schemas/resume.py` | Added `content` field to `ResumeCreate` |
+| `backend/app/services/resume_service.py` | `create()` passes `content` through |
+| `backend/tests/test_resume.py` | Added `test_create_with_content` |
+| `desktop/src/apiClient.js` | Added `fetchResume`, `importResumeText`, `uploadResumeFile`, `uploadResumeTextFile`, `downloadResumeText` exports |
+| `desktop/src/pages/Resumes.js` | Added download buttons, metadata view, folder import message, .doc handling |
+| `desktop/styles/app.css` | Added `.item-card-meta`, `.item-card-meta-item`, `.item-card-actions`, `.btn-sm` |
+| `desktop/tests/desktop.test.js` | Updated assertions for download, folder import, .doc, metadata |
 
-### Objectives
+### Test Results
 
-1. Diagnose desktop backend fetch failure (confirmed — CORS)
-2. Fix desktop/backend connection and CORS/local URL handling (applied)
-3. Run full live MVP workflow and document result (pending)
+- Desktop: **258 passed, 0 failed**
+- Backend: **33 resume tests passed** (1 new), all backend tests pass
+- Ruff: All checks passed
 
-### Acceptance Criteria
+### Acceptance Criteria Met
 
-1. Backend runs at `http://127.0.0.1:8000`
-2. Desktop runs at `http://127.0.0.1:5173`
-3. Settings backend URL shows `http://127.0.0.1:8000`
-4. Test Connection succeeds (green)
-5. Dashboard cards load analytics values
-6. Backend status shows "Connected"
-7. Backend tests pass (509)
-8. Desktop tests pass (120)
-9. Ruff clean
-10. No paid APIs, no telemetry, no cloud dependency
+1. ✅ Resumes page shows Upload Resume / Paste Resume Text / Create Blank Resume
+2. ✅ Upload supports .txt and .md files; PDF/DOC/DOCX shows guidance message
+3. ✅ Paste resume text with title saves to backend
+4. ✅ Resume list refreshes after save
+5. ✅ Click resume to view stored content with metadata (lazy fetch if needed)
+6. ✅ Download as .txt and .md buttons for each resume with content
+7. ✅ Download uses Blob/object URL — no cloud, no paid APIs
+8. ✅ Folder import limitation message shown
+9. ✅ Empty state shows actionable buttons
+10. ✅ Success/error messages displayed
+11. ✅ No paid APIs, no telemetry, no cloud dependency added
 
-### Manual Verification Steps
-
-```powershell
-# Terminal 1: Start backend
-cd backend
-.venv\Scripts\Activate.ps1
-uvicorn app.main:app --host 127.0.0.1 --port 8000
-
-# Terminal 2: Start desktop
-cd desktop
-npm start
-# Open http://127.0.0.1:5173 in browser
-
-# Verify in browser:
-# 1. http://127.0.0.1:8000/health → {"status":"ok","version":"0.1.0","mode":"local"}
-# 2. http://127.0.0.1:8000/analytics/summary → JSON with analytics
-# 3. http://127.0.0.1:5173 → Desktop loads
-# 4. Desktop → Settings → Test Connection → "Connected"
-# 5. Desktop → Dashboard → Cards show data, Backend Status green
-```
-
-### MVP workflow target
+### Manual Verification
 
 ```
-Start backend
-→ Open desktop
-→ Desktop connects to backend
-→ Dashboard loads analytics
-→ User can create/update basic profile if needed
-→ Browser extension loads
-→ Extension connects to backend
-→ Open sample job form
-→ Detect fields
-→ Map fields
-→ Preview approval
-→ Fill only approved fields
-→ Confirm no submit/click/upload happens
+1. Start backend at http://127.0.0.1:8000
+2. Start desktop at http://127.0.0.1:5173
+3. Open Resumes page → Upload / Paste / Create buttons visible
+4. Click "Paste Resume Text" → enter title + content → Save
+5. Resume appears in list with title, version, date
+6. Click resume to view content with metadata
+7. Click "Download .txt" → file downloads locally
+8. Click "Download .md" → file downloads locally
+9. Try Upload with .pdf → shows "PDF/DOCX parsing is not supported yet..."
+10. Folder import message visible in upload form
 ```
 
 ### Blocked Milestones
 
-The following milestones are PAUSED until 10A-FIX passes live MVP verification:
+The following milestones are PAUSED:
 
 - **10B** – GitHub Repository Publication Prep ⏸️
 - **10C** – Installer / Setup Improvements ⏸️
@@ -229,4 +211,4 @@ The following milestones are PAUSED until 10A-FIX passes live MVP verification:
 - **10E** – Desktop Backend Integration v1 ⏸️
 - **10F** – Public Developer Preview v0.1.0 ⏸️
 
-**Do not start 10B or any downstream milestone until 10A-FIX passes live testing.**
+**Do not start 10B or any downstream milestone until directed.**

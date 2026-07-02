@@ -73,10 +73,17 @@ Navigate to **Profile**.
 
 Navigate to **Resumes**.
 
-- Shows list of existing resumes (or "No resumes yet" empty state)
-- Click a resume card to toggle content view
+- Shows list of existing resumes (or "No resumes yet" empty state with Upload/Paste/Create buttons)
+- Click **Upload Resume** → file picker appears, supports .txt and .md; PDF/DOC/DOCX shows guidance
+- Click **Paste Resume Text** → inline form with title, target role, content textarea
+- Click **Create Blank Resume** → immediately creates empty resume
+- Enter pasted content and save → resume appears in list
+- Click a resume card to toggle content view with metadata (lazy fetch if content not loaded)
+- Click **Download .txt** → file downloads locally via Blob
+- Click **Download .md** → file downloads locally via Blob
+- Folder import limitation message visible in upload form
 
-**Expected:** Data from `GET /resumes`
+**Expected:** Data from `GET /resumes`, new resume via `POST /resumes` with content, download via Blob
 
 ### 8. Verify Jobs Page
 

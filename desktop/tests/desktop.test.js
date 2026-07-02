@@ -135,7 +135,14 @@ assert(routes.includes("documents"), "routes define documents");
 assert(routes.includes("ai-status"), "routes define ai-status");
 assert(routes.includes("browser-extension"), "routes define browser-extension");
 assert(routes.includes("settings"), "routes define settings");
+assert(routes.includes("browser-extension"), "routes define browser-extension");
 assert(routes.includes('import("./pages/'), "routes use dynamic imports");
+
+// Each dashboard route mapping has a corresponding route definition
+const cardRoutes = ["dashboard", "profile", "resumes", "jobs", "applications", "documents", "settings"];
+for (const cr of cardRoutes) {
+  assert(routes.includes(`"${cr}"`), `routes define "${cr}" (needed by dashboard cards)`);
+}
 
 // ── API client validation ──────────────────────────────────────
 
@@ -170,7 +177,7 @@ console.log("\n[api client — new helpers]");
 
 const apiHelpers = [
   "fetchProfile", "saveProfile",
-  "fetchResumes", "createResume", "generateResume",
+  "fetchResumes", "fetchResume", "createResume", "importResumeText", "uploadResumeFile", "uploadResumeTextFile", "downloadResumeText", "generateResume",
   "fetchJobs", "createJob", "evaluateJobText",
   "fetchApplications", "createApplication",
   "fetchDocuments", "createDocument",
@@ -190,6 +197,71 @@ assert(apiClient.includes("/ai/providers"), "apiClient.js calls /ai/providers en
 assert(apiClient.includes("/ai/models"), "apiClient.js calls /ai/models endpoint");
 assert(apiClient.includes("/ai/health"), "apiClient.js calls /ai/health endpoint");
 
+// ── Page actions exist (no dead placeholders) ──────────────────
+
+console.log("\n[page actions exist]");
+
+const allPages = {};
+for (const pf of pageFiles) {
+  allPages[pf] = readFile(`src/pages/${pf}`);
+}
+
+const pageActionChecks = [
+  { file: "Profile.js", check: "addEventListener", label: "Profile.js has event handlers" },
+  { file: "Profile.js", check: "saveProfileBtn", label: "Profile.js has save button" },
+  { file: "Profile.js", check: "profileSummary", label: "Profile.js has summary textarea" },
+  { file: "Profile.js", check: "profileRoles", label: "Profile.js has roles input" },
+  { file: "Profile.js", check: "saveProfile", label: "Profile.js calls saveProfile API" },
+  { file: "Resumes.js", check: "fetchResumes", label: "Resumes.js fetches from backend" },
+  { file: "Resumes.js", check: "createResume", label: "Resumes.js uses createResume API" },
+  { file: "Resumes.js", check: "fetchResume", label: "Resumes.js uses fetchResume API" },
+  { file: "Resumes.js", check: "item-card", label: "Resumes.js renders item cards or empty state" },
+  { file: "Resumes.js", check: "No resumes yet", label: "Resumes.js has useful empty state" },
+  { file: "Resumes.js", check: "Upload Resume", label: "Resumes.js has Upload Resume action" },
+  { file: "Resumes.js", check: "Paste Resume Text", label: "Resumes.js has Paste Resume Text action" },
+  { file: "Resumes.js", check: "Create Blank Resume", label: "Resumes.js has Create Blank Resume action" },
+  { file: "Resumes.js", check: "PDF/DOCX parsing is not supported yet", label: "Resumes.js shows unsupported PDF/DOCX message" },
+  { file: "Resumes.js", check: "pasteContent", label: "Resumes.js has paste content textarea" },
+  { file: "Resumes.js", check: "savePasteBtn", label: "Resumes.js has save paste button" },
+  { file: "Resumes.js", check: "pasteTitle", label: "Resumes.js has paste title input" },
+  { file: "Resumes.js", check: "uploadFile", label: "Resumes.js has file input for upload" },
+  { file: "Resumes.js", check: "Download .txt", label: "Resumes.js has download .txt option" },
+  { file: "Resumes.js", check: "Download .md", label: "Resumes.js has download .md option" },
+  { file: "Resumes.js", check: "downloadResumeText", label: "Resumes.js uses downloadResumeText API" },
+  { file: "Resumes.js", check: "Folder import is not supported in MVP", label: "Resumes.js has folder import limitation message" },
+  { file: "Resumes.js", check: "PDF/DOCX parsing is not supported yet", label: "Resumes.js has updated PDF/DOCX message" },
+  { file: "Resumes.js", check: ".doc", label: "Resumes.js handles .doc as unsupported" },
+  { file: "Resumes.js", check: "item-card-meta", label: "Resumes.js shows metadata in content view" },
+  { file: "Jobs.js", check: "createJob", label: "Jobs.js calls createJob API" },
+  { file: "Jobs.js", check: "showAddJobBtn", label: "Jobs.js has add job button" },
+  { file: "Jobs.js", check: "saveJobBtn", label: "Jobs.js has save job button" },
+  { file: "Jobs.js", check: "No jobs tracked yet", label: "Jobs.js has useful empty state" },
+  { file: "Applications.js", check: "createApplication", label: "Applications.js calls createApplication API" },
+  { file: "Applications.js", check: "showAddAppBtn", label: "Applications.js has add application button" },
+  { file: "Applications.js", check: "saveAppBtn", label: "Applications.js has save application button" },
+  { file: "Applications.js", check: "No applications yet", label: "Applications.js has useful empty state" },
+  { file: "Documents.js", check: "createDocument", label: "Documents.js calls createDocument API" },
+  { file: "Documents.js", check: "showAddDocBtn", label: "Documents.js has add document button" },
+  { file: "Documents.js", check: "saveDocBtn", label: "Documents.js has save document button" },
+  { file: "Documents.js", check: "No documents yet", label: "Documents.js has useful empty state" },
+  { file: "AIStatus.js", check: "fetchAiProviders", label: "AIStatus.js fetches AI providers" },
+  { file: "AIStatus.js", check: "fetchAiModels", label: "AIStatus.js fetches AI models" },
+  { file: "AIStatus.js", check: "fetchAiHealth", label: "AIStatus.js fetches AI health" },
+  { file: "AIStatus.js", check: "checkHealth", label: "AIStatus.js checks backend health" },
+  { file: "Settings.js", check: "checkHealth", label: "Settings.js checks backend health" },
+  { file: "Settings.js", check: "testBackendBtn", label: "Settings.js has test connection button" },
+  { file: "Settings.js", check: "saveBackendBtn", label: "Settings.js has save button" },
+];
+
+for (const { file, check, label } of pageActionChecks) {
+  const content = allPages[file];
+  if (content) {
+    assert(content.includes(check), label);
+  } else {
+    assert(false, `${file} not found for check: ${label}`);
+  }
+}
+
 // ── Page validation — Profile, Resumes, Jobs, Applications, Documents, AIStatus ──
 
 console.log("\n[page validation — live pages]");
@@ -205,8 +277,21 @@ assert(profilePage.includes("saveProfileBtn"), "Profile.js has save button");
 
 const resumesPage = readFile("src/pages/Resumes.js");
 assert(resumesPage.includes("fetchResumes"), "Resumes.js uses fetchResumes");
+assert(resumesPage.includes("createResume"), "Resumes.js uses createResume");
+assert(resumesPage.includes("fetchResume"), "Resumes.js uses fetchResume");
+assert(resumesPage.includes("downloadResumeText"), "Resumes.js uses downloadResumeText");
 assert(resumesPage.includes("item-card"), "Resumes.js renders item cards");
 assert(resumesPage.includes("No resumes yet"), "Resumes.js has empty state");
+assert(resumesPage.includes("Upload Resume"), "Resumes.js has upload action");
+assert(resumesPage.includes("Paste Resume Text"), "Resumes.js has paste action");
+assert(resumesPage.includes("Create Blank Resume"), "Resumes.js has create blank action");
+assert(resumesPage.includes("PDF/DOCX parsing is not supported yet"), "Resumes.js warns on PDF/DOCX");
+assert(resumesPage.includes("Folder import is not supported in MVP"), "Resumes.js shows folder import limitation");
+assert(resumesPage.includes("Download .txt"), "Resumes.js has download .txt option");
+assert(resumesPage.includes("Download .md"), "Resumes.js has download .md option");
+assert(resumesPage.includes("item-card-meta"), "Resumes.js shows metadata section");
+assert(resumesPage.includes("pastContent") || resumesPage.includes("pasteContent"), "Resumes.js has paste textarea");
+assert(resumesPage.includes("pasteTitle"), "Resumes.js has paste title input");
 
 const jobsPage = readFile("src/pages/Jobs.js");
 assert(jobsPage.includes("fetchJobs"), "Jobs.js uses fetchJobs");
@@ -240,8 +325,12 @@ assert(aiStatusPage.includes("AI Health"), "AIStatus.js shows health section");
 
 const browserExtPage = readFile("src/pages/BrowserExtension.js");
 assert(browserExtPage.includes("Setup Instructions"), "BrowserExtension.js has setup instructions");
-assert(browserExtPage.includes("Supported Job Boards"), "BrowserExtension.js has supported boards");
-assert(browserExtPage.includes("Backend Status"), "BrowserExtension.js has backend status section");
+assert(browserExtPage.includes("Load unpacked"), "BrowserExtension.js uses local unpacked instructions");
+assert(browserExtPage.includes("chrome://extensions"), "BrowserExtension.js mentions chrome://extensions");
+assert(!browserExtPage.includes("Chrome Web Store"), "BrowserExtension.js has no marketplace claims");
+assert(!browserExtPage.includes("Firefox Add-ons"), "BrowserExtension.js has no add-on store claims");
+assert(!browserExtPage.includes("Supported Job Boards"), "BrowserExtension.js has no supported boards section");
+assert(browserExtPage.includes("Backend Connection"), "BrowserExtension.js has backend connection section");
 assert(browserExtPage.includes("export default"), "BrowserExtension.js has exports");
 
 // ── Component validation ───────────────────────────────────────
@@ -321,20 +410,32 @@ assert(
   "no secrets hardcoded in source"
 );
 
-// ── Analytics dashboard ────────────────────────────────────────
+// ── Dashboard cards clickable ────────────────────────────────
 
-console.log("\n[analytics dashboard]");
+console.log("\n[dashboard cards clickable]");
 
 const dashboard = readFile("src/pages/Dashboard.js");
+assert(dashboard.includes("navigate"), "Dashboard imports navigate");
 assert(dashboard.includes("fetchAnalytics"), "Dashboard uses fetchAnalytics");
 assert(dashboard.includes("dash-card-stat"), "Dashboard has stat cards");
 assert(dashboard.includes("dash-card-health"), "Dashboard has health card");
-assert(dashboard.includes("Profile"), "Dashboard shows Profile card");
-assert(dashboard.includes("Resumes"), "Dashboard shows Resumes card");
-assert(dashboard.includes("Jobs"), "Dashboard shows Jobs card");
-assert(dashboard.includes("Applications"), "Dashboard shows Applications card");
-assert(dashboard.includes("Documents"), "Dashboard shows Documents card");
-assert(dashboard.includes("Backend Health"), "Dashboard shows Backend Health card");
+
+// Each card must have data-route for navigation
+assert(dashboard.includes(`"dash-card-profile": "profile"`), "Dashboard Profile card routes to profile");
+assert(dashboard.includes(`"dash-card-resumes": "resumes"`), "Dashboard Resumes card routes to resumes");
+assert(dashboard.includes(`"dash-card-jobs": "jobs"`), "Dashboard Jobs card routes to jobs");
+assert(dashboard.includes(`"dash-card-applications": "applications"`), "Dashboard Applications card routes to applications");
+assert(dashboard.includes(`"dash-card-documents": "documents"`), "Dashboard Documents card routes to documents");
+assert(dashboard.includes(`"dash-card-health": "settings"`), "Dashboard Health card routes to settings");
+
+// Cards must have click/keyboard accessibility attributes
+assert(dashboard.includes("tabindex=\"0\""), "Dashboard cards have tabindex for keyboard focus");
+assert(dashboard.includes("role=\"button\""), "Dashboard cards have button role");
+assert(dashboard.includes("aria-label"), "Dashboard cards have aria-label");
+assert(dashboard.includes("attachCardClicks"), "Dashboard has card click handler");
+assert(dashboard.includes("card.addEventListener(\"click\"") || dashboard.includes('card.addEventListener("click"'), "Dashboard attaches click listeners");
+assert(dashboard.includes("card.addEventListener(\"keydown\"") || dashboard.includes('card.addEventListener("keydown"'), "Dashboard attaches keyboard listeners");
+assert(dashboard.includes("navigate(route)"), "Dashboard navigates on card click");
 assert(
   !dashboard.includes("api.openai.com"),
   "Dashboard has no OpenAI API endpoints"
