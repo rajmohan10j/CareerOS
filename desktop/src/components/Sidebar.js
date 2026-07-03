@@ -17,7 +17,7 @@ function render(activeRoute) {
     .map((item) => {
       const active = item.route === activeRoute ? "nav-active" : "";
       return `
-        <li class="nav-item ${active}" data-route="${item.route}">
+        <li class="nav-item ${active}" data-route="${item.route}" tabindex="0" role="button" onclick="window.location.hash='${item.route}'" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();window.location.hash='${item.route}';}">
           <span class="nav-icon">${item.icon}</span>
           <span class="nav-label">${item.label}</span>
         </li>

@@ -31,6 +31,7 @@ console.log("\n[file structure]");
 
 const expectedFiles = [
   "package.json",
+  "dev-server.py",
   "index.html",
   "README.md",
   "src/main.js",
@@ -135,7 +136,16 @@ assert(routes.includes("documents"), "routes define documents");
 assert(routes.includes("ai-status"), "routes define ai-status");
 assert(routes.includes("browser-extension"), "routes define browser-extension");
 assert(routes.includes("settings"), "routes define settings");
+assert(routes.includes("browser-extension"), "routes define browser-extension");
 assert(routes.includes('import("./pages/'), "routes use dynamic imports");
+assert(routes.includes("careeros:navigate"), "navigate emits app navigation event for reliable rerender");
+assert(routes.includes("CustomEvent"), "navigate dispatches CustomEvent after hash update");
+
+// Each dashboard route mapping has a corresponding route definition
+const cardRoutes = ["dashboard", "profile", "resumes", "jobs", "applications", "documents", "settings"];
+for (const cr of cardRoutes) {
+  assert(routes.includes(`"${cr}"`), `routes define "${cr}" (needed by dashboard cards)`);
+}
 
 // ── API client validation ──────────────────────────────────────
 
@@ -190,6 +200,59 @@ assert(apiClient.includes("/ai/providers"), "apiClient.js calls /ai/providers en
 assert(apiClient.includes("/ai/models"), "apiClient.js calls /ai/models endpoint");
 assert(apiClient.includes("/ai/health"), "apiClient.js calls /ai/health endpoint");
 
+// ── Page actions exist (no dead placeholders) ──────────────────
+
+console.log("\n[page actions exist]");
+
+const allPages = {};
+for (const pf of pageFiles) {
+  allPages[pf] = readFile(`src/pages/${pf}`);
+}
+
+const pageActionChecks = [
+  { file: "Profile.js", check: "addEventListener", label: "Profile.js has event handlers" },
+  { file: "Profile.js", check: "saveProfileBtn", label: "Profile.js has save button" },
+  { file: "Profile.js", check: "profileSummary", label: "Profile.js has summary textarea" },
+  { file: "Profile.js", check: "profileRoles", label: "Profile.js has roles input" },
+  { file: "Profile.js", check: "saveProfile", label: "Profile.js calls saveProfile API" },
+  { file: "Resumes.js", check: "fetchResumes", label: "Resumes.js fetches from backend" },
+  { file: "Resumes.js", check: "createResume", label: "Resumes.js calls createResume API" },
+  { file: "Resumes.js", check: "showAddResumeBtn", label: "Resumes.js has upload resume button" },
+  { file: "Resumes.js", check: "saveResumeBtn", label: "Resumes.js has save resume button" },
+  { file: "Resumes.js", check: "resumeFile", label: "Resumes.js has resume file input" },
+  { file: "Resumes.js", check: "resumeContent", label: "Resumes.js has resume content textarea" },
+  { file: "Resumes.js", check: "item-card", label: "Resumes.js renders item cards or empty state" },
+  { file: "Resumes.js", check: "No resumes yet", label: "Resumes.js has useful empty state" },
+  { file: "Jobs.js", check: "createJob", label: "Jobs.js calls createJob API" },
+  { file: "Jobs.js", check: "showAddJobBtn", label: "Jobs.js has add job button" },
+  { file: "Jobs.js", check: "saveJobBtn", label: "Jobs.js has save job button" },
+  { file: "Jobs.js", check: "No jobs tracked yet", label: "Jobs.js has useful empty state" },
+  { file: "Applications.js", check: "createApplication", label: "Applications.js calls createApplication API" },
+  { file: "Applications.js", check: "showAddAppBtn", label: "Applications.js has add application button" },
+  { file: "Applications.js", check: "saveAppBtn", label: "Applications.js has save application button" },
+  { file: "Applications.js", check: "No applications yet", label: "Applications.js has useful empty state" },
+  { file: "Documents.js", check: "createDocument", label: "Documents.js calls createDocument API" },
+  { file: "Documents.js", check: "showAddDocBtn", label: "Documents.js has add document button" },
+  { file: "Documents.js", check: "saveDocBtn", label: "Documents.js has save document button" },
+  { file: "Documents.js", check: "No documents yet", label: "Documents.js has useful empty state" },
+  { file: "AIStatus.js", check: "fetchAiProviders", label: "AIStatus.js fetches AI providers" },
+  { file: "AIStatus.js", check: "fetchAiModels", label: "AIStatus.js fetches AI models" },
+  { file: "AIStatus.js", check: "fetchAiHealth", label: "AIStatus.js fetches AI health" },
+  { file: "AIStatus.js", check: "checkHealth", label: "AIStatus.js checks backend health" },
+  { file: "Settings.js", check: "checkHealth", label: "Settings.js checks backend health" },
+  { file: "Settings.js", check: "testBackendBtn", label: "Settings.js has test connection button" },
+  { file: "Settings.js", check: "saveBackendBtn", label: "Settings.js has save button" },
+];
+
+for (const { file, check, label } of pageActionChecks) {
+  const content = allPages[file];
+  if (content) {
+    assert(content.includes(check), label);
+  } else {
+    assert(false, `${file} not found for check: ${label}`);
+  }
+}
+
 // ── Page validation — Profile, Resumes, Jobs, Applications, Documents, AIStatus ──
 
 console.log("\n[page validation — live pages]");
@@ -205,6 +268,10 @@ assert(profilePage.includes("saveProfileBtn"), "Profile.js has save button");
 
 const resumesPage = readFile("src/pages/Resumes.js");
 assert(resumesPage.includes("fetchResumes"), "Resumes.js uses fetchResumes");
+assert(resumesPage.includes("createResume"), "Resumes.js uses createResume");
+assert(resumesPage.includes("+ Upload Resume"), "Resumes.js renders upload resume action");
+assert(resumesPage.includes("file.text()"), "Resumes.js reads uploaded text/markdown files");
+assert(resumesPage.includes("content"), "Resumes.js sends resume content to backend");
 assert(resumesPage.includes("item-card"), "Resumes.js renders item cards");
 assert(resumesPage.includes("No resumes yet"), "Resumes.js has empty state");
 
@@ -240,8 +307,12 @@ assert(aiStatusPage.includes("AI Health"), "AIStatus.js shows health section");
 
 const browserExtPage = readFile("src/pages/BrowserExtension.js");
 assert(browserExtPage.includes("Setup Instructions"), "BrowserExtension.js has setup instructions");
-assert(browserExtPage.includes("Supported Job Boards"), "BrowserExtension.js has supported boards");
-assert(browserExtPage.includes("Backend Status"), "BrowserExtension.js has backend status section");
+assert(browserExtPage.includes("Load unpacked"), "BrowserExtension.js uses local unpacked instructions");
+assert(browserExtPage.includes("chrome://extensions"), "BrowserExtension.js mentions chrome://extensions");
+assert(!browserExtPage.includes("Chrome Web Store"), "BrowserExtension.js has no marketplace claims");
+assert(!browserExtPage.includes("Firefox Add-ons"), "BrowserExtension.js has no add-on store claims");
+assert(!browserExtPage.includes("Supported Job Boards"), "BrowserExtension.js has no supported boards section");
+assert(browserExtPage.includes("Backend Connection"), "BrowserExtension.js has backend connection section");
 assert(browserExtPage.includes("export default"), "BrowserExtension.js has exports");
 
 // ── Component validation ───────────────────────────────────────
@@ -321,20 +392,43 @@ assert(
   "no secrets hardcoded in source"
 );
 
-// ── Analytics dashboard ────────────────────────────────────────
+// ── Dashboard cards clickable ────────────────────────────────
 
-console.log("\n[analytics dashboard]");
+console.log("\n[dashboard cards clickable]");
 
 const dashboard = readFile("src/pages/Dashboard.js");
+assert(dashboard.includes("navigate"), "Dashboard imports navigate");
 assert(dashboard.includes("fetchAnalytics"), "Dashboard uses fetchAnalytics");
 assert(dashboard.includes("dash-card-stat"), "Dashboard has stat cards");
 assert(dashboard.includes("dash-card-health"), "Dashboard has health card");
-assert(dashboard.includes("Profile"), "Dashboard shows Profile card");
-assert(dashboard.includes("Resumes"), "Dashboard shows Resumes card");
-assert(dashboard.includes("Jobs"), "Dashboard shows Jobs card");
-assert(dashboard.includes("Applications"), "Dashboard shows Applications card");
-assert(dashboard.includes("Documents"), "Dashboard shows Documents card");
-assert(dashboard.includes("Backend Health"), "Dashboard shows Backend Health card");
+
+// Each card must have a route mapping for navigation
+const dashboardRouteMappings = [
+  ['"dash-card-profile": "profile"', "Dashboard Profile card routes to profile"],
+  ['"dash-card-resumes": "resumes"', "Dashboard Resumes card routes to resumes"],
+  ['"dash-card-jobs": "jobs"', "Dashboard Jobs card routes to jobs"],
+  ['"dash-card-applications": "applications"', "Dashboard Applications card routes to applications"],
+  ['"dash-card-documents": "documents"', "Dashboard Documents card routes to documents"],
+  ['"dash-card-health": "settings"', "Dashboard Health card routes to settings"],
+];
+
+for (const [mapping, label] of dashboardRouteMappings) {
+  assert(dashboard.includes(mapping), label);
+}
+assert(dashboard.includes("data-route="), "Dashboard cards render data-route attributes");
+
+// Cards must have click/keyboard accessibility attributes
+assert(dashboard.includes("tabindex=\"0\""), "Dashboard cards have tabindex for keyboard focus");
+assert(dashboard.includes("role=\"button\""), "Dashboard cards have button role");
+assert(dashboard.includes("aria-label"), "Dashboard cards have aria-label");
+assert(dashboard.includes("attachCardClicks"), "Dashboard has card click handler");
+assert(dashboard.includes("card.addEventListener(\"click\"") || dashboard.includes('card.addEventListener("click"'), "Dashboard attaches click listeners");
+assert(dashboard.includes("card.addEventListener(\"keydown\"") || dashboard.includes('card.addEventListener("keydown"'), "Dashboard attaches keyboard listeners");
+assert(dashboard.includes("navigate(route)"), "Dashboard navigates on card click");
+assert(dashboard.includes("scheduleRetry"), "Dashboard retries analytics after backend startup failures");
+assert(dashboard.includes("window.setTimeout"), "Dashboard schedules retry timer for failed analytics loads");
+assert(dashboard.includes("clearRetryTimer"), "Dashboard clears retry timer after successful analytics load");
+assert(dashboard.includes("loadAnalytics(container)"), "Dashboard retry reruns analytics loader while mounted");
 assert(
   !dashboard.includes("api.openai.com"),
   "Dashboard has no OpenAI API endpoints"

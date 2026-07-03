@@ -380,16 +380,34 @@ html, body {
 }
 
 .settings-status {
-  margin-top: 8px;
+  display: block;
+  margin-top: 12px;
+  max-width: 640px;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background: #f8f9fc;
+  color: var(--color-text-secondary);
   font-size: 13px;
+  line-height: 1.4;
 }
 
 .status-ok {
+  border-color: #b7dfba;
+  background: #eef8ef;
   color: var(--color-success);
 }
 
 .status-error {
+  border-color: #efb9b9;
+  background: #fff0f0;
   color: var(--color-error);
+}
+
+.status-checking {
+  border-color: #b7d1f4;
+  background: #eef5ff;
+  color: var(--color-primary);
 }
 
 /* ── Page Actions ────────────────────────────────────────────── */

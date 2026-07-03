@@ -5,7 +5,7 @@
   "type": "module",
   "description": "CareerOS Desktop Application – local-first career management shell",
   "scripts": {
-    "start": "python -m http.server 5173",
+    "start": "python dev-server.py",
     "test": "node tests/desktop.test.js"
   },
   "dependencies": {},

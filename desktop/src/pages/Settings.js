@@ -15,10 +15,12 @@ function render() {
           <p class="setting-hint">The URL of your local CareerOS backend server (default: ${DEFAULT_BACKEND_URL}).</p>
         </div>
         <div class="setting-actions">
-          <button id="testBackendBtn" class="btn btn-secondary">Test Connection</button>
-          <button id="saveBackendBtn" class="btn btn-primary">Save</button>
+          <button id="testBackendBtn" class="btn btn-secondary" onclick="window.CareerOSSettingsActions?.testConnection()">Test Connection</button>
+          <button id="saveBackendBtn" class="btn btn-primary" onclick="window.CareerOSSettingsActions?.saveSettings()">Save</button>
         </div>
-        <div id="settingsStatus" class="settings-status"></div>
+        <div id="settingsStatus" class="settings-status" role="status" aria-live="polite">
+          Click Test Connection to check the backend.
+        </div>
       </section>
 
       <section class="settings-section">
@@ -32,39 +34,72 @@ function render() {
   `;
 }
 
+function getSettingsElements() {
+  return {
+    testBtn: document.getElementById("testBackendBtn"),
+    saveBtn: document.getElementById("saveBackendBtn"),
+    statusEl: document.getElementById("settingsStatus"),
+    urlInput: document.getElementById("backendUrlInput"),
+  };
+}
+
+function setStatus(message, state = "idle") {
+  const { statusEl } = getSettingsElements();
+  if (!statusEl) return;
+  statusEl.textContent = message;
+  statusEl.className = `settings-status status-${state}`;
+}
+
+async function testConnection() {
+  const { testBtn, statusEl } = getSettingsElements();
+  if (!testBtn || !statusEl) return;
+  if (testBtn.disabled) return;
+
+  testBtn.disabled = true;
+  testBtn.textContent = "Testing...";
+  setStatus("Testing backend connection...", "checking");
+
+  const result = await checkHealth();
+  if (result.status === "ok") {
+    setStatus(`Connected. Backend v${result.data.version || "?"}, mode ${result.data.mode || "?"}.`, "ok");
+  } else {
+    setStatus(`Connection failed. ${result.message}`, "error");
+  }
+
+  testBtn.disabled = false;
+  testBtn.textContent = "Test Connection";
+}
+
+function saveSettings() {
+  const { urlInput } = getSettingsElements();
+  const url = urlInput?.value.trim() || DEFAULT_BACKEND_URL;
+  setStoredBackendUrl(url);
+  setStatus(`Saved backend URL: ${getStoredBackendUrl()}`, "ok");
+}
+
+function installGlobalActions() {
+  window.CareerOSSettingsActions = {
+    testConnection,
+    saveSettings,
+  };
+}
+
 function onMount() {
+  installGlobalActions();
   const testBtn = document.getElementById("testBackendBtn");
   const saveBtn = document.getElementById("saveBackendBtn");
-  const statusEl = document.getElementById("settingsStatus");
-  const urlInput = document.getElementById("backendUrlInput");
 
   if (testBtn) {
-    testBtn.addEventListener("click", async () => {
-      testBtn.disabled = true;
-      testBtn.textContent = "Testing...";
-      statusEl.textContent = "Connecting...";
-      statusEl.className = "settings-status";
-      const result = await checkHealth();
-      if (result.status === "ok") {
-        statusEl.textContent = `Connected — v${result.data.version || "?"}, mode ${result.data.mode || "?"}`;
-        statusEl.className = "settings-status status-ok";
-      } else {
-        statusEl.textContent = `Connection failed: ${result.message}`;
-        statusEl.className = "settings-status status-error";
-      }
-      testBtn.disabled = false;
-      testBtn.textContent = "Test Connection";
-    });
+    testBtn.addEventListener("click", testConnection);
   }
 
   if (saveBtn) {
-    saveBtn.addEventListener("click", () => {
-      const url = urlInput.value.trim() || DEFAULT_BACKEND_URL;
-      setStoredBackendUrl(url);
-      statusEl.textContent = "Settings saved.";
-      statusEl.className = "settings-status status-ok";
-    });
+    saveBtn.addEventListener("click", saveSettings);
   }
+}
+
+if (typeof window !== "undefined") {
+  installGlobalActions();
 }
 
 export default { render, onMount };
