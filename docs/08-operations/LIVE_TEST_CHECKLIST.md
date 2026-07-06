@@ -87,5 +87,5 @@ Use this checklist to verify the full MVP workflow. Items checked on 2026-07-02 
 
 - Automated verification refreshed: backend 511, desktop 292, browser-extension assertion inventory 687, Ruff clean, release-check passing.
 - GitOps policy added: source, docs, tests, release manifests, workflow files, and reviewed non-sensitive fixtures should be tracked through Git/GitHub.
-- GitHub remote is not configured in this checkout yet; GitHub-backed Issues, Pull Requests, Actions, Releases, and branch protection remain a setup step.
+- GitHub remote is configured; GitHub-backed Issues, Pull Requests, Actions, Releases, and branch protection remain final setup/enforcement steps.
 - Do not commit secrets, local databases, generated artifacts, private resumes, private application records, or unsanitized reference data.

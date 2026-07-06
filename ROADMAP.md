@@ -31,7 +31,7 @@ All 20 Milestone 09 milestones completed.
 10A-FIX MVP Live Usability Fix ✅ — CORS fix applied and verified by local smoke test. All 9 desktop pages now live with real backend API calls (Dashboard, Profile, Resumes, Jobs, Applications, Documents, AI Status, Browser Extension, Settings). Dashboard cards are clickable/keyboard-accessible.
 10B GitHub Repository Publication Prep ✅ complete
 10C Installer / Setup Improvements ✅ — first-run setup checker, stronger doctor checks, safer backend startup, and updated local startup guidance
-10C-live-test Local Live-Test Release ✅ — current verification: setup-check 16 passed / 0 failed, doctor 32 passed / 0 failed, backend 511 tests, browser-extension 687 assertion inventory, desktop 292 tests, Ruff clean, release-check passing. GitOps policy documented; GitHub remote still needs to be configured before GitHub can enforce the workflow.
+10C-live-test Local Live-Test Release ✅ — current verification: setup-check 16 passed / 0 failed, doctor 32 passed / 0 failed, backend 511 tests, browser-extension 687 assertion inventory, desktop 292 tests, Ruff clean, release-check passing. GitOps policy documented; GitHub remote configured at `rajmohan10j/CareerOS`; branch protection, Actions enforcement, Issues/Projects, and Releases remain next GitHub setup steps.
 10D Real-World Browser Extension Testing Pack
 10E Desktop Backend Integration v1
 10F Public Developer Preview v0.1.0

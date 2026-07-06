@@ -7,7 +7,7 @@ Current verification: setup-check 16 passed / 0 failed, doctor 32 passed / 0 fai
 
 MVP readiness status: RELEASED for local live test / developer-preview MVP. Not yet stable/public-release ready until manual unpacked-extension browser verification, fresh-clone setup, and installer/distribution work are complete.
 
-GitOps status: Policy documented in `docs/03-development/GITOPS_OPERATING_MODEL.md`. Git/GitHub is the intended source of truth for code, docs, tests, release manifests, GitHub workflow files, and reviewed non-sensitive fixtures. This checkout currently has no GitHub remote configured, so GitHub-backed GitOps cannot be fully enforced until `origin`, branch protection, Actions, and release publishing are connected.
+GitOps status: Policy documented in `docs/03-development/GITOPS_OPERATING_MODEL.md`. Git/GitHub is the intended source of truth for code, docs, tests, release manifests, GitHub workflow files, and reviewed non-sensitive fixtures. GitHub remote is configured at `https://github.com/rajmohan10j/CareerOS.git`; branch protection, required Actions checks, Issues/Projects, and release publishing still need final setup.
 
 Completed:
 - Milestone 09A: Backend skeleton

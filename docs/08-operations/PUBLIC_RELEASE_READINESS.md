@@ -43,7 +43,7 @@ Per `ENGINEERING_BIBLE/010_RELEASE_STANDARDS.md`, the release stages are:
 ### Not Yet Ready
 
 - Desktop app is a Vanilla JS SPA — not wrapped in Tauri/Electron
-- GitHub remote is not configured in this checkout, so GitHub-backed GitOps is not yet enforceable
+- GitHub remote is configured, but branch protection, required Actions checks, Issues/Projects, and release publishing are not fully enforced yet
 - No packaged installer/distribution artifact
 - Firefox extension not implemented
 - Mobile browsers not supported

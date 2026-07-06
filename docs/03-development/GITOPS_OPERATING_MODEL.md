@@ -31,17 +31,15 @@ Do not track these in Git/GitHub:
 - Private resumes, compensation data, addresses, application answers, or personal application records unless explicitly sanitized and approved for repository storage
 - Browser-generated extension copies or temporary release zips
 
-## GitHub Remote Requirement
+## GitHub Remote
 
-This checkout must have a GitHub remote before GitOps can be fully active:
+This checkout is connected to:
 
 ```powershell
-git remote add origin <github-repo-url>
-git branch -M main
-git push -u origin main
+https://github.com/rajmohan10j/CareerOS.git
 ```
 
-Until a remote is configured, local Git history can track work, but GitHub Issues, Pull Requests, Actions, Releases, and branch protection cannot be the project control plane.
+GitHub-backed GitOps becomes fully active after branch protection, required Actions checks, Issues/Projects, and release publishing are configured.
 
 ## Branching
 
@@ -97,4 +95,4 @@ A release or live-test handoff is not ready until:
 
 ## Known Current Gap
 
-As of 2026-07-06, this local checkout has no GitHub remote configured. GitOps policy is documented and ready, but GitHub-backed tracking cannot be fully enforced until the repository remote, branch protection, and Actions are connected.
+As of 2026-07-06, the GitHub remote is configured and the live-test/GitOps baseline has been pushed to `rajmohan10j/CareerOS`. GitHub-backed tracking still needs branch protection, required Actions checks, Issues/Projects, and release publishing configured before it is fully enforceable.

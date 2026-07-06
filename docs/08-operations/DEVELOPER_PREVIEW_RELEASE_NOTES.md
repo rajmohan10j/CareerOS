@@ -84,7 +84,7 @@ CareerOS is a local-first career management platform with AI-powered job trackin
 
 - Desktop app is a Vanilla JS SPA — not yet wrapped in Tauri/Electron
 - Browser extension tested on Chrome/Edge only
-- GitHub remote is not configured in this checkout, so GitHub Actions, PRs, Issues, Releases, and branch protection are not yet enforcing GitOps
+- GitHub remote is configured; branch protection, required Actions checks, Issues/Projects, and release publishing still need final setup before GitOps is fully enforced
 - No packaged installer/distribution artifact
 - Manual unpacked-extension browser verification remains pending before public release
 - Firefox support not implemented

@@ -2,7 +2,7 @@
 
 Current: Milestone 10C - Installer / Setup Improvements is released for local live test / developer-preview MVP.
 
-GitOps note: Use Git/GitHub as the source of truth going forward for source, docs, tests, release manifests, workflow files, and reviewed non-sensitive fixtures. Do not commit secrets, local databases, caches, generated artifacts, private resumes, private application records, or unsanitized reference data. This checkout still needs a GitHub `origin` remote before GitHub Issues, Pull Requests, Actions, branch protection, and Releases can enforce the workflow.
+GitOps note: Use Git/GitHub as the source of truth going forward for source, docs, tests, release manifests, workflow files, and reviewed non-sensitive fixtures. Do not commit secrets, local databases, caches, generated artifacts, private resumes, private application records, or unsanitized reference data. The GitHub `origin` remote is configured; GitHub Issues, Pull Requests, Actions, branch protection, and Releases still need final setup/enforcement.
 
 ## Completed And Verified
 

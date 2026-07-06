@@ -105,7 +105,7 @@ cd ..
 - **No automated installer** — manual setup required
 - **Firefox** and **Safari** not yet supported
 - **Browser extension** only tested on Chrome and Edge
-- **GitHub remote not configured in this checkout** — required before GitHub Actions, PRs, Issues, Releases, and branch protection can become the active control plane
+- **GitHub control plane setup in progress** — remote is configured; branch protection, required Actions checks, Issues/Projects, and Releases still need final setup
 - **No distribution artifacts** — load extension via developer mode
 
 ## Documentation
