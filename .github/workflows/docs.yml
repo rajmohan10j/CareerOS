@@ -1,1 +1,50 @@
-name: docs.yml
+name: Docs
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - "**/*.md"
+      - ".github/workflows/docs.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "**/*.md"
+      - ".github/workflows/docs.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  markdown-smoke:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check required docs exist
+        shell: pwsh
+        run: |
+          $required = @(
+            "README.md",
+            "CHANGELOG.md",
+            "ROADMAP.md",
+            "CONTRIBUTING.md",
+            "SECURITY.md",
+            "docs/03-development/GITOPS_OPERATING_MODEL.md",
+            "docs/08-operations/LIVE_TEST_REPORT.md"
+          )
+          foreach ($path in $required) {
+            if (-not (Test-Path $path)) {
+              Write-Error "Missing required doc: $path"
+            }
+          }
+
+      - name: Check docs have no unresolved merge markers
+        shell: pwsh
+        run: |
+          $matches = Get-ChildItem -Path . -Recurse -Filter *.md |
+            Select-String -Pattern '<<<<<<<|=======|>>>>>>>'
+          if ($matches) {
+            $matches | ForEach-Object { Write-Error "$($_.Path):$($_.LineNumber) contains merge marker" }
+          }

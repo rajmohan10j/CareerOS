@@ -29,18 +29,16 @@ jobs:
         with:
           node-version: "20"
           cache: "npm"
-          cache-dependency-path: browser-extension/package.json
+          cache-dependency-path: browser-extension/package-lock.json
 
-      - name: Install dependencies (for test runner)
+      - name: Install dependencies
         run: npm ci
 
       - name: Run all extension test files
         run: |
-          total=0
           for f in tests/*.test.js; do
             echo "Running $f..."
             node --experimental-vm-modules "$f"
-            total=$((total + $?))
           done
           echo "All extension test suites completed."
 
