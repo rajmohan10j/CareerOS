@@ -137,7 +137,7 @@ Navigate to **Browser Extension**.
 1. Open `chrome://extensions`
 2. Enable **Developer mode**
 3. Click **Load unpacked**
-4. Select the `browser-extension/` folder
+4. Select the canonical `browser-extension/` folder. Do not select generated copies under `releases/`.
 
 **Expected:** Extension icon appears in toolbar
 

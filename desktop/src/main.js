@@ -1,5 +1,5 @@
 import { render as renderLayout, mount as mountLayout, unmount as unmountLayout } from "./components/Layout.js";
-import { navigate, renderRoute } from "./routes.js?v=settings-feedback-20260703";
+import { navigate, renderRoute } from "./routes.js?v=profile-clickfix-20260703";
 
 const app = document.getElementById("app");
 let _renderToken = 0;
@@ -21,14 +21,14 @@ async function init() {
   window.addEventListener("hashchange", renderAppRoute);
   window.addEventListener("careeros:navigate", renderAppRoute);
   app.addEventListener("click", (e) => {
-    const routeEl = e.target.closest("[data-route]");
+    const routeEl = e.target.closest("[data-route][role='button']");
     if (routeEl && app.contains(routeEl) && routeEl.dataset.route) {
       navigate(routeEl.dataset.route);
     }
   });
   app.addEventListener("keydown", (e) => {
     if (e.key !== "Enter" && e.key !== " ") return;
-    const routeEl = e.target.closest("[data-route]");
+    const routeEl = e.target.closest("[data-route][role='button']");
     if (routeEl && app.contains(routeEl) && routeEl.dataset.route) {
       e.preventDefault();
       navigate(routeEl.dataset.route);

@@ -19,7 +19,15 @@ git clone <repo-url>
 cd CareerOS
 ```
 
-### 2. Set up the Python backend
+### 2. Run the first setup check
+
+```powershell
+.\scripts\setup-check.ps1
+```
+
+This verifies Python, Node.js, npm, backend imports, npm scripts, and local port state. Warnings for backend or desktop live endpoints are expected before you start them.
+
+### 3. Set up the Python backend
 
 ```powershell
 cd backend
@@ -29,7 +37,7 @@ pip install -e ".[dev]"
 cd ..
 ```
 
-### 3. Start the backend
+### 4. Start the backend
 
 ```powershell
 .\scripts\start-backend.ps1
@@ -38,16 +46,31 @@ cd ..
 The backend starts on `http://127.0.0.1:8000`.  
 Open `http://127.0.0.1:8000/docs` for the Swagger UI.
 
-### 4. Open the desktop app (in a browser)
+### 5. Start the desktop app (in a second terminal)
 
-Open `desktop/src/index.html` in your browser.
+```powershell
+cd desktop
+npm start
+```
 
-### 5. Load the browser extension (development mode)
+Open `http://127.0.0.1:5173` in your browser.
+
+### 6. Verify the live local loop
+
+```powershell
+.\scripts\setup-check.ps1 -RequireLive
+```
+
+This confirms the backend health endpoint, Swagger UI, and desktop app are reachable.
+
+### 7. Load the browser extension (development mode)
 
 1. Open Chrome/Edge and go to `chrome://extensions`.
 2. Enable **Developer mode**.
-3. Click **Load unpacked** and select the `browser-extension/` folder.
+3. Click **Load unpacked** and select the canonical `browser-extension/` folder.
 4. The extension icon appears in the toolbar.
+
+Rule: use `browser-extension/` as the only manual Load unpacked target. Generated folders or zip files under `releases/` are temporary artifacts and should not be kept as browser-test targets.
 
 ## Running Tests
 
@@ -57,6 +80,8 @@ Open `desktop/src/index.html` in your browser.
 | Extension tests | `.\scripts\test-extension.ps1` |
 | Desktop tests | `.\scripts\test-desktop.ps1` |
 | All tests | `.\scripts\verify-all.ps1` |
+| First-run setup check | `.\scripts\setup-check.ps1` |
+| Live endpoint setup check | `.\scripts\setup-check.ps1 -RequireLive` |
 | Environment check | `.\scripts\doctor.ps1` |
 | Release check | `.\scripts\release-check.ps1` |
 

@@ -50,6 +50,14 @@ assert(
     manifest.permissions.includes("storage"),
   'permissions includes "storage"'
 );
+assert(
+  manifest.permissions.includes("activeTab"),
+  'permissions includes "activeTab" for user-initiated page access'
+);
+assert(
+  manifest.permissions.includes("scripting"),
+  'permissions includes "scripting" for content-script recovery'
+);
 
 assert(
   !manifest.permissions.includes("tabs"),
@@ -74,9 +82,10 @@ assert(
 
 assert(
   manifest.host_permissions &&
-    manifest.host_permissions.length === 1 &&
-    manifest.host_permissions[0] === "http://localhost:8000/*",
-  'host_permissions is only "http://localhost:8000/*"'
+    manifest.host_permissions.length === 2 &&
+    manifest.host_permissions.includes("http://127.0.0.1:8000/*") &&
+    manifest.host_permissions.includes("http://localhost:8000/*"),
+  "host_permissions are limited to local backend origins"
 );
 
 assert(
@@ -112,6 +121,7 @@ const expectedFiles = [
   "src/options.js",
   "src/apiClient.js",
   "src/profileClient.js",
+  "src/staticAnswers.js",
   "src/autofillMapper.js",
   "src/approvalState.js",
   "src/mappingPreview.js",
@@ -158,8 +168,16 @@ assert(
   "background.js forwards to content script"
 );
 assert(
-  background.includes("http://localhost:8000"),
-  "background.js references localhost:8000"
+  background.includes("scripting.executeScript"),
+  "background.js injects content script when page listener is missing"
+);
+assert(
+  background.includes("CareerOS could not connect to this page yet"),
+  "background.js returns actionable content-script recovery errors"
+);
+assert(
+  background.includes("http://127.0.0.1:8000"),
+  "background.js references 127.0.0.1:8000"
 );
 assert(
   !background.includes("apiKey") && !background.includes("api_key"),
@@ -266,6 +284,14 @@ assert(
   "popup.html has select all safe button"
 );
 assert(
+  popupHTML.includes("selectStaticAnswersBtn"),
+  "popup.html has select static answers button"
+);
+assert(
+  popupHTML.includes("copyStaticAnswersBtn"),
+  "popup.html has copy answer bank button"
+);
+assert(
   popupHTML.includes("resetApprovalsBtn"),
   "popup.html has reset approvals button"
 );
@@ -364,6 +390,14 @@ assert(
   "popup.js calls approvalStore.selectAllSafe"
 );
 assert(
+  popupJS.includes("selectStaticAnswers"),
+  "popup.js supports selecting static answers"
+);
+assert(
+  popupJS.includes("buildQuickCopyText"),
+  "popup.js supports quick copy answer bank"
+);
+assert(
   popupJS.includes("approvalStore.reset"),
   "popup.js calls approvalStore.reset"
 );
@@ -406,6 +440,10 @@ assert(
   "apiClient.js has DEFAULT_BACKEND_URL"
 );
 assert(
+  apiClient.includes("http://127.0.0.1:8000"),
+  "apiClient.js defaults to 127.0.0.1:8000"
+);
+assert(
   !apiClient.includes("apiKey") && !apiClient.includes("api_key") && !apiClient.includes("secret"),
   "apiClient.js does not contain secrets"
 );
@@ -423,6 +461,10 @@ const optionsJS = readFile("src/options.js");
 assert(
   optionsJS.includes("checkHealth"),
   "options.js uses checkHealth"
+);
+assert(
+  optionsJS.includes("checkHealth(currentUrl)"),
+  "options.js tests the typed backend URL"
 );
 assert(
   optionsJS.includes("getStoredBackendUrl"),
@@ -601,8 +643,8 @@ assert(
   "mappingPreview.js renders action toggles"
 );
 assert(
-  mappingPreview.includes("toggle-disabled"),
-  "mappingPreview.js disables sensitive field approve"
+  mappingPreview.includes("review before approving"),
+  "mappingPreview.js warns before sensitive field approve"
 );
 assert(
   mappingPreview.includes("low-conf-badge"),
@@ -661,6 +703,28 @@ assert(
 assert(
   !autofillExecutor.includes("chrome.storage"),
   "autofillExecutor.js does not use chrome.storage"
+);
+
+const staticAnswers = readFile("src/staticAnswers.js");
+assert(
+  staticAnswers.includes("STATIC_AUTOFILL_INTENTS"),
+  "staticAnswers.js defines static autofill intents"
+);
+assert(
+  staticAnswers.includes("selectStaticAnswers"),
+  "staticAnswers.js exports selectStaticAnswers"
+);
+assert(
+  staticAnswers.includes("buildQuickCopyText"),
+  "staticAnswers.js exports buildQuickCopyText"
+);
+assert(
+  staticAnswers.includes("STATIC_AUTOFILL_INTENTS"),
+  "staticAnswers.js limits auto-select to explicit static intents"
+);
+assert(
+  !staticAnswers.includes(".submit(") && !staticAnswers.includes(".click("),
+  "staticAnswers.js does not submit or click forms"
 );
 
 // ── Summary ───────────────────────────────────────────────────────

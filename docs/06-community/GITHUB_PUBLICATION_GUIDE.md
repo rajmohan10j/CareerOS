@@ -8,6 +8,8 @@ Status: Implemented (Milestone 10B – GitHub Repository Publication Prep)
 
 Guide the CareerOS team through publishing the repository on GitHub as a public open-source project.
 
+GitHub publication is required before the GitOps operating model can be fully active. Local Git can track changes before publication, but GitHub Issues, Pull Requests, Actions, branch protection, and Releases require a configured remote.
+
 ## Pre-Publication Checklist
 
 ### Repository Settings
@@ -33,6 +35,7 @@ Guide the CareerOS team through publishing the repository on GitHub as a public 
 - [ ] Require status checks to pass (all CI workflows)
 - [ ] Require up-to-date branches
 - [ ] Do not allow bypassing protections
+- [ ] Direct pushes to `main` disabled after initial publication
 
 ### Repository Files
 
@@ -47,6 +50,7 @@ Guide the CareerOS team through publishing the repository on GitHub as a public 
 - [ ] `.github/PULL_REQUEST_TEMPLATE.md` — PR template
 - [ ] `.github/DISCUSSION_TEMPLATE.md` — discussion template
 - [ ] `.github/workflows/` — 5 CI workflows
+- [ ] `docs/03-development/GITOPS_OPERATING_MODEL.md` — GitOps source-of-truth policy
 
 ### Community Health
 
@@ -64,6 +68,18 @@ Guide the CareerOS team through publishing the repository on GitHub as a public 
 5. Verify all CI workflows run on push
 6. Verify issue and PR templates appear correctly
 7. Test a fresh clone + quick start workflow
+
+## Data Boundary
+
+Before the first push, verify that Git does not include private runtime data:
+
+- No `.env` files, secrets, keys, or tokens
+- No `*.db` files
+- No `__pycache__/`, `.pytest_cache/`, `.ruff_cache/`, `.codex-runtime/`, or `.codex-live-logs/`
+- No private resumes, compensation data, addresses, or private application answers
+- No unsanitized reference data
+
+Reviewed non-sensitive fixtures may be committed under `reference-data/`; private local entries should stay under `reference-data/private/` or use `*.local.*` filenames.
 
 ## Post-Publication
 

@@ -49,7 +49,8 @@ Get-ChildItem -Path "tests" -Filter "*.test.js" | ForEach-Object {
     if ($match.Success) { $extTotal += [int]$match.Groups[1].Value }
 }
 Pop-Location
-Check "Extension tests pass (570)" { $extTotal -eq 570 }
+Write-Host "    Extension assertion total: $extTotal" -ForegroundColor DarkGray
+Check "Extension tests pass (>= 687)" { $extTotal -ge 687 }
 
 # Check desktop tests
 $DesktopDir = Join-Path $RootDir "desktop"
@@ -73,7 +74,7 @@ Check "CURRENT_STATUS has 09S completed" { $status -match "09S" -and $status -ma
 Check "CURRENT_STATUS has Milestone 09 all completed" { $status -match "Milestone 09 milestones completed" }
 
 $nextTask = Get-Content (Join-Path $RootDir "EXECUTION\003_NEXT_TASK.md") -Raw
-Check "NEXT_TASK mentions Milestone 09 all completed" { $nextTask -match "Milestone 09 milestones completed" }
+Check "NEXT_TASK identifies 10D as the next milestone" { $nextTask -match "10D" -and $nextTask -match "Real-World Browser Extension Testing Pack" }
 
 # ── No paid API dependencies ──────────────────────────────────
 Write-Host ""

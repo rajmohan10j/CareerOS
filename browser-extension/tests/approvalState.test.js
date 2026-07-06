@@ -43,6 +43,7 @@ assert(src.includes("store.set"), "approvalState.js uses store.set");
 assert(src.includes("store.get"), "approvalState.js uses store.get");
 assert(src.includes("store.clear"), "approvalState.js uses store.clear");
 assert(src.includes("store.has"), "approvalState.js uses store.has");
+assert(src.includes("getFieldKey"), "approvalState.js derives a stable field key");
 assert(src.includes("return {"), "approvalState.js returns an object");
 
 // ── State methods ─────────────────────────────────────────────────
@@ -61,8 +62,8 @@ for (const method of expectedMethods) {
 // ── Approval logic ────────────────────────────────────────────────
 
 console.log("\n[approval logic]");
-assert(src.includes("store.set(fieldIntent, true)"), "approve sets true");
-assert(src.includes("store.set(fieldIntent, false)"), "reject sets false");
+assert(src.includes("store.set(getFieldKey(field), true)"), "approve sets true by field key");
+assert(src.includes("store.set(getFieldKey(field), false)"), "reject sets false by field key");
 assert(src.includes("v === true"), "getApproved filters true values");
 assert(src.includes("v === false"), "getRejected filters false values");
 
@@ -74,7 +75,7 @@ assert(src.includes("mapping.sensitive"), "selectAllSafe checks sensitive flag")
 assert(src.includes("mappingConfidence"), "selectAllSafe checks confidence");
 assert(src.includes("\"available\""), "selectAllSafe checks available status");
 assert(src.includes("\"derived\""), "selectAllSafe checks derived status");
-assert(src.includes("mapping.intent"), "selectAllSafe uses intent from mapping");
+assert(src.includes("getFieldKey(mapping)"), "selectAllSafe uses stable key from mapping");
 
 // ── Remove method ─────────────────────────────────────────────────
 
@@ -87,8 +88,8 @@ assert(src.includes("function clear"), "approvalState.js defines clear");
 
 console.log("\n[summary]");
 assert(src.includes("getSummary"), "approvalState.js defines getSummary");
-assert(src.includes("isApproved(m.intent)"), "getSummary counts approved");
-assert(src.includes("isRejected(m.intent)"), "getSummary counts rejected");
+assert(src.includes("isApproved(m)"), "getSummary counts approved by field key");
+assert(src.includes("isRejected(m)"), "getSummary counts rejected by field key");
 assert(src.includes("approved++"), "getSummary increments approved");
 assert(src.includes("rejected++"), "getSummary increments rejected");
 assert(src.includes("pending++"), "getSummary increments pending");

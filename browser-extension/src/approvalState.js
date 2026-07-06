@@ -1,16 +1,21 @@
 function createApprovalStore() {
   const store = new Map();
 
-  function approve(fieldIntent) {
-    store.set(fieldIntent, true);
+  function getFieldKey(field) {
+    if (typeof field === "string") return field;
+    return field?.fieldKey || field?.intent || "";
   }
 
-  function reject(fieldIntent) {
-    store.set(fieldIntent, false);
+  function approve(field) {
+    store.set(getFieldKey(field), true);
   }
 
-  function remove(fieldIntent) {
-    store.delete(fieldIntent);
+  function reject(field) {
+    store.set(getFieldKey(field), false);
+  }
+
+  function remove(field) {
+    store.delete(getFieldKey(field));
   }
 
   function clear() {
@@ -21,16 +26,16 @@ function createApprovalStore() {
     store.clear();
   }
 
-  function isApproved(fieldIntent) {
-    return store.get(fieldIntent) === true;
+  function isApproved(field) {
+    return store.get(getFieldKey(field)) === true;
   }
 
-  function isRejected(fieldIntent) {
-    return store.get(fieldIntent) === false;
+  function isRejected(field) {
+    return store.get(getFieldKey(field)) === false;
   }
 
-  function isPending(fieldIntent) {
-    return !store.has(fieldIntent);
+  function isPending(field) {
+    return !store.has(getFieldKey(field));
   }
 
   function getApproved() {
@@ -54,7 +59,7 @@ function createApprovalStore() {
       if (mapping.sensitive) continue;
       if (mapping.mappingConfidence != null && mapping.mappingConfidence < 0.6) continue;
       if (mapping.mappingStatus !== "available" && mapping.mappingStatus !== "derived") continue;
-      store.set(mapping.intent, true);
+      store.set(getFieldKey(mapping), true);
     }
   }
 
@@ -63,14 +68,14 @@ function createApprovalStore() {
     let rejected = 0;
     let pending = 0;
     for (const m of allMappings) {
-      if (isApproved(m.intent)) approved++;
-      else if (isRejected(m.intent)) rejected++;
+      if (isApproved(m)) approved++;
+      else if (isRejected(m)) rejected++;
       else pending++;
     }
     return { approved, rejected, pending, total: allMappings.length };
   }
 
-  return { approve, reject, remove, clear, reset, isApproved, isRejected, isPending, getApproved, getRejected, selectAllSafe, getSummary };
+  return { approve, reject, remove, clear, reset, isApproved, isRejected, isPending, getApproved, getRejected, selectAllSafe, getSummary, getFieldKey };
 }
 
 export { createApprovalStore };

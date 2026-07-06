@@ -97,8 +97,8 @@ assert(src.includes("total"), "buildApprovalSummaryHTML shows total count");
 console.log("\n[sensitive field handling]");
 assert(src.includes("preview-sensitive"), "sensitive rows get preview-sensitive class");
 assert(src.includes("sensitive-tag"), "sensitive fields get a sensitive-tag");
-assert(src.includes("toggle-disabled"), "sensitive radios are disabled");
-assert(src.includes("\"disabled\""), "sensitive approve radio is disabled");
+assert(src.includes("review before approving"), "sensitive approve radio asks for review");
+assert(!src.includes("toggle-disabled"), "sensitive radios are not globally disabled");
 
 // ── Low confidence handling ───────────────────────────────────────
 
@@ -111,7 +111,7 @@ assert(src.includes("low confidence"), "mappingPreview.js shows low confidence w
 
 console.log("\n[sensitive warning]");
 assert(src.includes("sensitive-warning"), "mappingPreview.js has sensitive warning section");
-assert(src.includes("requires manual review"), "sensitive warning mentions manual review");
+assert(src.includes("Review carefully before filling"), "sensitive warning asks for careful review");
 
 // ── Confidence display ────────────────────────────────────────────
 

@@ -57,7 +57,7 @@ function render() {
   `;
 }
 
-async function onMount() {
+async function onMount(container = document.getElementById("pageContainer")) {
   _loading = true;
   _error = null;
 
@@ -87,8 +87,9 @@ async function onMount() {
   }
 
   _loading = false;
-  const container = document.getElementById("pageContainer");
-  if (container) container.innerHTML = render();
+  if (container && container.dataset.route === "ai-status" && container.querySelector(".ai-status-page")) {
+    container.innerHTML = render();
+  }
 }
 
 export default { render, onMount };

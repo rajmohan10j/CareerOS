@@ -10,7 +10,7 @@
     <div class="container">
       <header class="header">
         <h1 class="title">CareerOS</h1>
-        <span class="version">v0.2.0</span>
+        <span class="version">v0.3.7</span>
       </header>
 
       <section class="status-section">
@@ -32,6 +32,7 @@
 
       <section class="detection-section">
         <button id="detectFieldsBtn" class="detect-btn">Detect Form Fields</button>
+        <button id="fillNextPendingBtn" class="map-btn">Fill Next Pending Entry</button>
         <div id="fieldSummary" class="field-summary hidden">
           <span class="label">Fields detected</span>
           <span id="fieldCount" class="field-count">0</span>
@@ -55,6 +56,8 @@
       <section id="approvalSection" class="approval-section hidden">
         <h2 class="approval-title">Approve Mappings</h2>
         <button id="selectAllSafeBtn" class="safe-btn">Select All Safe</button>
+        <button id="selectStaticAnswersBtn" class="safe-btn">Select Static Answers</button>
+        <button id="copyStaticAnswersBtn" class="safe-btn">Copy Answer Bank</button>
         <button id="resetApprovalsBtn" class="reset-btn">Reset All</button>
         <div id="approvalSummary" class="approval-summary-area hidden"></div>
         <div id="previewContent" class="preview-content"></div>

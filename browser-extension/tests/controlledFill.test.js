@@ -43,6 +43,7 @@ assert(contentSrc.includes("sendResponse"), "content.js sends response for FILL_
 
 console.log("\n[content script: field finding]");
 assert(contentSrc.includes("findFieldElement"), "content.js has findFieldElement");
+assert(contentSrc.includes("findFieldElementByKey"), "content.js fills the exact detected field by key first");
 assert(contentSrc.includes("getElementById"), "findFieldElement uses getElementById");
 assert(contentSrc.includes("querySelector"), "findFieldElement uses querySelector");
 assert(contentSrc.includes("field.id"), "findFieldElement checks id first");
@@ -59,8 +60,12 @@ assert(contentSrc.includes("\"hidden\""), "rejects hidden fields");
 assert(contentSrc.includes("\"file\""), "rejects file inputs");
 assert(contentSrc.includes("\"submit\""), "rejects submit buttons");
 assert(contentSrc.includes("\"button\""), "rejects button type inputs");
-assert(contentSrc.includes("\"radio\""), "rejects radio inputs");
-assert(contentSrc.includes("\"checkbox\""), "rejects checkbox inputs");
+assert(contentSrc.includes("fillRadioElement"), "supports controlled radio input filling");
+assert(contentSrc.includes("findMatchingRadio"), "matches approved value to a radio option");
+assert(contentSrc.includes("setNativeChecked"), "uses native checked setter for framework radio controls");
+assert(contentSrc.includes("syncRadioGroupUi"), "syncs custom radio aria state");
+assert(contentSrc.includes("dispatchRadioActivation"), "dispatches radio activation events for custom controls");
+assert(contentSrc.includes("fillCheckboxElement"), "supports controlled checkbox input filling");
 
 // ── Content script: element fill logic ─────────────────────────────
 

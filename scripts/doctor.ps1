@@ -7,6 +7,9 @@
 #>
 
 $RootDir = Resolve-Path (Join-Path $PSScriptRoot "..")
+$BackendDir = Join-Path $RootDir "backend"
+$DesktopDir = Join-Path $RootDir "desktop"
+$ExtensionDir = Join-Path $RootDir "browser-extension"
 $Issues = @()
 $Passed = 0
 $Failed = 0
@@ -23,6 +26,25 @@ function Check {
     }
 }
 
+function Get-BackendPython {
+    $candidates = @(
+        (Join-Path $BackendDir ".venv\Scripts\python.exe"),
+        (Join-Path $BackendDir "venv\Scripts\python.exe"),
+        (Join-Path $BackendDir ".venv\bin\python"),
+        (Join-Path $BackendDir "venv\bin\python")
+    )
+    foreach ($candidate in $candidates) {
+        if (Test-Path $candidate) { return $candidate }
+    }
+    return "python"
+}
+
+function Test-PythonImport {
+    param([string]$Python, [string]$Module)
+    & $Python -c "import $Module" *> $null
+    return $LASTEXITCODE -eq 0
+}
+
 Write-Host ""
 Write-Host "CareerOS Environment Doctor" -ForegroundColor Cyan
 Write-Host "===========================" -ForegroundColor Cyan
@@ -30,11 +52,16 @@ Write-Host ""
 
 # ── Python ─────────────────────────────────────────────────────
 Write-Host "[Python]" -ForegroundColor Yellow
-$py = (Get-Command "python" -ErrorAction SilentlyContinue)
+$Python = Get-BackendPython
+$py = (Get-Command $Python -ErrorAction SilentlyContinue)
 Check "python is on PATH" { $py -ne $null }
 if ($py) {
-    $pyVer = & python --version 2>&1
+    $pyVer = & $Python --version 2>&1
     Check "python version >= 3.11" { $pyVer -match "3\.(1[1-9]|[2-9]\d)" }
+    Check "FastAPI import works" { Test-PythonImport $Python "fastapi" }
+    Check "uvicorn import works" { Test-PythonImport $Python "uvicorn" }
+    Check "pytest import works" { Test-PythonImport $Python "pytest" }
+    Check "ruff import works" { Test-PythonImport $Python "ruff" }
 }
 
 # ── Node.js ────────────────────────────────────────────────────
@@ -71,6 +98,22 @@ Check "ROADMAP.md exists" { Test-Path (Join-Path $RootDir "ROADMAP.md") }
 Check "CHANGELOG.md exists" { Test-Path (Join-Path $RootDir "CHANGELOG.md") }
 Check "SECURITY.md exists" { Test-Path (Join-Path $RootDir "SECURITY.md") }
 Check "README.md exists" { Test-Path (Join-Path $RootDir "README.md") }
+Check "scripts/setup-check.ps1 exists" { Test-Path (Join-Path $RootDir "scripts\setup-check.ps1") }
+
+# ── Project scripts ────────────────────────────────────────────
+Write-Host ""
+Write-Host "[Project Scripts]" -ForegroundColor Yellow
+$desktopPkgPath = Join-Path $DesktopDir "package.json"
+$extensionPkgPath = Join-Path $ExtensionDir "package.json"
+if (Test-Path $desktopPkgPath) {
+    $desktopPkg = Get-Content $desktopPkgPath -Raw | ConvertFrom-Json
+    Check "desktop npm start exists" { $desktopPkg.scripts.start -ne $null }
+    Check "desktop npm test exists" { $desktopPkg.scripts.test -ne $null }
+}
+if (Test-Path $extensionPkgPath) {
+    $extensionPkg = Get-Content $extensionPkgPath -Raw | ConvertFrom-Json
+    Check "browser-extension npm test exists" { $extensionPkg.scripts.test -ne $null }
+}
 
 # ── Key docs ───────────────────────────────────────────────────
 Write-Host ""

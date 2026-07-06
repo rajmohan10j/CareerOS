@@ -27,7 +27,8 @@ Use this checklist to verify CareerOS is ready for a developer preview release.
 ## Browser Extension
 
 - [ ] `.\scripts\test-extension.ps1` passes
-- [ ] Extension loads in Chrome via "Load unpacked"
+- [ ] Extension loads in Chrome via "Load unpacked" from canonical folder: `browser-extension/`
+- [ ] No duplicate unpacked extension folders or browser-extension zip artifacts remain under `releases/`
 - [ ] Popup shows backend health
 - [ ] Form detection works on test pages
 - [ ] Autofill preview renders mapping data
@@ -67,3 +68,12 @@ Use this checklist to verify CareerOS is ready for a developer preview release.
 - [ ] `.\scripts\doctor.ps1` runs without errors
 - [ ] `.\scripts\verify-all.ps1` runs all tests
 - [ ] `.\scripts\release-check.ps1` passes all checks
+
+## GitOps
+
+- [ ] GitHub remote is configured as `origin`
+- [ ] `main` branch protection is enabled
+- [ ] Pull requests are required for changes after publication
+- [ ] GitHub Actions are required before merge/release
+- [ ] Release manifests are committed under `releases/`
+- [ ] No secrets, local databases, generated caches, private resumes, private application records, or unsanitized reference data are committed

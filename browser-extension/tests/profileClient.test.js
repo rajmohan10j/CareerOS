@@ -58,6 +58,7 @@ assert(src.includes("parseJsonField"), "profileClient.js defines parseJsonField"
 assert(src.includes("locations"), "normalizeProfile handles locations");
 assert(src.includes("target_roles"), "normalizeProfile handles target_roles");
 assert(src.includes("salary_expectations"), "normalizeProfile handles salary_expectations");
+assert(src.includes("preferences_json"), "normalizeProfile handles preferences_json");
 assert(src.includes("JSON.parse"), "parseJsonField uses JSON.parse for string fields");
 assert(src.includes("typeof value === \"object\""), "parseJsonField checks for object type");
 

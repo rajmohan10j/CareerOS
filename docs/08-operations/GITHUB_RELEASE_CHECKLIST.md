@@ -9,11 +9,15 @@ Status: Updated (Milestone 10B – GitHub Repository Publication Prep)
 ### Repository Setup
 
 - [ ] Repository is public or has public access configured
+- [ ] GitHub remote is configured as `origin`
+- [ ] `main` branch is protected
+- [ ] Changes flow through issues, branches, pull requests, Actions, and release manifests
 - [ ] Repository description and website URL are set
 - [ ] Topics/tags are configured (e.g., `career-management`, `fastapi`, `browser-extension`, `ats`)
 - [ ] License file (MIT) is present at repository root
 - [ ] `.gitignore` covers all generated files (`.venv/`, `node_modules/`, `__pycache__/`, `*.db`, `.env`)
 - [ ] `README.md` has project description, quick start, and links to documentation
+- [ ] `docs/03-development/GITOPS_OPERATING_MODEL.md` is current
 
 ### Code Quality
 
@@ -28,6 +32,7 @@ Status: Updated (Milestone 10B – GitHub Repository Publication Prep)
 
 - [ ] No secrets, API keys, or credentials committed
 - [ ] No `.env` files committed (add to `.gitignore`)
+- [ ] No local databases, private resumes, private application records, or unsanitized reference data committed
 - [ ] No internal URLs, hostnames, or IP addresses in committed code
 - [ ] No paid API dependencies
 - [ ] No telemetry or tracking code
@@ -56,7 +61,8 @@ Status: Updated (Milestone 10B – GitHub Repository Publication Prep)
 - [ ] `.\scripts\release-check.ps1` passes all checks
 - [ ] Backend starts successfully with `.\scripts\start-backend.ps1`
 - [ ] Swagger UI loads at `http://127.0.0.1:8000/docs`
-- [ ] Extension loads in Chrome via "Load unpacked"
+- [ ] Extension loads in Chrome via "Load unpacked" from canonical folder: `browser-extension/`
+- [ ] No duplicate unpacked extension folders or browser-extension zip artifacts remain under `releases/`
 - [ ] Desktop opens without console errors
 
 ## Release Process
@@ -67,6 +73,7 @@ Status: Updated (Milestone 10B – GitHub Repository Publication Prep)
 - [ ] Publish release on GitHub
 - [ ] Verify release page renders correctly
 - [ ] Test that a fresh clone + quick start works end-to-end
+- [ ] Confirm GitHub Actions passed on the release commit or tag
 
 ## Post-Release
 

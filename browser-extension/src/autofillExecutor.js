@@ -2,7 +2,7 @@ function buildApprovedFillFields(approvalStore, mappedFields) {
   if (!approvalStore || !mappedFields) return [];
   const approvedIntents = approvalStore.getApproved();
   return mappedFields
-    .filter((f) => approvedIntents.includes(f.intent))
+    .filter((f) => approvedIntents.includes(f.fieldKey || f.intent))
     .filter((f) => f.mappedValue != null && String(f.mappedValue).trim() !== "")
     .filter((f) => {
       const tag = (f.tagName || "").toLowerCase();
@@ -12,9 +12,16 @@ function buildApprovedFillFields(approvalStore, mappedFields) {
     })
     .map((f) => ({
       intent: f.intent,
+      fieldKey: f.fieldKey || f.intent,
       value: String(f.mappedValue),
       name: f.name || null,
       id: f.id || null,
+      label: f.label || null,
+      placeholder: f.placeholder || null,
+      ariaLabel: f.ariaLabel || null,
+      nearbyText: f.nearbyText || null,
+      position: f.position || null,
+      radios: f.radios || null,
       tagName: (f.tagName || "input").toLowerCase(),
       fieldType: f.fieldType || "text",
       inputType: f.inputType || null,

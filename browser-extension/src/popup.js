@@ -1,9 +1,11 @@
 import { checkHealth } from "./apiClient.js";
-import { fetchAllProfileData } from "./profileClient.js";
+import { fetchAllProfileData, saveFieldObservations } from "./profileClient.js";
 import { mapFields, summarizeMappings } from "./autofillMapper.js";
 import { createApprovalStore } from "./approvalState.js";
 import { buildPreviewContainerHTML, buildApprovalSummaryHTML } from "./mappingPreview.js";
 import { buildApprovedFillFields, executeFill } from "./autofillExecutor.js";
+import { selectStaticAnswers, buildQuickCopyText } from "./staticAnswers.js";
+import { ensureApplicationSession, getNextPendingEntry, markEntryFilled } from "./applicationSessionClient.js";
 
 const statusEl = document.getElementById("backendStatus");
 const versionEl = document.getElementById("backendVersion");
@@ -11,6 +13,7 @@ const modeEl = document.getElementById("backendMode");
 const errorDetailEl = document.getElementById("errorDetail");
 const optionsLink = document.getElementById("openOptionsLink");
 const detectBtn = document.getElementById("detectFieldsBtn");
+const fillNextPendingBtn = document.getElementById("fillNextPendingBtn");
 const fieldSummary = document.getElementById("fieldSummary");
 const fieldCountEl = document.getElementById("fieldCount");
 const fieldDebug = document.getElementById("fieldDebug");
@@ -26,6 +29,8 @@ const mappingContent = document.getElementById("mappingContent");
 
 const approvalSection = document.getElementById("approvalSection");
 const selectAllSafeBtn = document.getElementById("selectAllSafeBtn");
+const selectStaticAnswersBtn = document.getElementById("selectStaticAnswersBtn");
+const copyStaticAnswersBtn = document.getElementById("copyStaticAnswersBtn");
 const resetApprovalsBtn = document.getElementById("resetApprovalsBtn");
 const approvalSummaryEl = document.getElementById("approvalSummary");
 const previewContent = document.getElementById("previewContent");
@@ -132,13 +137,15 @@ detectBtn.addEventListener("click", async () => {
     });
 
     if (response && response.success) {
-      lastDetectedFields = response.fields;
+      lastDetectedFields = scopeFieldsForCurrentView(dedupeDetectedFields(response.fields));
+      const page = await sendRuntimeMessage({ type: "GET_PAGE_INFO" });
+      saveFieldObservations(page, lastDetectedFields);
       fieldSummary.classList.remove("hidden");
-      fieldCountEl.textContent = response.fieldCount;
-      if (response.fieldCount > 0) {
+      fieldCountEl.textContent = lastDetectedFields.length;
+      if (lastDetectedFields.length > 0) {
         fieldDebug.classList.remove("hidden");
         mappingSection.classList.remove("hidden");
-        renderDebugTable(response.fields);
+        renderDebugTable(lastDetectedFields);
       }
     } else {
       showError(response?.error || "Field detection failed");
@@ -150,6 +157,257 @@ detectBtn.addEventListener("click", async () => {
     detectBtn.textContent = "Detect Form Fields";
   }
 });
+
+fillNextPendingBtn.addEventListener("click", async () => {
+  fillNextPendingBtn.disabled = true;
+  fillNextPendingBtn.textContent = "Filling next...";
+  fillResultEl.classList.add("hidden");
+
+  try {
+    const page = await sendRuntimeMessage({ type: "GET_PAGE_INFO" });
+    if (!page || !page.url) throw new Error("Could not read the active application page.");
+
+    await ensureApplicationSession(page);
+
+    const detected = await sendRuntimeMessage({ type: "DETECT_FIELDS" });
+    if (!detected?.success || !detected.fields?.length) {
+      throw new Error(detected?.error || "No fields detected on this page.");
+    }
+    const detectedFields = scopeFieldsForCurrentView(dedupeDetectedFields(detected.fields));
+    saveFieldObservations(page, detectedFields);
+
+    const section = detectActiveSection(detectedFields);
+    if (!section) {
+      throw new Error("This page does not look like a Work Experience or Education entry section yet.");
+    }
+
+    const blockIndex = getCurrentBlockIndex(detectedFields, section);
+    let next = null;
+    let entry = null;
+    let entryIndex = blockIndex;
+    if (blockIndex != null) {
+      const profileData = await fetchAllProfileData();
+      const records = profileData?.canonicalResume?.data?.[section] || [];
+      entry = records[blockIndex] || null;
+      next = { index: blockIndex, entry, complete: !entry };
+    } else {
+      next = await getNextPendingEntry(page.url, section);
+      entry = next.entry;
+      entryIndex = next.index;
+    }
+
+    if (next.complete || !entry) {
+      showSuccess(`All ${section} entries are already marked complete for this application.`);
+      return;
+    }
+
+    const fillFields = buildNextEntryFillFields(detectedFields, section, entry);
+    if (fillFields.length === 0) {
+      throw new Error(`No empty ${section} fields are ready to fill on this page.`);
+    }
+
+    const result = await executeFill(fillFields);
+    renderFillResult(result);
+    if (result.success && result.filled > 0 && result.failed === 0) {
+      await markEntryFilled(page.url, section, entryIndex, `Filled ${result.filled} field(s) from extension`);
+      showSuccess(`Marked ${section} entry ${entryIndex + 1} complete.`);
+    } else if (result.filled > 0) {
+      showError(`Filled ${result.filled} field(s), but did not mark complete because ${result.failed || 0} failed.`);
+    } else {
+      showError("No fields were filled, so progress was not marked complete.");
+    }
+  } catch (err) {
+    showError(err.message);
+  } finally {
+    fillNextPendingBtn.disabled = false;
+    fillNextPendingBtn.textContent = "Fill Next Pending Entry";
+  }
+});
+
+function sendRuntimeMessage(payload) {
+  return new Promise((resolve) => chrome.runtime.sendMessage(payload, resolve));
+}
+
+function scopeFieldsForCurrentView(fields) {
+  if (!Array.isArray(fields) || fields.length === 0) return [];
+  const visible = fields.filter((f) => f.visibleInViewport !== false);
+  const source = visible.length > 0 ? visible : fields;
+  const blockScoped = chooseMostRelevantRepeatingBlock(source);
+  if (blockScoped.length > 0) return blockScoped;
+  const empty = source.filter((f) => isBlankCurrentValue(f.currentValue));
+  return empty.length > 0 ? empty : source;
+}
+
+function getCurrentBlockIndex(fields, section) {
+  const pattern = section === "experience" ? /work\s+experience\s+(\d+)/i : /education\s+(\d+)/i;
+  for (const field of fields || []) {
+    const text = [field.sectionHeading, field.label, field.nearbyText, field.fieldKey].filter(Boolean).join(" ");
+    const match = text.match(pattern);
+    if (match) {
+      const parsed = Number.parseInt(match[1], 10);
+      if (Number.isFinite(parsed) && parsed > 0) return parsed - 1;
+    }
+  }
+  return null;
+}
+
+function chooseMostRelevantRepeatingBlock(fields) {
+  const groups = new Map();
+  for (const field of fields) {
+    const block = getRepeatingBlockLabel(field);
+    if (!block) continue;
+    if (!groups.has(block)) groups.set(block, []);
+    groups.get(block).push(field);
+  }
+  if (groups.size === 0) return [];
+
+  let bestBlock = null;
+  let bestScore = -1;
+  let bestIndex = -1;
+  for (const [block, group] of groups.entries()) {
+    const blankCount = group.filter((f) => isBlankCurrentValue(f.currentValue)).length;
+    const editableCount = group.filter((f) => !f.disabled && !f.readOnly).length;
+    const score = blankCount * 10 + editableCount;
+    const blockIndex = parseRepeatingBlockIndex(block);
+    if (score > bestScore || (score === bestScore && blockIndex > bestIndex)) {
+      bestBlock = block;
+      bestScore = score;
+      bestIndex = blockIndex;
+    }
+  }
+  return bestBlock ? groups.get(bestBlock) || [] : [];
+}
+
+function getRepeatingBlockLabel(field) {
+  const text = [field?.sectionHeading, field?.nearbyText, field?.fieldKey].filter(Boolean).join(" ");
+  const match = text.match(/\b(work\s+experience|education)\s+(\d+)\b/i);
+  return match ? `${match[1].toLowerCase()} ${match[2]}` : null;
+}
+
+function parseRepeatingBlockIndex(block) {
+  const match = String(block || "").match(/(\d+)/);
+  return match ? Number.parseInt(match[1], 10) : -1;
+}
+
+function dedupeDetectedFields(fields) {
+  if (!Array.isArray(fields)) return [];
+  const seen = new Set();
+  const result = [];
+  for (const field of fields) {
+    if (isNoisySkippedDateField(field)) continue;
+    const key = detectedFieldDedupeKey(field);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    result.push(field);
+  }
+  return result;
+}
+
+function dedupeMappedFields(fields) {
+  if (!Array.isArray(fields)) return [];
+  const seen = new Set();
+  const result = [];
+  for (const field of fields) {
+    if (isNoisySkippedDateField(field)) continue;
+    const key = mappedFieldDedupeKey(field);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    result.push(field);
+  }
+  return result;
+}
+
+function isNoisySkippedDateField(field) {
+  const intent = field?.intent || "";
+  if (!/_(start|end)_date$/.test(intent)) return false;
+  const status = field?.mappingStatus || "";
+  const message = field?.mappingMessage || "";
+  return status === "manual_review" &&
+    /not inside a Work Experience block/i.test(message);
+}
+
+function detectedFieldDedupeKey(field) {
+  const intent = field?.intent || "unknown";
+  const label = normalizeDedupeText(field?.label || field?.placeholder || field?.ariaLabel || field?.name || field?.id || "");
+  const section = normalizeDedupeText(field?.sectionHeading || "");
+  const id = normalizeDedupeText(field?.id || field?.name || "");
+  if (/_(start|end)_date$/.test(intent)) return `${intent}|${id || label}|${section}`;
+  return `${intent}|${label}|${section}`;
+}
+
+function mappedFieldDedupeKey(field) {
+  const intent = field?.intent || "unknown";
+  const label = normalizeDedupeText(field?.label || field?.placeholder || field?.ariaLabel || field?.name || field?.id || "");
+  const value = normalizeDedupeText(field?.mappedValue ?? field?.value ?? "");
+  const section = normalizeDedupeText(getRepeatingBlockLabel(field) || field?.sectionHeading || "");
+  if (/_(start|end)_date$/.test(intent)) {
+    return `${intent}|${label}|${value}|${field?.fieldKey || ""}`;
+  }
+  return `${intent}|${label}|${value}|${section}`;
+}
+
+function normalizeDedupeText(value) {
+  return String(value || "").replace(/\s+/g, " ").trim().toLowerCase();
+}
+
+function detectActiveSection(fields) {
+  const visibleEmpty = fields.filter((f) => !f.disabled && !f.readOnly);
+  const experienceCount = visibleEmpty.filter((f) => (f.intent || "").startsWith("experience_")).length;
+  const educationCount = visibleEmpty.filter((f) => (f.intent || "").startsWith("education_")).length;
+  if (experienceCount === 0 && educationCount === 0) return null;
+  return experienceCount >= educationCount ? "experience" : "education";
+}
+
+function buildNextEntryFillFields(fields, section, entry) {
+  return dedupeDetectedFields(fields)
+    .filter((f) => (f.intent || "").startsWith(`${section}_`))
+    .filter((f) => isBlankCurrentValue(f.currentValue))
+    .map((f) => ({ ...f, value: valueForEntryIntent(f.intent, entry, f) }))
+    .filter((f) => f.value != null && String(f.value).trim() !== "");
+}
+
+function valueForEntryIntent(intent, entry, field = null) {
+  const yesNo = (value) => value ? "Yes" : "No";
+  const map = {
+    experience_title: entry.title,
+    experience_company: entry.company,
+    experience_location: entry.location,
+    experience_current: yesNo(Boolean(entry.currently_work_here ?? entry.current)),
+    experience_start_date: dateValueForField(entry.from || entry.start_date, field),
+    experience_end_date: dateValueForField(entry.to || entry.end_date, field),
+    experience_description: entry.description,
+    education_school: entry.school,
+    education_degree: entry.degree,
+    education_field: entry.field_of_study,
+    education_gpa: entry.gpa,
+    education_start_date: dateValueForField(entry.from || entry.start_date, field),
+    education_end_date: dateValueForField(entry.to || entry.end_date, field),
+  };
+  return map[intent] ?? null;
+}
+
+function isBlankCurrentValue(value) {
+  const text = String(value || "").trim();
+  return !text || /^m{1,2}\/?y{2,4}$/i.test(text) || /^y{2,4}$/i.test(text) || /^current value is\s*(m{1,2}\/?y{2,4}|y{2,4})$/i.test(text);
+}
+
+function dateValueForField(value, field) {
+  const raw = String(value || "").trim();
+  if (!raw) return "";
+  const match = raw.match(/^(\d{1,2})\/(\d{4})$/);
+  if (!match) return raw;
+  const text = [
+    field?.label,
+    field?.placeholder,
+    field?.ariaLabel,
+    field?.name,
+    field?.id,
+    field?.fieldKey,
+  ].filter(Boolean).join(" ");
+  if (/year|yyyy|dateSectionYear/i.test(text)) return match[2];
+  if (/month|mm|dateSectionMonth/i.test(text)) return match[1].padStart(2, "0");
+  return raw;
+}
 
 toggleDebugBtn.addEventListener("click", () => {
   debugContent.classList.toggle("hidden");
@@ -242,14 +500,13 @@ function renderApprovalUI(mappedFields) {
     radio.addEventListener("change", (e) => {
       const row = e.target.closest("[data-intent]");
       if (!row) return;
-      const intent = row.getAttribute("data-intent");
+      const fieldKey = row.getAttribute("data-field-key") || row.getAttribute("data-intent");
       if (e.target.value === "approve") {
-        approvalStore.approve(intent);
+        approvalStore.approve(fieldKey);
       } else if (e.target.value === "reject") {
-        approvalStore.reject(intent);
+        approvalStore.reject(fieldKey);
       } else {
-        approvalStore.reject(intent);
-        approvalStore.approve(intent);
+        approvalStore.remove(fieldKey);
       }
       renderApprovalSummary();
       updateFillButton();
@@ -269,6 +526,28 @@ selectAllSafeBtn.addEventListener("click", () => {
   approvalStore.reset();
   approvalStore.selectAllSafe(lastMappedFields);
   renderApprovalUI(lastMappedFields);
+});
+
+selectStaticAnswersBtn.addEventListener("click", () => {
+  if (!lastMappedFields || !approvalStore) return;
+  const count = selectStaticAnswers(approvalStore, lastMappedFields);
+  renderApprovalUI(lastMappedFields);
+  showSuccess(`${count} saved static answer${count === 1 ? "" : "s"} selected for filling.`);
+});
+
+copyStaticAnswersBtn.addEventListener("click", async () => {
+  if (!lastMappedFields) return;
+  const text = buildQuickCopyText(lastMappedFields);
+  if (!text) {
+    showError("No saved answer-bank values are available yet. Update your Desktop Profile first.");
+    return;
+  }
+  try {
+    await navigator.clipboard.writeText(text);
+    showSuccess("Copied answer bank to clipboard.");
+  } catch {
+    showError("Could not copy automatically. Open proposed mappings and copy values manually.");
+  }
 });
 
 resetApprovalsBtn.addEventListener("click", () => {
@@ -362,7 +641,9 @@ mapBtn.addEventListener("click", async () => {
       return;
     }
 
-    const mapped = mapFields(lastDetectedFields, profileData);
+    const mapped = dedupeMappedFields(mapFields(lastDetectedFields, profileData));
+    const page = await sendRuntimeMessage({ type: "GET_PAGE_INFO" });
+    saveFieldObservations(page, mapped);
     lastMappedFields = mapped;
     const summary = summarizeMappings(mapped);
 

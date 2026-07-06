@@ -1,10 +1,13 @@
 # Current Status
 
-Current Milestone: 10A-FIX – MVP Live Usability Fix ✅ Complete
+Current Milestone: 10C – Installer / Setup Improvements ✅ Complete and released for live test
 
-All 9 desktop pages are now live with real backend API calls. CORS fix applied, 176 desktop tests pass, 509 backend tests pass.
+All 9 desktop pages are live with real backend API calls. CORS fix applied and verified by local smoke test. First-run setup verification is now available through `scripts/setup-check.ps1`; `doctor.ps1` and `start-backend.ps1` have stronger dependency and port checks.
+Current verification: setup-check 16 passed / 0 failed, doctor 32 passed / 0 failed, backend 511 tests, browser-extension 687 assertions across all extension test files, desktop 292 tests, Ruff clean, release-check passing.
 
-MVP readiness status: NOT READY for public GitHub release. Desktop→backend connection must pass live manual verification before 10B or any downstream milestone can proceed.
+MVP readiness status: RELEASED for local live test / developer-preview MVP. Not yet stable/public-release ready until manual unpacked-extension browser verification, fresh-clone setup, and installer/distribution work are complete.
+
+GitOps status: Policy documented in `docs/03-development/GITOPS_OPERATING_MODEL.md`. Git/GitHub is the intended source of truth for code, docs, tests, release manifests, GitHub workflow files, and reviewed non-sensitive fixtures. This checkout currently has no GitHub remote configured, so GitHub-backed GitOps cannot be fully enforced until `origin`, branch protection, Actions, and release publishing are connected.
 
 Completed:
 - Milestone 09A: Backend skeleton
@@ -192,12 +195,17 @@ All Milestone 09 milestones completed.
     - **Settings:** already live (no change)
   - **API client:** 11 new fetch helpers (fetchProfile, saveProfile, fetchResumes, createResume, generateResume, fetchJobs, createJob, evaluateJobText, fetchApplications, createApplication, fetchDocuments, createDocument, fetchAiProviders, fetchAiModels, fetchAiHealth)
   - **CSS:** styles added for item lists/cards, forms, empty states, AI JSON
-  - **Tests:** 176 desktop tests pass; 509 backend tests pass
-  - **Docs:** MVP_LIVE_RUN_GUIDE updated with per-page verification steps
+  - **Tests:** 224 desktop tests pass; 570 browser-extension tests pass; 509 backend tests pass; Ruff clean
+  - **Docs:** MVP_LIVE_RUN_GUIDE and LIVE_TEST_REPORT updated with local smoke verification results
 
-- **10B** – GitHub Repository Publication Prep ⏸️ paused (pending decision)
+- **10B** – GitHub Repository Publication Prep ✅ complete
 
-- **10C** – Installer / Setup Improvements ⏸️ paused (pending decision)
+- **10C** – Installer / Setup Improvements ✅ complete
+  - Added `scripts/setup-check.ps1`, a read-only first-run verifier for Python/Node/npm, backend imports, npm scripts, port state, and optional live endpoint checks via `-RequireLive`
+  - Strengthened `scripts/doctor.ps1` with backend dependency imports and npm script checks
+  - Strengthened `scripts/start-backend.ps1` with clear missing-dependency guidance and port-8000 conflict handling
+  - Updated startup/troubleshooting/script docs and desktop test coverage for setup workflow
+  - Verified `setup-check.ps1`, `doctor.ps1`, desktop tests (263), and live backend/desktop setup check
 
 - **10D** – Real-World Browser Extension Testing Pack
   - Structured test pages (multiple form layouts, dynamic fields, shadow DOM, iframes), fill scenario catalog, edge case database, automated detection/mapping/fill tests

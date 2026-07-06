@@ -189,6 +189,10 @@ async function fetchApplications() {
   return apiFetch("/applications");
 }
 
+async function fetchApplicationSessions() {
+  return apiFetch("/application-sessions");
+}
+
 async function createApplication(data) {
   return apiPost("/applications", data);
 }
@@ -253,6 +257,7 @@ export {
   createJob,
   evaluateJobText,
   fetchApplications,
+  fetchApplicationSessions,
   createApplication,
   fetchDocuments,
   createDocument,

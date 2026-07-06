@@ -37,7 +37,7 @@ async function testConnection() {
   testBtn.textContent = "Testing...";
   setStatus("Connecting...", false);
 
-  const result = await checkHealth();
+  const result = await checkHealth(currentUrl);
 
   backendUrlInput.disabled = false;
   testBtn.disabled = false;

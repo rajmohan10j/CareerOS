@@ -15,6 +15,8 @@ Please read and follow our [Code of Conduct](CODE_OF_CONDUCT.md).
 
 ## How to Contribute
 
+CareerOS follows a GitOps workflow. Code, tests, documentation, release notes, and reviewed non-sensitive fixtures should move through Git branches, GitHub pull requests, GitHub Actions, and release manifests. See [GITOPS_OPERATING_MODEL.md](docs/03-development/GITOPS_OPERATING_MODEL.md).
+
 ### Setup
 
 ```powershell
@@ -86,11 +88,14 @@ cd ..
 6. Do not commit secrets or credentials
 7. Add tests for new functionality
 8. Update documentation for changes
+9. Do not commit local databases, generated caches, private resumes, private application records, or unsanitized reference data
+10. Update release/status docs when a change affects live-test or release readiness
 
 ## Security
 
 - Report vulnerabilities privately via SECURITY.md
 - Do not commit `.env` files or API keys
+- Do not commit local SQLite databases, private resume content, compensation data, addresses, or private application answers
 - All data must stay local by default
 - No automatic job submission or data transmission
 

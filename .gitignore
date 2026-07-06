@@ -25,3 +25,20 @@ Thumbs.db
 *.zip
 *.tar.gz
 *.whl
+releases/careeros-browser-extension-*/
+releases/careeros-browser-extension-*.zip
+
+# Local verification logs
+.codex-live-logs/
+.codex-runtime/
+
+# Local-only/private reference data
+reference-data/**
+!reference-data/
+!reference-data/README.md
+!reference-data/applications/
+!reference-data/applications/README.md
+!reference-data/fixtures/
+!reference-data/fixtures/**
+reference-data/private/
+reference-data/**/*.local.*

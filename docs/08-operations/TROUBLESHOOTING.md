@@ -10,6 +10,7 @@ Status: Implemented (Milestone 09T – Production Readiness Foundation)
 
 **Checklist:**
 
+1. **Run setup check** — `.\scripts\setup-check.ps1` reports missing tools, missing backend imports, and port state.
 1. **Python version** — Run `python --version`. Must be 3.11 or later.
 2. **Virtual environment** — Ensure you created and activated a venv:
    ```powershell
@@ -23,6 +24,7 @@ Status: Implemented (Milestone 09T – Production Readiness Foundation)
    ```powershell
    netstat -ano | findstr :8000
    ```
+   If CareerOS is already running, `.\scripts\start-backend.ps1` exits successfully after checking `/health`.
 5. **Database permissions** — The backend needs write access to the `backend/` directory for `careeros.db`.
 
 ## Tests fail
@@ -126,6 +128,8 @@ Status: Implemented (Milestone 09T – Production Readiness Foundation)
 
 ## Getting help
 
+- Run `.\scripts\setup-check.ps1` before startup to check first-run readiness.
+- Run `.\scripts\setup-check.ps1 -RequireLive` after startup to confirm backend and desktop endpoints.
 - Run `.\scripts\doctor.ps1` to check your environment.
 - Run `.\scripts\release-check.ps1` to verify release readiness.
 - Check `EXECUTION/002_CURRENT_STATUS.md` for the current milestone status.

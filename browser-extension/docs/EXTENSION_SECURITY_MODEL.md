@@ -1,7 +1,7 @@
 # EXTENSION_SECURITY_MODEL
 
 Document ID: DOC-107  
-Version: 0.3.0  
+Version: 0.3.7  
 Status: Implemented  
 Milestone: 09O
 

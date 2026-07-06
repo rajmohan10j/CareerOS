@@ -316,6 +316,12 @@ html, body {
   margin-bottom: 12px;
 }
 
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
 .setting-group label {
   display: block;
   font-weight: 600;

@@ -51,12 +51,13 @@ class TestResumeAPI:
 
     def test_create_and_get(self, _session):
         client = TestClient(_test_app)
-        payload = {"title": "My Resume", "target_role": "Engineer"}
+        payload = {"title": "My Resume", "target_role": "Engineer", "content": "# My Resume\n\nExperience"}
         create_resp = client.post("/resumes", json=payload)
         assert create_resp.status_code == 201
         data = create_resp.json()
         assert data["title"] == "My Resume"
         assert data["target_role"] == "Engineer"
+        assert data["content"] == "# My Resume\n\nExperience"
         assert data["version"] == 1
         assert data["is_latest"] is True
         assert "id" in data
@@ -158,6 +159,12 @@ class TestResumeService:
         assert resume.id is not None
         assert resume.title == "Test"
         assert resume.version == 1
+
+    def test_create_service_preserves_content(self, _session):
+        repo = ResumeRepository(_session)
+        svc = ResumeService(repo)
+        resume = svc.create(ResumeCreate(title="Uploaded", content="Resume text"))
+        assert resume.content == "Resume text"
 
     def test_list(self, _session):
         repo = ResumeRepository(_session)

@@ -4,6 +4,7 @@ import { fileURLToPath } from "url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DESKTOP_ROOT = resolve(__dirname, "..");
+const REPO_ROOT = resolve(DESKTOP_ROOT, "..");
 
 function readFile(relativePath) {
   return readFileSync(resolve(DESKTOP_ROOT, relativePath), "utf-8");
@@ -11,6 +12,14 @@ function readFile(relativePath) {
 
 function fileExists(relativePath) {
   return existsSync(resolve(DESKTOP_ROOT, relativePath));
+}
+
+function readRepoFile(relativePath) {
+  return readFileSync(resolve(REPO_ROOT, relativePath), "utf-8");
+}
+
+function repoFileExists(relativePath) {
+  return existsSync(resolve(REPO_ROOT, relativePath));
 }
 
 let passed = 0;
@@ -214,6 +223,21 @@ const pageActionChecks = [
   { file: "Profile.js", check: "saveProfileBtn", label: "Profile.js has save button" },
   { file: "Profile.js", check: "profileSummary", label: "Profile.js has summary textarea" },
   { file: "Profile.js", check: "profileRoles", label: "Profile.js has roles input" },
+  { file: "Profile.js", check: "profileFullName", label: "Profile.js has full name input" },
+  { file: "Profile.js", check: "profilePrefix", label: "Profile.js has prefix input" },
+  { file: "Profile.js", check: "profileMiddleName", label: "Profile.js has middle name input" },
+  { file: "Profile.js", check: "profileEmail", label: "Profile.js has email input" },
+  { file: "Profile.js", check: "profilePhone", label: "Profile.js has phone input" },
+  { file: "Profile.js", check: "profileLinkedIn", label: "Profile.js has LinkedIn input" },
+  { file: "Profile.js", check: "profilePortfolio", label: "Profile.js has portfolio input" },
+  { file: "Profile.js", check: "profileWorkAuth", label: "Profile.js has work authorization input" },
+  { file: "Profile.js", check: "profileLegalEligibility", label: "Profile.js has legal eligibility input" },
+  { file: "Profile.js", check: "profileProfessionalCategory", label: "Profile.js has professional category input" },
+  { file: "Profile.js", check: "profileReferralSource", label: "Profile.js has referral source input" },
+  { file: "Profile.js", check: "profilePreviousEmployment", label: "Profile.js has previous employment input" },
+  { file: "Profile.js", check: "profileDob", label: "Profile.js has date of birth input" },
+  { file: "Profile.js", check: "profileCitizenship", label: "Profile.js has citizenship input" },
+  { file: "Profile.js", check: "profileSalaryMin", label: "Profile.js has salary input" },
   { file: "Profile.js", check: "saveProfile", label: "Profile.js calls saveProfile API" },
   { file: "Resumes.js", check: "fetchResumes", label: "Resumes.js fetches from backend" },
   { file: "Resumes.js", check: "createResume", label: "Resumes.js calls createResume API" },
@@ -264,6 +288,20 @@ assert(profilePage.includes("summary"), "Profile.js has summary field");
 assert(profilePage.includes("target_roles"), "Profile.js has target_roles field");
 assert(profilePage.includes("industries"), "Profile.js has industries field");
 assert(profilePage.includes("locations"), "Profile.js has locations field");
+assert(profilePage.includes("salary_expectations"), "Profile.js saves salary_expectations");
+assert(profilePage.includes("preferences_json"), "Profile.js saves preferences_json");
+assert(profilePage.includes("contact_email"), "Profile.js stores contact email");
+assert(profilePage.includes("contact_phone"), "Profile.js stores contact phone");
+assert(profilePage.includes("linkedin_url"), "Profile.js stores LinkedIn URL");
+assert(profilePage.includes("portfolio_url"), "Profile.js stores portfolio URL");
+assert(profilePage.includes("work_authorization"), "Profile.js stores work authorization");
+assert(profilePage.includes("legal_eligibility"), "Profile.js stores legal eligibility");
+assert(profilePage.includes("professional_category"), "Profile.js stores professional category");
+assert(profilePage.includes("middle_name"), "Profile.js stores middle name");
+assert(profilePage.includes("referral_source"), "Profile.js stores referral source");
+assert(profilePage.includes("previous_employment"), "Profile.js stores previous employment");
+assert(profilePage.includes("date_of_birth"), "Profile.js stores date of birth");
+assert(profilePage.includes("citizenship_status"), "Profile.js stores citizenship status");
 assert(profilePage.includes("saveProfileBtn"), "Profile.js has save button");
 
 const resumesPage = readFile("src/pages/Resumes.js");
@@ -354,6 +392,40 @@ assert(settings.includes("checkHealth"), "Settings uses checkHealth");
 assert(settings.includes("setStoredBackendUrl"), "Settings saves backend URL");
 assert(settings.includes("const currentUrl = getStoredBackendUrl()"), "Settings gets URL synchronously (not awaited)");
 assert(settings.includes('value="${currentUrl}"'), "Settings input receives a string value");
+
+// ── Setup scripts ──────────────────────────────────────────────
+
+console.log("\n[setup scripts]");
+
+assert(repoFileExists("scripts/setup-check.ps1"), "setup-check.ps1 exists");
+
+const setupCheck = readRepoFile("scripts/setup-check.ps1");
+assert(setupCheck.includes("CareerOS First-Run Setup Check"), "setup-check has clear title");
+assert(setupCheck.includes("RequireLive"), "setup-check supports live endpoint enforcement");
+assert(setupCheck.includes("Test-PythonImport"), "setup-check verifies backend Python imports");
+assert(setupCheck.includes("fastapi"), "setup-check checks FastAPI import");
+assert(setupCheck.includes("uvicorn"), "setup-check checks uvicorn import");
+assert(setupCheck.includes("sqlmodel"), "setup-check checks SQLModel import");
+assert(setupCheck.includes("pytest"), "setup-check checks pytest import");
+assert(setupCheck.includes("ruff"), "setup-check checks Ruff import");
+assert(setupCheck.includes("desktop has start script"), "setup-check validates desktop start script");
+assert(setupCheck.includes("browser-extension has test script"), "setup-check validates extension test script");
+assert(setupCheck.includes("Test-PortOpen 8000"), "setup-check checks backend port");
+assert(setupCheck.includes("Test-PortOpen 5173"), "setup-check checks desktop port");
+assert(setupCheck.includes("/health"), "setup-check checks backend health endpoint");
+assert(setupCheck.includes("/docs"), "setup-check checks Swagger docs endpoint");
+assert(setupCheck.includes("Does not modify files"), "setup-check documents read-only behavior");
+
+const startBackend = readRepoFile("scripts/start-backend.ps1");
+assert(startBackend.includes("Missing backend dependencies"), "start-backend reports missing dependencies");
+assert(startBackend.includes("Test-PortOpen 8000"), "start-backend checks port 8000 before starting");
+assert(startBackend.includes("/health"), "start-backend detects already running backend");
+
+const doctor = readRepoFile("scripts/doctor.ps1");
+assert(doctor.includes("FastAPI import works"), "doctor verifies FastAPI import");
+assert(doctor.includes("uvicorn import works"), "doctor verifies uvicorn import");
+assert(doctor.includes("scripts/setup-check.ps1 exists"), "doctor checks setup-check script");
+assert(doctor.includes("desktop npm start exists"), "doctor checks desktop npm start");
 
 // ── Security ───────────────────────────────────────────────────
 

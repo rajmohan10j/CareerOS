@@ -1,13 +1,13 @@
 const routes = {
-  "dashboard": () => import("./pages/Dashboard.js?v=settings-feedback-20260703"),
-  "profile": () => import("./pages/Profile.js?v=settings-feedback-20260703"),
-  "resumes": () => import("./pages/Resumes.js?v=settings-feedback-20260703"),
-  "jobs": () => import("./pages/Jobs.js?v=settings-feedback-20260703"),
-  "applications": () => import("./pages/Applications.js?v=settings-feedback-20260703"),
-  "documents": () => import("./pages/Documents.js?v=settings-feedback-20260703"),
-  "ai-status": () => import("./pages/AIStatus.js?v=settings-feedback-20260703"),
-  "browser-extension": () => import("./pages/BrowserExtension.js?v=settings-feedback-20260703"),
-  "settings": () => import("./pages/Settings.js?v=settings-feedback-20260703"),
+  "dashboard": () => import("./pages/Dashboard.js?v=profile-clickfix-20260703"),
+  "profile": () => import("./pages/Profile.js?v=profile-clickfix-20260703"),
+  "resumes": () => import("./pages/Resumes.js?v=profile-clickfix-20260703"),
+  "jobs": () => import("./pages/Jobs.js?v=profile-clickfix-20260703"),
+  "applications": () => import("./pages/Applications.js?v=profile-clickfix-20260703"),
+  "documents": () => import("./pages/Documents.js?v=profile-clickfix-20260703"),
+  "ai-status": () => import("./pages/AIStatus.js?v=profile-clickfix-20260703"),
+  "browser-extension": () => import("./pages/BrowserExtension.js?v=profile-clickfix-20260703"),
+  "settings": () => import("./pages/Settings.js?v=profile-clickfix-20260703"),
 };
 
 const DEFAULT_ROUTE = "dashboard";

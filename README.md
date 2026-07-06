@@ -2,9 +2,9 @@
 
 > **Developer Preview** — Local-first career management platform with AI-powered job tracking, resume optimization, browser autofill, and analytics.
 
-> ✅ **Milestone 10A-FIX complete.** All 9 desktop pages are now live with real backend API calls (Dashboard, Profile, Resumes, Jobs, Applications, Documents, AI Status, Browser Extension, Settings). See `docs/08-operations/MVP_LIVE_RUN_GUIDE.md` for the run guide.
+> ✅ **Live-test developer preview released.** All 9 desktop pages are live with real backend API calls, local desktop-to-backend CORS is verified, and automated backend/desktop/extension checks pass. See `docs/08-operations/MVP_LIVE_RUN_GUIDE.md`, `docs/08-operations/LIVE_TEST_REPORT.md`, and `releases/LIVE_TEST_RELEASE_2026-07-06.md`.
 
-[![Tests](https://img.shields.io/badge/tests-1%2C199%20passing-brightgreen)](#)
+[![Tests](https://img.shields.io/badge/tests-1%2C490%20verified-brightgreen)](#)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue)](https://www.python.org/)
 [![Node](https://img.shields.io/badge/node-18%2B-green)](https://nodejs.org/)
@@ -32,6 +32,12 @@ Everything runs on **your machine** — no cloud, no telemetry, no paid APIs req
 | **No cloud dependency** | Fully self-contained. Backend, database, and AI all local. |
 | **User approval required** | All autofill operations require per-field approval. |
 | **Minimal permissions** | Extension needs only `storage` + `localhost:8000`. |
+
+## GitOps
+
+CareerOS uses Git, GitHub, and GitHub Actions as the operating source of truth for source code, documentation, tests, release manifests, and reviewed non-sensitive reference fixtures.
+
+Important boundary: local databases, secrets, caches, generated artifacts, and private resume/application data must not be committed. See `docs/03-development/GITOPS_OPERATING_MODEL.md`.
 
 ## Features
 
@@ -64,6 +70,9 @@ Everything runs on **your machine** — no cloud, no telemetry, no paid APIs req
 **Prerequisites:** Python 3.11+, Node.js 18+, PowerShell (Windows) or bash (macOS/Linux)
 
 ```powershell
+# First-run readiness check
+.\scripts\setup-check.ps1
+
 # Backend setup
 cd backend
 python -m venv .venv
@@ -77,26 +86,26 @@ cd ..
 
 - Open **Swagger UI**: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
 - Check your environment: `.\scripts\doctor.ps1`
-- Load the browser extension via `chrome://extensions` → Load unpacked → select `browser-extension/`
-- Open `desktop/src/index.html` in your browser for the desktop app
+- Start the desktop app: `cd desktop; npm start`, then open [http://127.0.0.1:5173](http://127.0.0.1:5173)
+- Verify the live local loop: `.\scripts\setup-check.ps1 -RequireLive`
+- Load the browser extension via `chrome://extensions` → Load unpacked → select the canonical `browser-extension/` folder. Do not load generated copies under `releases/`.
 
 ## Test Count
 
 | Component | Tests |
-|---|---|---|
-| Backend | 509 |
-| Browser Extension | 570 |
-| Desktop | 120 |
-| **Total** | **1,199** |
+|---|---|
+| Backend | 511 |
+| Browser Extension | 687 assertion inventory / 188 package smoke |
+| Desktop | 292 |
+| **Total** | **1,490 assertion inventory** |
 
 ## Current Limitations
 
 - **Desktop app** is a Vanilla JS SPA — not yet wrapped in Tauri/Electron
-- **Desktop placeholder pages** not wired to live API endpoints
 - **No automated installer** — manual setup required
 - **Firefox** and **Safari** not yet supported
 - **Browser extension** only tested on Chrome and Edge
-- **No CI/CD pipeline** — planned in future milestone
+- **GitHub remote not configured in this checkout** — required before GitHub Actions, PRs, Issues, Releases, and branch protection can become the active control plane
 - **No distribution artifacts** — load extension via developer mode
 
 ## Documentation
@@ -106,6 +115,7 @@ cd ..
 | `docs/08-operations/LOCAL_STARTUP_GUIDE.md` | Full setup instructions |
 | `docs/08-operations/TROUBLESHOOTING.md` | Common issues and fixes |
 | `docs/08-operations/DEVELOPER_PREVIEW_RELEASE_NOTES.md` | Release notes |
+| `docs/03-development/GITOPS_OPERATING_MODEL.md` | Git/GitHub operating model |
 | `docs/06-community/CONTRIBUTOR_ONBOARDING.md` | Contributor guide |
 | `ENGINEERING_BIBLE/README.md` | Engineering standards |
 

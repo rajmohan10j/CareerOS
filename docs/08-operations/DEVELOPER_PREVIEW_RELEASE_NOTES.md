@@ -2,7 +2,7 @@
 
 Document ID: DOC-074  
 Version: 0.1.0  
-Status: Implemented (Milestone 10A – Developer Preview Release Preparation)
+Status: Updated (Milestone 10C-live-test – GitOps policy added)
 
 ## Version
 
@@ -54,10 +54,10 @@ CareerOS is a local-first career management platform with AI-powered job trackin
 
 | Component | Tests |
 |---|---|
-| Backend | 506 passing |
-| Browser Extension | 570 passing |
-| Desktop App | 108 passing |
-| **Total** | **1,184 passing** |
+| Backend | 511 passing |
+| Browser Extension | 687 assertion inventory passing |
+| Desktop App | 292 passing |
+| **Total** | **1,490 verified assertions/checks** |
 
 ## Browser Support
 
@@ -84,11 +84,15 @@ CareerOS is a local-first career management platform with AI-powered job trackin
 
 - Desktop app is a Vanilla JS SPA — not yet wrapped in Tauri/Electron
 - Browser extension tested on Chrome/Edge only
-- No CI/CD pipeline configured
-- No automated installer script
-- Desktop placeholder pages not yet wired to live API endpoints
+- GitHub remote is not configured in this checkout, so GitHub Actions, PRs, Issues, Releases, and branch protection are not yet enforcing GitOps
+- No packaged installer/distribution artifact
+- Manual unpacked-extension browser verification remains pending before public release
 - Firefox support not implemented
 - Mobile browsers not supported
+
+## GitOps Addendum
+
+CareerOS now treats Git/GitHub as the intended source of truth for source code, documentation, tests, release manifests, workflow files, and reviewed non-sensitive fixtures. Local databases, secrets, generated artifacts, private resumes, private application records, and unsanitized reference data must not be committed. See `docs/03-development/GITOPS_OPERATING_MODEL.md`.
 
 ## Quick Start
 
@@ -107,4 +111,5 @@ Open `http://127.0.0.1:8000/docs` for Swagger UI.
 - `DEVELOPER_PREVIEW_CHECKLIST.md` — release verification checklist
 - `GITHUB_RELEASE_CHECKLIST.md` — GitHub publication steps
 - `PUBLIC_RELEASE_READINESS.md` — readiness assessment
+- `GITOPS_OPERATING_MODEL.md` — Git/GitHub source-of-truth policy
 - `MILESTONE_09_COMPLETION_REPORT.md` — full milestone completion report

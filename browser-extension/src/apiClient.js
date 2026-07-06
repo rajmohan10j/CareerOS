@@ -1,4 +1,4 @@
-const DEFAULT_BACKEND_URL = "http://localhost:8000";
+const DEFAULT_BACKEND_URL = "http://127.0.0.1:8000";
 
 function getStoredBackendUrl() {
   return new Promise((resolve) => {
@@ -12,8 +12,8 @@ function getStoredBackendUrl() {
   });
 }
 
-async function checkHealth() {
-  const baseUrl = await getStoredBackendUrl();
+async function checkHealth(backendUrl) {
+  const baseUrl = backendUrl || await getStoredBackendUrl();
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 5000);
   const startTime = Date.now();

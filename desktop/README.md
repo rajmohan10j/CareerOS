@@ -36,18 +36,18 @@ desktop/
 │   │   └── BackendStatus.js    # Backend health check (polled every 30s)
 │   └── pages/
 │       ├── Dashboard.js        # Overview with dashboard cards + health
-│       ├── Profile.js          # Placeholder
-│       ├── Resumes.js          # Placeholder
-│       ├── Jobs.js             # Placeholder
-│       ├── Applications.js     # Placeholder
-│       ├── Documents.js        # Placeholder
-│       ├── AIStatus.js         # Placeholder with backend health
-│       ├── BrowserExtension.js # Placeholder
+│       ├── Profile.js          # Live profile form
+│       ├── Resumes.js          # Live resume list
+│       ├── Jobs.js             # Live job list + add form
+│       ├── Applications.js     # Live application list + add form
+│       ├── Documents.js        # Live document list + add form
+│       ├── AIStatus.js         # Live AI provider/model/health status
+│       ├── BrowserExtension.js # Local extension setup guidance
 │       └── Settings.js         # Backend URL config + test connection
 ├── styles/
 │   └── app.css                 # Application styles
 └── tests/
-    └── desktop.test.js         # 120 tests — file structure, pages, security, analytics dashboard, URL normalization, CORS
+    └── desktop.test.js         # 263 tests — file structure, pages, security, analytics dashboard, URL normalization, CORS, setup scripts
 ```
 
 ## Capabilities
@@ -58,7 +58,7 @@ desktop/
 - Backend health check (checks `GET /health` on startup and every 30s)
 - Status bar showing backend connection status
 - Settings page with backend URL configuration + Test Connection button
-- Placeholder pages for: Profile, Resumes, Jobs, Applications, Documents, AI Status, Browser Extension
+- Live MVP pages for: Profile, Resumes, Jobs, Applications, Documents, AI Status, Browser Extension
 - Local-first: all configuration stored in localStorage, backend calls to 127.0.0.1:8000 only
 
 ## Getting Started
@@ -94,7 +94,7 @@ Then configure `tauri.conf.json` with window settings and `src/index.html` as th
 
 - Local user interface (thin client)
 - Dashboard and navigation
-- Profile, resume, job, application management (future)
+- Profile, resume, job, application, and document MVP management
 - AI assistant interface (future)
 - Settings and model configuration (future)
 - Local backend connection

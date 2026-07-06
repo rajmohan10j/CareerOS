@@ -36,6 +36,19 @@ def test_cors_allows_desktop_origin():
         )
 
 
+def test_cors_allows_chrome_extension_origin():
+    origin = "chrome-extension://careerostestid"
+    response = client.options(
+        "/profile",
+        headers={
+            "Origin": origin,
+            "Access-Control-Request-Method": "GET",
+        },
+    )
+    assert response.status_code == 200
+    assert response.headers.get("access-control-allow-origin") == origin
+
+
 def test_cors_rejects_unlisted_origin():
     response = client.options(
         "/health",

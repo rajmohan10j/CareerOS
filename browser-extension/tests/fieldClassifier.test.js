@@ -33,8 +33,10 @@ const detectorSrc = readFile("src/fieldDetector.js");
 console.log("\n[pattern coverage]");
 
 const typePatterns = [
+  { type: "name_prefix", patterns: ["prefix", "salutation"] },
   { type: "full_name", patterns: ["full\\\\s*\\\\*name", "legal\\\\s*\\\\*name", "your\\\\s*\\\\*name", "applicant\\\\s*\\\\*name"] },
   { type: "first_name", patterns: ["first\\\\s*\\\\*name", "given\\\\s*\\\\*name", "first"] },
+  { type: "middle_name", patterns: ["middle\\\\s*\\\\*name", "middle"] },
   { type: "last_name", patterns: ["last\\\\s*\\\\*name", "family\\\\s*\\\\*name", "surname"] },
   { type: "email", patterns: ["e[\\\\s-]?mail", "email address", "\\\\bemail\\\\b"] },
   { type: "phone", patterns: ["phone", "mobile", "telephone", "contact"] },
@@ -45,14 +47,39 @@ const typePatterns = [
   { type: "postal_code", patterns: ["zip", "postal", "post code"] },
   { type: "current_company", patterns: ["current\\\\s*\\\\*compan", "employer", "company", "organization"] },
   { type: "current_title", patterns: ["current\\\\s*\\\\*(title|position|role)", "job\\\\s*\\\\*title", "\\\\b(title|position|role)\\\\b"] },
+  { type: "experience_title", patterns: ["job\\\\s*\\\\*title"] },
+  { type: "experience_company", patterns: ["company", "employer"] },
+  { type: "experience_location", patterns: ["location"] },
+  { type: "experience_current", patterns: ["currently\\\\s*\\\\*work\\\\s*\\\\*here"] },
+  { type: "experience_start_date", patterns: ["from", "start"] },
+  { type: "experience_end_date", patterns: ["to", "end"] },
+  { type: "experience_description", patterns: ["role\\\\s*\\\\*description"] },
+  { type: "education_school", patterns: ["school", "university"] },
+  { type: "education_degree", patterns: ["degree"] },
+  { type: "education_field", patterns: ["field"] },
+  { type: "education_gpa", patterns: ["gpa"] },
+  { type: "education_start_date", patterns: ["from"] },
+  { type: "education_end_date", patterns: ["to"] },
   { type: "education", patterns: ["education", "degree", "school", "university", "college"] },
   { type: "experience", patterns: ["experience", "work\\\\s*\\\\*history", "employment"] },
   { type: "skills", patterns: ["skills", "expertise", "technolog", "proficiency"] },
+  { type: "linkedin_url", patterns: ["linkedin"] },
+  { type: "portfolio_url", patterns: ["portfolio", "github", "website"] },
   { type: "resume_upload", patterns: ["resume", "\\\\bcv\\\\b", "upload.*resume", "attach.*resume"] },
   { type: "cover_letter", patterns: ["cover\\\\s*\\\\*letter", "coverletter"] },
   { type: "salary_expectation", patterns: ["salary", "compensation", "\\\\bpay\\\\b"] },
   { type: "work_authorization", patterns: ["authorization", "\\\\bvisa\\\\b", "work\\\\s*\\\\*permit", "sponsor", "work\\\\s*\\\\*author", "citizenship"] },
+  { type: "legal_eligibility", patterns: ["legally.*eligible", "right.*work"] },
   { type: "notice_period", patterns: ["notice\\\\s*\\\\*period", "available.*start", "start.*date", "earliest.*start"] },
+  { type: "professional_category", patterns: ["professional\\\\s*\\\\*category", "career\\\\s*\\\\*level"] },
+  { type: "referral_source", patterns: ["how.*hear.*about.*us", "referral", "source"] },
+  { type: "previous_employment", patterns: ["previously.*employed", "former.*employee"] },
+  { type: "declaration_confirmation", patterns: ["declaration", "true.*accurate"] },
+  { type: "terms_acknowledgement", patterns: ["terms.*conditions", "terms.*use"] },
+  { type: "date_of_birth", patterns: ["date\\\\s*\\\\*of\\\\s*\\\\*birth", "dob"] },
+  { type: "citizenship_status", patterns: ["citizenship", "citizen\\\\s*\\\\*status"] },
+  { type: "gender", patterns: ["gender"] },
+  { type: "pronoun", patterns: ["pronoun"] },
   { type: "diversity", patterns: ["diversity", "demographic", "gender", "ethnicity", "race", "veteran", "disability"] },
   { type: "equal_opportunity", patterns: ["equal opportunity", "eeo", "affirmative action", "equal employment", "eoe", "equal employer"] },
 ];
@@ -78,11 +105,22 @@ const specialPatterns = [
   ['inputType === "number"', "number input type is handled"],
   ['fieldType === "textarea"', "textarea field type is handled specially"],
   ['fieldType === "select"', "select field type is handled specially"],
+  ["inEducationSection", "education section fields are handled specially"],
+  ["inExperienceSection", "experience section fields are handled specially"],
 ];
 
 for (const [pattern, label] of specialPatterns) {
   assert(classifierSrc.includes(pattern), label);
 }
+
+const descriptionIndex = classifierSrc.indexOf("experience_description");
+const startDateIndex = classifierSrc.indexOf("isStartDateField");
+const endDateIndex = classifierSrc.indexOf("isEndDateField");
+assert(descriptionIndex >= 0 && startDateIndex >= 0 && descriptionIndex < startDateIndex, "role description is classified before start date");
+assert(descriptionIndex >= 0 && endDateIndex >= 0 && descriptionIndex < endDateIndex, "role description is classified before end date");
+assert(classifierSrc.includes("primaryFieldText"), "date classification uses primary field text guard");
+assert(classifierSrc.includes("field?.label"), "date guard checks direct label text");
+assert(classifierSrc.includes("field?.placeholder"), "date guard checks placeholder text");
 
 // ── Detector signal extraction ────────────────────────────────────
 
@@ -91,6 +129,7 @@ console.log("\n[detector signal extraction]");
 const signalPatterns = [
   ["options", "fieldDetector.js extracts select options"],
   ["radios", "fieldDetector.js detects radio groups"],
+  ["findRadioGroupLabel", "fieldDetector.js extracts radio group labels"],
   ["ariaLabel", "fieldDetector.js extracts aria-label"],
   ["sectionHeading", "fieldDetector.js extracts section headings"],
   ["nearbyText", "fieldDetector.js extracts nearby text"],

@@ -34,7 +34,8 @@ assert(src.length > 0, "src/autofillMapper.js exists and is non-empty");
 console.log("\n[exports]");
 const expectedExports = [
   "mapFields", "mapIntentToValue", "summarizeMappings",
-  "getLatestExperience", "SENSITIVE_TYPES",
+  "getLatestExperience", "getEducationForField", "getExperienceForField",
+  "REFERENCE_EDUCATION", "REFERENCE_EXPERIENCES", "SENSITIVE_TYPES",
 ];
 for (const exp of expectedExports) {
   assert(src.includes(exp), `autofillMapper.js exports ${exp}`);
@@ -45,11 +46,17 @@ for (const exp of expectedExports) {
 console.log("\n[intent handling]");
 
 const expectedIntents = [
-  "full_name", "first_name", "last_name", "email", "phone",
+  "name_prefix", "full_name", "first_name", "middle_name", "last_name", "email", "phone",
   "address", "city", "state", "country", "postal_code",
-  "current_company", "current_title", "education", "experience", "skills",
-  "resume_upload", "cover_letter", "salary_expectation",
-  "work_authorization", "notice_period",
+  "current_company", "current_title", "experience_title", "experience_company",
+  "experience_location", "experience_current", "experience_start_date",
+  "experience_end_date", "experience_description", "education_school",
+  "education_degree", "education_field", "education_gpa", "education_start_date",
+  "education_end_date", "education", "experience", "skills",
+  "linkedin_url", "portfolio_url", "resume_upload", "cover_letter", "salary_expectation",
+  "work_authorization", "legal_eligibility", "notice_period", "professional_category",
+  "referral_source", "previous_employment", "declaration_confirmation",
+  "terms_acknowledgement", "date_of_birth", "citizenship_status", "gender", "pronoun",
 ];
 for (const intent of expectedIntents) {
   assert(
@@ -85,7 +92,13 @@ assert(src.includes("sensitive: true"), "autofillMapper.js marks sensitive field
 console.log("\n[derivation logic]");
 
 assert(src.includes("deriveFirstLastFromSummary"), "autofillMapper.js has deriveFirstLastFromSummary");
+assert(src.includes("getPreference"), "autofillMapper.js reads profile preferences");
+assert(src.includes("formatSalaryExpectation"), "autofillMapper.js formats salary expectations");
 assert(src.includes("getLatestExperience"), "autofillMapper.js has getLatestExperience");
+assert(src.includes("getExperienceForField"), "autofillMapper.js maps specific experience rows");
+assert(src.includes("REFERENCE_EXPERIENCES"), "autofillMapper.js has reference resume fallback");
+assert(src.includes("getEducationForField"), "autofillMapper.js maps specific education rows");
+assert(src.includes("REFERENCE_EDUCATION"), "autofillMapper.js has reference education fallback");
 assert(src.includes("start_date"), "getLatestExperience sorts by start_date");
 assert(src.includes("localeCompare"), "getLatestExperience uses localeCompare for sorting");
 assert(src.includes("split(/\\s+/"), "deriveFirstLastFromSummary splits summary by whitespace");
@@ -131,8 +144,26 @@ assert(src.includes("profileData"), "mapFields takes profileData parameter");
 assert(src.includes("profile?.summary"), "mapFields accesses profile summary");
 assert(src.includes("profile?.locations"), "mapFields accesses profile locations");
 assert(src.includes("profile?.salaryExpectations"), "mapFields accesses salary expectations");
+assert(src.includes("full_name"), "mapFields can use profile full_name");
+assert(src.includes("middle_name"), "mapFields can use profile middle_name");
+assert(src.includes("contact_email"), "mapFields can use profile contact_email");
+assert(src.includes("contact_phone"), "mapFields can use profile contact_phone");
+assert(src.includes("linkedin_url"), "mapFields can use profile LinkedIn URL");
+assert(src.includes("portfolio_url"), "mapFields can use profile portfolio URL");
+assert(src.includes("work_authorization"), "mapFields can use profile work authorization");
+assert(src.includes("legal_eligibility"), "mapFields can use profile legal eligibility");
+assert(src.includes("referral_source"), "mapFields can use profile referral source");
+assert(src.includes("previous_employment"), "mapFields can use profile previous employment");
+assert(src.includes("date_of_birth"), "mapFields can use profile date of birth");
+assert(src.includes("citizenship_status"), "mapFields can use profile citizenship status");
 assert(src.includes("skills.length"), "mapFields checks skills length");
 assert(src.includes("experiences.length"), "mapFields checks experiences length");
+assert(src.includes("experience_title"), "mapFields can use resume experience title");
+assert(src.includes("experience_company"), "mapFields can use resume experience company");
+assert(src.includes("experience_description"), "mapFields can use resume experience description");
+assert(src.includes("education_school"), "mapFields can use resume education school");
+assert(src.includes("education_degree"), "mapFields can use resume education degree");
+assert(src.includes("education_field"), "mapFields can use resume education field");
 
 // ── Security ──────────────────────────────────────────────────────
 

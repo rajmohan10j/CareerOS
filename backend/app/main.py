@@ -6,7 +6,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.ai import router as ai_router
 from app.api.analytics import router as analytics_router
 from app.api.application import router as application_router
+from app.api.application_session import router as application_session_router
 from app.api.ats import router as ats_router
+from app.api.canonical_resume import router as canonical_resume_router
 from app.api.document import router as document_router
 from app.api.experience import router as experience_router
 from app.api.health import router as health_router
@@ -41,6 +43,7 @@ app.add_middleware(
         "http://127.0.0.1:8000",
         "http://localhost:8000",
     ],
+    allow_origin_regex=r"chrome-extension://.*",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -54,6 +57,8 @@ app.include_router(job_router)
 app.include_router(experience_router)
 app.include_router(skill_router)
 app.include_router(application_router)
+app.include_router(application_session_router)
+app.include_router(canonical_resume_router)
 app.include_router(ats_router)
 app.include_router(plugin_router)
 app.include_router(knowledge_router)

@@ -1,11 +1,13 @@
 function buildPreviewItem(mapping, approvalStore) {
-  const approved = approvalStore.isApproved(mapping.intent);
-  const rejected = approvalStore.isRejected(mapping.intent);
-  const pending = approvalStore.isPending(mapping.intent);
+  const approved = approvalStore.isApproved(mapping);
+  const rejected = approvalStore.isRejected(mapping);
+  const pending = approvalStore.isPending(mapping);
   const safe = !mapping.sensitive && mapping.mappingConfidence != null && mapping.mappingConfidence >= 0.6 && (mapping.mappingStatus === "available" || mapping.mappingStatus === "derived");
 
   return {
     intent: mapping.intent,
+    fieldKey: mapping.fieldKey || mapping.intent,
+    fieldLabel: mapping.label || mapping.placeholder || mapping.ariaLabel || mapping.name || mapping.id || mapping.nearbyText || "—",
     value: mapping.mappedValue,
     status: mapping.mappingStatus,
     confidence: mapping.mappingConfidence,
@@ -29,25 +31,27 @@ function buildItemHTML(mapping, approvalStore) {
   const isRejected = preview.rejected;
 
   const valueDisplay = preview.value != null ? escapeHtml(String(preview.value)) : "<span class='preview-empty'>—</span>";
-  const sensitiveBadge = preview.sensitive ? '<span class="sensitive-tag">sensitive — requires manual review</span>' : "";
+  const sensitiveBadge = preview.sensitive ? '<span class="sensitive-tag">sensitive — review before approving</span>' : "";
   const messageHtml = preview.message ? escapeHtml(preview.message) : "—";
   const confidencePct = preview.confidence != null ? Math.round(preview.confidence * 100) : null;
   const confidenceDisplay = confidencePct != null ? `${confidencePct}%` : "—";
   const lowConfBadge = preview.confidence != null && preview.confidence < 0.6 ? '<span class="low-conf-badge" title="Low confidence — verify value before filling">low confidence</span>' : "";
   const statusBadge = `<span class="status-badge badge-${preview.status}">${preview.status}</span>`;
   const sensitiveWarning = preview.sensitive ? '<div class="sensitive-warning">This field contains personal or regulated information. Review carefully before filling.</div>' : "";
+  const fieldLabelHtml = preview.fieldLabel ? `<div class="preview-field-label">${escapeHtml(preview.fieldLabel)}</div>` : "";
 
   const approvedChecked = isApproved ? "checked" : "";
   const rejectedChecked = isRejected ? "checked" : "";
 
   return `
-    <div class="preview-row ${preview.sensitive ? "preview-sensitive" : ""} ${isApproved ? "preview-approved" : ""} ${isRejected ? "preview-rejected" : ""}" data-intent="${preview.intent}">
+    <div class="preview-row ${preview.sensitive ? "preview-sensitive" : ""} ${isApproved ? "preview-approved" : ""} ${isRejected ? "preview-rejected" : ""}" data-intent="${preview.intent}" data-field-key="${escapeHtml(preview.fieldKey)}">
       <div class="preview-header">
         <span class="preview-intent">${escapeHtml(preview.intent)}</span>
         ${statusBadge}
         ${sensitiveBadge}
         ${lowConfBadge}
       </div>
+      ${fieldLabelHtml}
       <div class="preview-value">${valueDisplay}</div>
       ${sensitiveWarning}
       <div class="preview-details">
@@ -55,16 +59,16 @@ function buildItemHTML(mapping, approvalStore) {
         <span class="preview-msg">${messageHtml}</span>
       </div>
       <div class="preview-actions">
-        <label class="preview-toggle ${!preview.sensitive ? "" : "toggle-disabled"}" title="${preview.sensitive ? "Sensitive field — cannot be auto-approved" : "Approve this field for filling"}">
-          <input type="radio" name="action_${preview.intent}" value="approve" class="preview-approve" ${approvedChecked} ${preview.sensitive ? "disabled" : ""}>
+        <label class="preview-toggle" title="${preview.sensitive ? "Sensitive field — review carefully before approving" : "Approve this field for filling"}">
+          <input type="radio" name="action_${escapeHtml(preview.fieldKey)}" value="approve" class="preview-approve" ${approvedChecked}>
           Approve
         </label>
         <label class="preview-toggle">
-          <input type="radio" name="action_${preview.intent}" value="reject" class="preview-reject" ${rejectedChecked}>
+          <input type="radio" name="action_${escapeHtml(preview.fieldKey)}" value="reject" class="preview-reject" ${rejectedChecked}>
           Reject
         </label>
         <label class="preview-toggle">
-          <input type="radio" name="action_${preview.intent}" value="pending" class="preview-pending" ${!isApproved && !isRejected ? "checked" : ""}>
+          <input type="radio" name="action_${escapeHtml(preview.fieldKey)}" value="pending" class="preview-pending" ${!isApproved && !isRejected ? "checked" : ""}>
           Skip
         </label>
       </div>

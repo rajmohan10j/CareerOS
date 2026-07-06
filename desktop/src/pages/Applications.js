@@ -1,12 +1,14 @@
-import { fetchApplications, createApplication } from "../apiClient.js";
+import { fetchApplicationSessions, fetchApplications, createApplication } from "../apiClient.js";
 
 let _applications = [];
+let _sessions = [];
 let _loading = true;
 let _error = null;
 let _showForm = false;
 let _saving = false;
 
 function render() {
+  const sessionHtml = renderSessions();
   let listHtml = "";
   if (_loading) {
     listHtml = '<p class="health-checking">Loading applications...</p>';
@@ -69,15 +71,67 @@ function render() {
         <button class="btn btn-primary" id="showAddAppBtn">+ Add Application</button>
       </div>
       ${formHtml}
+      ${sessionHtml}
       ${listHtml}
     </div>
   `;
 }
 
+function renderSessions() {
+  if (_loading) return "";
+  if (_sessions.length === 0) {
+    return `
+      <section class="settings-section">
+        <h2>Live Application Sessions</h2>
+        <p class="placeholder-hint">No live browser sessions tracked yet. Use the extension's Fill Next Pending Entry action on an application page.</p>
+      </section>
+    `;
+  }
+
+  const rows = _sessions.map((s) => {
+    const exp = s.progress?.experience || {};
+    const edu = s.progress?.education || {};
+    const expFilled = exp.filled?.length || 0;
+    const eduFilled = edu.filled?.length || 0;
+    const title = s.job_title || s.page_title || "Application session";
+    return `
+      <div class="item-card">
+        <div class="item-card-header">
+          <strong>${escapeHtml(title)}</strong>
+          <span class="item-card-status">${escapeHtml(s.status || "in_progress")}</span>
+        </div>
+        <div class="item-card-details">
+          <span>Experience: ${expFilled}/${exp.total || 0}</span>
+          <span>Education: ${eduFilled}/${edu.total || 0}</span>
+          <span class="item-card-date">Updated: ${new Date(s.updated_at).toLocaleString()}</span>
+        </div>
+        <div class="item-card-notes">${escapeHtml(s.url || "")}</div>
+      </div>
+    `;
+  }).join("");
+
+  return `
+    <section class="settings-section">
+      <h2>Live Application Sessions</h2>
+      <p class="placeholder-hint">Tracks which resume entries have already been filled for each online application.</p>
+      <div class="item-list">${rows}</div>
+    </section>
+  `;
+}
+
+function escapeHtml(value) {
+  const div = document.createElement("div");
+  div.textContent = value == null ? "" : String(value);
+  return div.innerHTML;
+}
+
 async function onMount() {
   _loading = true;
   _error = null;
-  const result = await fetchApplications();
+  const [result, sessionResult] = await Promise.all([
+    fetchApplications(),
+    fetchApplicationSessions(),
+  ]);
   if (result.status === "ok") {
     _applications = Array.isArray(result.data) ? result.data : [];
     _error = null;
@@ -85,6 +139,7 @@ async function onMount() {
     _applications = [];
     _error = result.message;
   }
+  _sessions = sessionResult.status === "ok" && Array.isArray(sessionResult.data) ? sessionResult.data : [];
   _loading = false;
   const container = document.getElementById("pageContainer");
   if (container) container.innerHTML = render();
