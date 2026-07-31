@@ -50,7 +50,8 @@ class ApplicationCampaignService:
         )
 
     async def prepare(self, request: ApplicationCampaignRequest) -> ApplicationCampaignResponse:
-        if self._resume_repo.get_by_id(request.resume_id) is None:
+        source_resume = self._resume_repo.get_by_id(request.resume_id)
+        if source_resume is None:
             raise ValueError(f"Resume {request.resume_id} not found")
 
         items: list[ApplicationCampaignItem] = []
@@ -108,7 +109,8 @@ class ApplicationCampaignService:
                         (
                             resume
                             for resume in self._resume_repo.list()
-                            if resume.profile_id == 1 and resume.version == optimized.version
+                            if resume.profile_id == source_resume.profile_id
+                            and resume.version == optimized.version
                         ),
                         None,
                     )
