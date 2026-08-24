@@ -1,0 +1,86 @@
+{
+  "schema_version": 1,
+  "installed_at": "2026-07-30",
+  "environment": {
+    "os": "Windows",
+    "career_os_root": "C:\\Users\\Raj\\Projects\\CareerOS",
+    "portable_project_skill_root": "C:\\Users\\Raj\\Projects\\CareerOS\\.agents\\skills",
+    "codex_user_skill_root": "C:\\Users\\Raj\\.agents\\skills",
+    "opencode_user_skill_root": "C:\\Users\\Raj\\.agents\\skills"
+  },
+  "installed": [
+    {
+      "name": "superpowers",
+      "scope": "user, Codex plugin",
+      "source_url": "https://github.com/obra/superpowers.git",
+      "source_ref": "v6.2.0",
+      "source_commit": "3dcbd5c4b48e02263fbf4a3c01e3fe4f81d584d9",
+      "installed_path": "C:\\Users\\Raj\\.codex\\plugins\\cache\\superpowers-dev\\superpowers\\6.2.0",
+      "manifest_sha256": "5c5767c0fa7d98efa56c3f4f82d27772333ac1ab758a73997afba4a039bc1aba",
+      "verification": "Codex plugin installed and enabled; using-superpowers and test-driven-development present in codex debug prompt-input."
+    },
+    {
+      "name": "superpowers",
+      "scope": "user, OpenCode plugin",
+      "source_url": "https://github.com/obra/superpowers.git",
+      "source_ref": "v6.2.0",
+      "source_commit": "3dcbd5c4b48e02263fbf4a3c01e3fe4f81d584d9",
+      "config_path": "C:\\Users\\Raj\\.config\\opencode\\opencode.jsonc",
+      "installed_path": "C:\\Users\\Raj\\.cache\\opencode\\packages\\superpowers@git+https_\\github.com\\obra\\superpowers.git#v6.2.0\\node_modules\\superpowers",
+      "verification": "OpenCode effective config contains the pinned git plugin; representative Superpowers skills are discovered."
+    },
+    {
+      "name": "frontend-design",
+      "scope": "CareerOS project",
+      "source_url": "https://github.com/anthropics/skills/tree/b29e7cf65e5cb78a5ac33d582270551bc74a14eb/skills/frontend-design",
+      "source_commit": "b29e7cf65e5cb78a5ac33d582270551bc74a14eb",
+      "installed_path": "C:\\Users\\Raj\\Projects\\CareerOS\\.agents\\skills\\frontend-design",
+      "skill_sha256": "1608ea77fbb6fc30d13a97d12cfa8ebf31358d40f0dd97beed24829d6b3f45dd",
+      "verification": "Discovered by Codex and OpenCode."
+    },
+    {
+      "name": "webapp-testing",
+      "scope": "CareerOS project",
+      "source_url": "https://github.com/anthropics/skills/tree/b29e7cf65e5cb78a5ac33d582270551bc74a14eb/skills/webapp-testing",
+      "source_commit": "b29e7cf65e5cb78a5ac33d582270551bc74a14eb",
+      "installed_path": "C:\\Users\\Raj\\Projects\\CareerOS\\.agents\\skills\\webapp-testing",
+      "skill_sha256": "51b7349e77ec63b7744a6f63647e7566a0b4d2e301121cc10e8c2113af6556a2",
+      "verification": "Discovered by Codex and OpenCode."
+    },
+    {
+      "name": "code-simplifier",
+      "scope": "CareerOS project",
+      "source_url": "https://github.com/anthropics/claude-plugins-official/blob/cf99fc252a44e3f36763abe1db8744757f1b0297/plugins/code-simplifier/agents/code-simplifier.md",
+      "source_commit": "cf99fc252a44e3f36763abe1db8744757f1b0297",
+      "installed_path": "C:\\Users\\Raj\\Projects\\CareerOS\\.agents\\skills\\code-simplifier",
+      "skill_sha256": "42ec2207be444ca740218fedcdd17413025dbc89f80f28b7c2397f80c9949b2c",
+      "adapted": true,
+      "adaptation": "Converted Anthropic's agent prompt to portable SKILL.md, removed Claude-only model metadata, and replaced TypeScript-only defaults with repository-neutral test guardrails.",
+      "verification": "Discovered by Codex and OpenCode."
+    },
+    {
+      "name": "security-best-practices",
+      "requested_as": "security-guidance",
+      "scope": "CareerOS project",
+      "source_url": "https://github.com/openai/skills/tree/49f948faa9258a0c61caceaf225e179651397431/skills/.curated/security-best-practices",
+      "source_commit": "49f948faa9258a0c61caceaf225e179651397431",
+      "installed_path": "C:\\Users\\Raj\\Projects\\CareerOS\\.agents\\skills\\security-best-practices",
+      "skill_sha256": "7b3dae1ffc5434d890f3c65c8f552af52d0307fab3b35dec13013c9ca3844c4f",
+      "verification": "Discovered by Codex and OpenCode; portable security replacement supports CareerOS's Python and JavaScript/TypeScript stacks."
+    }
+  ],
+  "not_reinstalled": [
+    {
+      "name": "skill-creator",
+      "reason": "Bundled by Codex at C:\\Users\\Raj\\.codex\\skills\\.system\\skill-creator; another copy would create duplicate capability."
+    }
+  ],
+  "not_transplanted": [
+    {
+      "name": "security-guidance",
+      "source_url": "https://github.com/anthropics/claude-plugins-official/tree/cf99fc252a44e3f36763abe1db8744757f1b0297/plugins/security-guidance",
+      "source_commit": "cf99fc252a44e3f36763abe1db8744757f1b0297",
+      "reason": "It is a Claude Code hook plugin requiring Claude-specific lifecycle hooks and model/API behavior, not a portable Agent Skill. OpenAI security-best-practices was installed instead."
+    }
+  ]
+}
