@@ -3,6 +3,7 @@ const routes = {
   "profile": () => import("./pages/Profile.js"),
   "resumes": () => import("./pages/Resumes.js"),
   "jobs": () => import("./pages/Jobs.js"),
+  "linkedin": () => import("./pages/LinkedIn.js"),
   "applications": () => import("./pages/Applications.js"),
   "documents": () => import("./pages/Documents.js"),
   "ai-status": () => import("./pages/AIStatus.js"),

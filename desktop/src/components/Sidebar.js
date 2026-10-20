@@ -5,6 +5,7 @@ const NAV_ITEMS = [
   { route: "profile", label: "Profile", icon: "👤" },
   { route: "resumes", label: "Resumes", icon: "📄" },
   { route: "jobs", label: "Jobs", icon: "💼" },
+  { route: "linkedin", label: "LinkedIn", icon: "🌐" },
   { route: "applications", label: "Applications", icon: "📋" },
   { route: "documents", label: "Documents", icon: "📁" },
   { route: "ai-status", label: "AI Status", icon: "🤖" },

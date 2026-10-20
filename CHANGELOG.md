@@ -2,7 +2,15 @@
 
 ## v0.2.1
 - Active development baseline branched from v0.2.0-stable (Milestone 10A-FIX-4).
-- Ready for upcoming features and system updates.
+- **LinkedIn Intelligence Hub Integration**:
+  - Re-engineered `C:\Users\Raj\.linkedin-mcp` and `C:\Users\Raj\tools\linkedin-mcp-server` into CareerOS.
+  - Backend schemas (`backend/app/schemas/linkedin.py`): Search, JobItem, JobDetail, Import, SavedJobs, Recruiter models.
+  - Subprocess Bridge (`backend/app/services/linkedin_bridge_runner.py` & `linkedin_bridge.py`): Decoupled, non-blocking execution via Patchright stealth Chromium engine with persistent authenticated session reuse.
+  - Business Service (`backend/app/services/linkedin_service.py`): Real-time local skill matching, AI candidate fit score (0–100), and 1-click import into CareerOS `jobs` table with evaluation JSON persistence.
+  - FastAPI Endpoints (`backend/app/api/linkedin.py`): `GET /linkedin/status`, `POST /linkedin/search`, `GET /linkedin/jobs/{id}`, `POST /linkedin/import`, `GET /linkedin/saved`.
+  - Desktop UI (`desktop/src/pages/LinkedIn.js`): Full-featured LinkedIn Hub with 3 tabs (Job Discovery with Work Type, Experience, Date Posted, and Easy Apply filters; Saved & Applied Tracker Sync; Session & Health Diagnostics).
+  - UI Navigation & Routes: Added `🌐 LinkedIn` to `Sidebar.js` and `routes.js`.
+  - Verified with 515 passing backend unit tests, 267 passing desktop tests, and end-to-end Playwright browser automation test. Zero PII, zero cloud, 100% local-first.
 
 ---
 

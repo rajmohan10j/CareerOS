@@ -74,11 +74,11 @@ async function checkHealth() {
   }
 }
 
-async function apiFetch(endpoint) {
+async function apiFetch(endpoint, timeoutMs = 5000) {
   const baseUrl = await getStoredBackendUrl();
   const url = `${baseUrl}${endpoint}`;
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 5000);
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
   try {
     const resp = await fetch(url, { signal: controller.signal });
     clearTimeout(timeout);
@@ -97,11 +97,11 @@ async function apiFetch(endpoint) {
   }
 }
 
-async function apiPost(endpoint, body) {
+async function apiPost(endpoint, body, timeoutMs = 5000) {
   const baseUrl = await getStoredBackendUrl();
   const url = `${baseUrl}${endpoint}`;
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 5000);
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
   try {
     const resp = await fetch(url, {
       method: "POST",
@@ -268,6 +268,26 @@ async function fetchAnalytics() {
   }
 }
 
+async function fetchLinkedInStatus() {
+  return apiFetch("/linkedin/status", 8000);
+}
+
+async function searchLinkedInJobs(params) {
+  return apiPost("/linkedin/search", params, 45000);
+}
+
+async function fetchLinkedInJobDetails(jobId) {
+  return apiFetch(`/linkedin/jobs/${jobId}`, 25000);
+}
+
+async function importLinkedInJob(payload) {
+  return apiPost("/linkedin/import", payload, 10000);
+}
+
+async function fetchLinkedInSavedJobs(stage = "saved", maxPages = 1) {
+  return apiFetch(`/linkedin/saved?stage=${encodeURIComponent(stage)}&max_pages=${maxPages}`, 30000);
+}
+
 export {
   checkHealth,
   fetchAnalytics,
@@ -294,4 +314,9 @@ export {
   fetchAiProviders,
   fetchAiModels,
   fetchAiHealth,
+  fetchLinkedInStatus,
+  searchLinkedInJobs,
+  fetchLinkedInJobDetails,
+  importLinkedInJob,
+  fetchLinkedInSavedJobs,
 };

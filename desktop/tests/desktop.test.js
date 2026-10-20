@@ -45,6 +45,7 @@ const expectedFiles = [
   "src/pages/Profile.js",
   "src/pages/Resumes.js",
   "src/pages/Jobs.js",
+  "src/pages/LinkedIn.js",
   "src/pages/Applications.js",
   "src/pages/Documents.js",
   "src/pages/AIStatus.js",
@@ -108,6 +109,7 @@ const pageFiles = [
   "Profile.js",
   "Resumes.js",
   "Jobs.js",
+  "LinkedIn.js",
   "Applications.js",
   "Documents.js",
   "AIStatus.js",
@@ -130,6 +132,7 @@ assert(routes.includes("dashboard"), "routes define dashboard");
 assert(routes.includes("profile"), "routes define profile");
 assert(routes.includes("resumes"), "routes define resumes");
 assert(routes.includes("jobs"), "routes define jobs");
+assert(routes.includes("linkedin"), "routes define linkedin");
 assert(routes.includes("applications"), "routes define applications");
 assert(routes.includes("documents"), "routes define documents");
 assert(routes.includes("ai-status"), "routes define ai-status");
@@ -182,6 +185,7 @@ const apiHelpers = [
   "fetchApplications", "createApplication",
   "fetchDocuments", "createDocument",
   "fetchAiProviders", "fetchAiModels", "fetchAiHealth",
+  "fetchLinkedInStatus", "searchLinkedInJobs", "fetchLinkedInJobDetails", "importLinkedInJob", "fetchLinkedInSavedJobs",
 ];
 for (const h of apiHelpers) {
   assert(apiClient.includes(h), `apiClient.js exports ${h}`);
