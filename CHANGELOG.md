@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.2.1
+- Active development baseline branched from v0.2.0-stable (Milestone 10A-FIX-4).
+- Ready for upcoming features and system updates.
+
+---
+
 ## v0.1.0
 - Initial Blueprint repository created.
 
