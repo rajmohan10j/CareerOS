@@ -80,20 +80,23 @@ function render() {
     for (const j of _jobs) {
       const score = j.fit_score != null ? `<span class="item-card-score">Fit: ${j.fit_score}/100</span>` : "";
       const status = j.status ? `<span class="item-card-status">${j.status}</span>` : "";
-      const link = j.url ? `<a href="${j.url}" target="_blank" rel="noopener noreferrer" class="link-external" style="margin-left: auto; font-size: 12px;" onclick="event.stopPropagation()">Open Link ↗</a>` : "";
       listHtml += `
-        <div class="item-card" data-job-id="${j.id}" style="cursor: pointer;" title="Click to view details and application link">
-          <div class="item-card-header">
-            <strong>${j.title || "Untitled"}</strong>
-            ${j.company ? `<span class="item-card-company">@ ${j.company}</span>` : ""}
-            ${link}
+        <div class="item-card" data-job-id="${j.id}" style="cursor: pointer; padding: 16px; margin-bottom: 12px;" title="Click anywhere on card to view full details and notes">
+          <div class="item-card-header" style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;">
+            <div>
+              <strong style="font-size: 16px; color: var(--color-text);">${j.title || "Untitled"}</strong>
+              ${j.company ? `<span class="item-card-company" style="margin-left: 8px; font-weight: 500;">@ ${j.company}</span>` : ""}
+            </div>
+            <div style="display: flex; gap: 8px; align-items: center; flex-shrink: 0;">
+              ${j.url ? `<a href="${j.url}" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm" onclick="event.stopPropagation()">🌐 Open Link ↗</a>` : ""}
+              <button class="btn btn-secondary btn-sm btn-open-modal" data-job-id="${j.id}">👁 View Details</button>
+            </div>
           </div>
-          <div class="item-card-details">
-            ${j.location ? `<span>${j.location}</span>` : ""}
+          <div class="item-card-details" style="margin-top: 10px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+            ${j.location ? `<span>📍 ${j.location}</span>` : ""}
             ${status}
             ${score}
-            <span class="item-card-date">Added: ${new Date(j.created_at).toLocaleDateString()}</span>
-            <span style="font-size: 12px; color: var(--color-primary); margin-left: 6px;">👁 View ➔</span>
+            <span class="item-card-date" style="margin-left: auto;">Added: ${new Date(j.created_at).toLocaleDateString()}</span>
           </div>
         </div>
       `;

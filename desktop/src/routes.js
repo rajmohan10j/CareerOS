@@ -1,14 +1,14 @@
 const routes = {
-  "dashboard": () => import("./pages/Dashboard.js"),
-  "profile": () => import("./pages/Profile.js"),
-  "resumes": () => import("./pages/Resumes.js"),
-  "jobs": () => import("./pages/Jobs.js"),
-  "linkedin": () => import("./pages/LinkedIn.js"),
-  "applications": () => import("./pages/Applications.js"),
-  "documents": () => import("./pages/Documents.js"),
-  "ai-status": () => import("./pages/AIStatus.js"),
-  "browser-extension": () => import("./pages/BrowserExtension.js"),
-  "settings": () => import("./pages/Settings.js"),
+  "dashboard": () => import("./pages/Dashboard.js?v=0.2.1"),
+  "profile": () => import("./pages/Profile.js?v=0.2.1"),
+  "resumes": () => import("./pages/Resumes.js?v=0.2.1"),
+  "jobs": () => import("./pages/Jobs.js?v=0.2.1"),
+  "linkedin": () => import("./pages/LinkedIn.js?v=0.2.1"),
+  "applications": () => import("./pages/Applications.js?v=0.2.1"),
+  "documents": () => import("./pages/Documents.js?v=0.2.1"),
+  "ai-status": () => import("./pages/AIStatus.js?v=0.2.1"),
+  "browser-extension": () => import("./pages/BrowserExtension.js?v=0.2.1"),
+  "settings": () => import("./pages/Settings.js?v=0.2.1"),
 };
 
 const DEFAULT_ROUTE = "dashboard";
