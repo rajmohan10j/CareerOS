@@ -12,6 +12,10 @@ let _searching = false;
 let _searchError = null;
 let _searchResults = [];
 let _importedJobIds = new Set();
+let _selectedJobIds = new Set();
+let _selectedSavedJobIds = new Set();
+let _bulkImporting = false;
+let _bulkProgressText = "";
 let _detailModal = null;
 let _loadingDetail = false;
 
@@ -151,8 +155,13 @@ function renderSearchResults() {
     `;
   }
 
+  const unimported = _searchResults.filter(j => !_importedJobIds.has(j.job_id));
+  const allSelected = unimported.length > 0 && unimported.every(j => _selectedJobIds.has(j.job_id));
+
   const cards = _searchResults.map((job) => {
     const isImported = _importedJobIds.has(job.job_id);
+    const isSelected = _selectedJobIds.has(job.job_id);
+
     const fitBadge = job.fit_score != null
       ? `<span class="badge ${job.fit_score >= 80 ? 'badge-success' : 'badge-info'}">Fit: ${job.fit_score}%</span>`
       : '';
@@ -165,11 +174,17 @@ function renderSearchResults() {
       .join(" ");
 
     return `
-      <div class="job-result-card" data-job-id="${job.job_id}">
+      <div class="job-result-card ${isSelected ? 'job-result-card-selected' : ''}" data-job-id="${job.job_id}" style="${isSelected ? 'border-color: var(--color-primary); background: rgba(21, 101, 192, 0.03);' : ''}">
         <div class="job-result-header">
-          <div>
-            <h3 class="job-result-title">${job.title}</h3>
-            <p class="job-result-company">${job.company} • 📍 ${job.location}</p>
+          <div style="display: flex; align-items: flex-start; gap: 12px;">
+            ${isImported
+              ? '<span title="Already Imported" style="font-size: 18px; margin-top: 2px;">✅</span>'
+              : `<input type="checkbox" class="chk-select-job" data-job-id="${job.job_id}" ${isSelected ? 'checked' : ''} style="width: 18px; height: 18px; margin-top: 4px; cursor: pointer;" title="Select this job" />`
+            }
+            <div>
+              <h3 class="job-result-title">${job.title}</h3>
+              <p class="job-result-company">${job.company} • 📍 ${job.location}</p>
+            </div>
           </div>
           <div class="job-result-badges">
             ${applyBadge}
@@ -187,9 +202,10 @@ function renderSearchResults() {
           </div>
           <div class="footer-buttons">
             <button class="btn btn-secondary btn-sm btn-view-details" data-job-id="${job.job_id}">👁 View Details</button>
-            <button class="btn ${isImported ? 'btn-success' : 'btn-primary'} btn-sm btn-import-job" data-job-id="${job.job_id}" ${isImported ? 'disabled' : ''}>
-              ${isImported ? 'Imported ✅' : '📥 Import to Jobs'}
-            </button>
+            ${isImported
+              ? '<a href="#jobs" class="btn btn-success btn-sm">Imported ✅ View in Tracker ➔</a>'
+              : `<button class="btn btn-primary btn-sm btn-import-job" data-job-id="${job.job_id}">📥 Import to Jobs</button>`
+            }
           </div>
         </div>
       </div>
@@ -197,9 +213,34 @@ function renderSearchResults() {
   }).join("");
 
   return `
-    <div class="results-header">
-      <h4>Found ${_searchResults.length} LinkedIn Opportunities</h4>
+    <div class="card" style="margin-bottom: 16px; padding: 12px 18px; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 8px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+        <div>
+          <h4 style="margin: 0 0 4px 0;">Found ${_searchResults.length} LinkedIn Opportunities</h4>
+          <span style="font-size: 13px; color: var(--color-text-secondary);">
+            ${_importedJobIds.size} imported • <strong>${_selectedJobIds.size} selected</strong>
+          </span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+          <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 13px; font-weight: 500; user-select: none;">
+            <input type="checkbox" id="chkSelectAllSearch" ${allSelected ? 'checked' : ''} ${unimported.length === 0 ? 'disabled' : ''} style="width: 17px; height: 17px; cursor: pointer;" />
+            <span>Select All (${unimported.length})</span>
+          </label>
+          <button class="btn btn-secondary btn-sm" id="btnDeselectAllSearch" ${_selectedJobIds.size === 0 ? 'disabled' : ''}>
+            Clear Selection
+          </button>
+          <button class="btn btn-primary btn-sm" id="btnBulkImportSearch" ${_selectedJobIds.size === 0 || _bulkImporting ? 'disabled' : ''}>
+            ${_bulkImporting ? `⏳ ${_bulkProgressText || 'Importing...'}` : `📥 Import Selected (${_selectedJobIds.size})`}
+          </button>
+        </div>
+      </div>
+      ${_bulkImporting ? `
+        <div style="margin-top: 10px; font-size: 13px; color: var(--color-primary); font-weight: 500;">
+          ⏳ ${_bulkProgressText}... Saving jobs to CareerOS Tracker...
+        </div>
+      ` : ''}
     </div>
+
     <div class="job-results-list">
       ${cards}
     </div>
@@ -232,17 +273,49 @@ function renderSavedTab() {
 }
 
 function renderSavedList() {
+  const unimported = _savedJobs.filter(j => !_importedJobIds.has(j.job_id));
+  const allSelected = unimported.length > 0 && unimported.every(j => _selectedSavedJobIds.has(j.job_id));
+
   return `
-    <ul class="saved-jobs-list">
-      ${_savedJobs.map(j => `
-        <li class="saved-job-item">
-          <div>
-            <strong>Job ID: ${j.job_id}</strong>
-            <a href="${j.url}" target="_blank" class="link-external" style="margin-left: 10px;">View Posting ↗</a>
-          </div>
-          <button class="btn btn-secondary btn-sm btn-import-saved" data-job-id="${j.job_id}">📥 Import</button>
-        </li>
-      `).join("")}
+    <div style="margin-bottom: 12px; padding: 10px 14px; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 6px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+      <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 13px; font-weight: 500;">
+        <input type="checkbox" id="chkSelectAllSaved" ${allSelected ? 'checked' : ''} ${unimported.length === 0 ? 'disabled' : ''} style="width: 17px; height: 17px; cursor: pointer;" />
+        <span>Select All (${unimported.length})</span>
+      </label>
+      <div style="display: flex; gap: 8px;">
+        <button class="btn btn-secondary btn-sm" id="btnDeselectAllSaved" ${_selectedSavedJobIds.size === 0 ? 'disabled' : ''}>
+          Clear Selection
+        </button>
+        <button class="btn btn-primary btn-sm" id="btnBulkImportSaved" ${_selectedSavedJobIds.size === 0 || _bulkImporting ? 'disabled' : ''}>
+          ${_bulkImporting ? `⏳ ${_bulkProgressText || 'Importing...'}` : `📥 Import Selected (${_selectedSavedJobIds.size})`}
+        </button>
+      </div>
+    </div>
+
+    <ul class="saved-jobs-list" style="list-style: none; padding: 0; margin: 0;">
+      ${_savedJobs.map(j => {
+        const isImported = _importedJobIds.has(j.job_id);
+        const isSelected = _selectedSavedJobIds.has(j.job_id);
+
+        return `
+          <li class="saved-job-item" style="display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border-bottom: 1px solid var(--color-border); ${isSelected ? 'background: rgba(21, 101, 192, 0.04);' : ''}">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              ${isImported
+                ? '<span>✅</span>'
+                : `<input type="checkbox" class="chk-select-saved" data-job-id="${j.job_id}" ${isSelected ? 'checked' : ''} style="width: 16px; height: 16px; cursor: pointer;" />`
+              }
+              <strong>Job ID: ${j.job_id}</strong>
+              <a href="${j.url}" target="_blank" rel="noopener noreferrer" class="link-external" style="margin-left: 10px;">View Posting ↗</a>
+            </div>
+            <div>
+              ${isImported
+                ? '<a href="#jobs" class="btn btn-success btn-sm">Imported ✅ View in Tracker ➔</a>'
+                : `<button class="btn btn-secondary btn-sm btn-import-saved" data-job-id="${j.job_id}">📥 Import</button>`
+              }
+            </div>
+          </li>
+        `;
+      }).join("")}
     </ul>
   `;
 }
@@ -283,6 +356,8 @@ function renderStatusTab() {
 
 function renderDetailModal() {
   const m = _detailModal;
+  const isImported = _importedJobIds.has(m.job_id);
+
   return `
     <div class="modal-overlay">
       <div class="modal-card">
@@ -293,7 +368,7 @@ function renderDetailModal() {
         <div class="modal-body">
           <p><strong>Company:</strong> ${m.company} • <strong>Location:</strong> ${m.location}</p>
           <p><strong>Apply Mode:</strong> ${m.apply_type === 'easy_apply' ? '⚡ Easy Apply' : '↗ External'}</p>
-          ${m.apply_url ? `<p><strong>Application Link:</strong> <a href="${m.apply_url}" target="_blank" class="link-external">${m.apply_url}</a></p>` : ''}
+          ${m.apply_url ? `<p><strong>Application Link:</strong> <a href="${m.apply_url}" target="_blank" rel="noopener noreferrer" class="link-external">${m.apply_url} ↗</a></p>` : ''}
           ${m.fit_score != null ? `<div class="alert alert-info"><strong>CareerOS AI Fit Score: ${m.fit_score}%</strong><br/><small>${m.recommendation || ''}</small></div>` : ''}
           <hr />
           <h4>About the Job:</h4>
@@ -301,7 +376,10 @@ function renderDetailModal() {
         </div>
         <div class="modal-footer">
           <button class="btn btn-secondary" id="btnCloseModalBtn">Close</button>
-          <button class="btn btn-primary" id="btnModalImport" data-job-id="${m.job_id}">📥 Import into CareerOS</button>
+          ${isImported
+            ? '<a href="#jobs" class="btn btn-success">Imported ✅ View in Tracker ➔</a>'
+            : `<button class="btn btn-primary" id="btnModalImport" data-job-id="${m.job_id}">📥 Import into CareerOS</button>`
+          }
         </div>
       </div>
     </div>
@@ -341,6 +419,7 @@ async function onMount(container) {
 
       _searching = true;
       _searchError = null;
+      _selectedJobIds.clear();
       container.innerHTML = render();
       onMount(container);
 
@@ -369,7 +448,85 @@ async function onMount(container) {
     });
   }
 
-  // Bind import button clicks
+  // Bind Single Job Checkbox Selection
+  container.querySelectorAll(".chk-select-job").forEach((chk) => {
+    chk.addEventListener("change", () => {
+      const jid = chk.dataset.jobId;
+      if (chk.checked) {
+        _selectedJobIds.add(jid);
+      } else {
+        _selectedJobIds.delete(jid);
+      }
+      container.innerHTML = render();
+      onMount(container);
+    });
+  });
+
+  // Bind Select All (Search)
+  const chkSelectAllSearch = container.querySelector("#chkSelectAllSearch");
+  if (chkSelectAllSearch) {
+    chkSelectAllSearch.addEventListener("change", () => {
+      const unimported = _searchResults.filter(j => !_importedJobIds.has(j.job_id));
+      if (chkSelectAllSearch.checked) {
+        unimported.forEach(j => _selectedJobIds.add(j.job_id));
+      } else {
+        _selectedJobIds.clear();
+      }
+      container.innerHTML = render();
+      onMount(container);
+    });
+  }
+
+  // Bind Deselect All (Search)
+  const btnDeselectAllSearch = container.querySelector("#btnDeselectAllSearch");
+  if (btnDeselectAllSearch) {
+    btnDeselectAllSearch.addEventListener("click", () => {
+      _selectedJobIds.clear();
+      container.innerHTML = render();
+      onMount(container);
+    });
+  }
+
+  // Bind Bulk Import (Search)
+  const btnBulkImportSearch = container.querySelector("#btnBulkImportSearch");
+  if (btnBulkImportSearch) {
+    btnBulkImportSearch.addEventListener("click", async () => {
+      if (_selectedJobIds.size === 0 || _bulkImporting) return;
+      _bulkImporting = true;
+      const idsToImport = Array.from(_selectedJobIds);
+      const total = idsToImport.length;
+
+      for (let i = 0; i < total; i++) {
+        const jid = idsToImport[i];
+        const job = _searchResults.find(j => j.job_id === jid);
+        if (!job) continue;
+
+        _bulkProgressText = `Importing ${i + 1} of ${total}: ${job.title.substring(0, 25)}`;
+        container.innerHTML = render();
+
+        await importLinkedInJob({
+          job_id: job.job_id,
+          title: job.title,
+          company: job.company,
+          location: job.location,
+          url: job.url,
+          jd_text: job.snippet,
+          apply_type: job.apply_type,
+          apply_url: job.apply_url,
+        });
+
+        _importedJobIds.add(jid);
+        _selectedJobIds.delete(jid);
+      }
+
+      _bulkImporting = false;
+      _bulkProgressText = "";
+      container.innerHTML = render();
+      onMount(container);
+    });
+  }
+
+  // Bind Individual Import button clicks
   container.querySelectorAll(".btn-import-job").forEach((btn) => {
     btn.addEventListener("click", async () => {
       const jid = btn.dataset.jobId;
@@ -392,14 +549,12 @@ async function onMount(container) {
 
       if (res.status === "ok") {
         _importedJobIds.add(jid);
-        btn.innerText = "Imported ✅";
-        btn.classList.remove("btn-primary");
-        btn.classList.add("btn-success");
+        _selectedJobIds.delete(jid);
       } else {
-        btn.disabled = false;
-        btn.innerText = "Retry Import";
         alert(res.message || "Failed to import job.");
       }
+      container.innerHTML = render();
+      onMount(container);
     });
   });
 
@@ -460,14 +615,12 @@ async function onMount(container) {
       });
       if (res.status === "ok") {
         _importedJobIds.add(_detailModal.job_id);
-        modalImport.innerText = "Imported ✅";
-        modalImport.classList.remove("btn-primary");
-        modalImport.classList.add("btn-success");
+        _selectedJobIds.delete(_detailModal.job_id);
       } else {
-        modalImport.disabled = false;
-        modalImport.innerText = "Retry Import";
         alert(res.message || "Failed to import job.");
       }
+      container.innerHTML = render();
+      onMount(container);
     });
   }
 
@@ -478,6 +631,7 @@ async function onMount(container) {
       const select = container.querySelector("#savedStageSelect");
       _savedStage = select ? select.value : "saved";
       _loadingSaved = true;
+      _selectedSavedJobIds.clear();
       container.innerHTML = render();
       onMount(container);
 
@@ -492,6 +646,106 @@ async function onMount(container) {
       onMount(container);
     });
   }
+
+  // Bind Saved Single Job Checkbox Selection
+  container.querySelectorAll(".chk-select-saved").forEach((chk) => {
+    chk.addEventListener("change", () => {
+      const jid = chk.dataset.jobId;
+      if (chk.checked) {
+        _selectedSavedJobIds.add(jid);
+      } else {
+        _selectedSavedJobIds.delete(jid);
+      }
+      container.innerHTML = render();
+      onMount(container);
+    });
+  });
+
+  // Bind Select All (Saved)
+  const chkSelectAllSaved = container.querySelector("#chkSelectAllSaved");
+  if (chkSelectAllSaved) {
+    chkSelectAllSaved.addEventListener("change", () => {
+      const unimported = _savedJobs.filter(j => !_importedJobIds.has(j.job_id));
+      if (chkSelectAllSaved.checked) {
+        unimported.forEach(j => _selectedSavedJobIds.add(j.job_id));
+      } else {
+        _selectedSavedJobIds.clear();
+      }
+      container.innerHTML = render();
+      onMount(container);
+    });
+  }
+
+  // Bind Deselect All (Saved)
+  const btnDeselectAllSaved = container.querySelector("#btnDeselectAllSaved");
+  if (btnDeselectAllSaved) {
+    btnDeselectAllSaved.addEventListener("click", () => {
+      _selectedSavedJobIds.clear();
+      container.innerHTML = render();
+      onMount(container);
+    });
+  }
+
+  // Bind Bulk Import (Saved)
+  const btnBulkImportSaved = container.querySelector("#btnBulkImportSaved");
+  if (btnBulkImportSaved) {
+    btnBulkImportSaved.addEventListener("click", async () => {
+      if (_selectedSavedJobIds.size === 0 || _bulkImporting) return;
+      _bulkImporting = true;
+      const idsToImport = Array.from(_selectedSavedJobIds);
+      const total = idsToImport.length;
+
+      for (let i = 0; i < total; i++) {
+        const jid = idsToImport[i];
+        _bulkProgressText = `Importing ${i + 1} of ${total}: Job #${jid}`;
+        container.innerHTML = render();
+
+        await importLinkedInJob({
+          job_id: jid,
+          title: `LinkedIn Saved Job #${jid}`,
+          company: "LinkedIn Saved Role",
+          location: "Remote",
+          url: `https://www.linkedin.com/jobs/view/${jid}/`,
+          jd_text: `Imported from LinkedIn saved jobs tracker (#${jid})`,
+          apply_type: "external",
+          apply_url: `https://www.linkedin.com/jobs/view/${jid}/`,
+        });
+
+        _importedJobIds.add(jid);
+        _selectedSavedJobIds.delete(jid);
+      }
+
+      _bulkImporting = false;
+      _bulkProgressText = "";
+      container.innerHTML = render();
+      onMount(container);
+    });
+  }
+
+  // Bind Individual Saved Import
+  container.querySelectorAll(".btn-import-saved").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const jid = btn.dataset.jobId;
+      btn.disabled = true;
+      btn.innerText = "Importing...";
+
+      await importLinkedInJob({
+        job_id: jid,
+        title: `LinkedIn Saved Job #${jid}`,
+        company: "LinkedIn Saved Role",
+        location: "Remote",
+        url: `https://www.linkedin.com/jobs/view/${jid}/`,
+        jd_text: `Imported from LinkedIn saved jobs tracker (#${jid})`,
+        apply_type: "external",
+        apply_url: `https://www.linkedin.com/jobs/view/${jid}/`,
+      });
+
+      _importedJobIds.add(jid);
+      _selectedSavedJobIds.delete(jid);
+      container.innerHTML = render();
+      onMount(container);
+    });
+  });
 
   // Bind status refresh
   const btnRefreshStatus = container.querySelector("#btnRefreshStatus");
