@@ -1,5 +1,5 @@
 import { render as renderLayout, mount as mountLayout, unmount as unmountLayout } from "./components/Layout.js";
-import { renderRoute } from "./routes.js";
+import { renderRoute } from "./routes.js?v=0.2.1";
 import { refresh as refreshBackend } from "./components/BackendStatus.js";
 
 const app = document.getElementById("app");
