@@ -88,7 +88,7 @@ class LinkedInBridge:
             message=message,
         )
 
-    async def search_jobs(self, req: LinkedInSearchRequest, timeout: float = 45.0) -> dict[str, Any]:
+    async def search_jobs(self, req: LinkedInSearchRequest, timeout: float = 90.0) -> dict[str, Any]:
         python_exe = self._get_python_executable()
         cmd = [
             python_exe,

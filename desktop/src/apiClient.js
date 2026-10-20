@@ -273,7 +273,7 @@ async function fetchLinkedInStatus() {
 }
 
 async function searchLinkedInJobs(params) {
-  return apiPost("/linkedin/search", params, 45000);
+  return apiPost("/linkedin/search", params, 90000);
 }
 
 async function fetchLinkedInJobDetails(jobId) {

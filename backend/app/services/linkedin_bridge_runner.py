@@ -45,6 +45,53 @@ def get_status():
     }
 
 
+def parse_search_results(job_ids, references, raw_text, default_location="Remote"):
+    import re
+    ref_jobs = references.get("search_results", []) if isinstance(references, dict) else []
+    id_to_title = {}
+    for ref in ref_jobs:
+        if isinstance(ref, dict) and ref.get("kind") == "job":
+            m = re.search(r'/jobs/view/(\d+)', ref.get("url", ""))
+            if m:
+                id_to_title[m.group(1)] = ref.get("text", "").strip()
+
+    lines = [line.strip() for line in raw_text.split("\n") if line.strip()]
+
+    jobs = []
+    for jid in job_ids:
+        title = id_to_title.get(str(jid), f"LinkedIn Job #{jid}")
+        company = "LinkedIn Company"
+        location = default_location or "Remote"
+        apply_type = "external"
+        snippet = ""
+
+        if title in lines:
+            idx = lines.index(title)
+            if idx + 1 < len(lines):
+                company = lines[idx + 1]
+            if idx + 2 < len(lines):
+                location = lines[idx + 2]
+
+            context_block = lines[idx:min(idx + 8, len(lines))]
+            snippet = " • ".join(context_block[1:])
+            for l in context_block:
+                if "easy apply" in l.lower():
+                    apply_type = "easy_apply"
+
+        jobs.append({
+            "job_id": str(jid),
+            "title": title,
+            "company": company,
+            "location": location,
+            "url": f"https://www.linkedin.com/jobs/view/{jid}/",
+            "apply_type": apply_type,
+            "apply_url": f"https://www.linkedin.com/jobs/view/{jid}/",
+            "snippet": snippet or f"{title} at {company}",
+        })
+
+    return jobs
+
+
 async def run_search_jobs(args):
     from linkedin_mcp_server.dependencies import get_ready_extractor
     from linkedin_mcp_server.drivers.browser import close_browser
@@ -65,49 +112,10 @@ async def run_search_jobs(args):
 
         job_ids = result.get("job_ids", [])
         sections = result.get("sections", {})
+        references = result.get("references", {})
         raw_text = sections.get("search_results", "")
 
-        jobs_list = []
-        for jid in job_ids:
-            try:
-                job_res = await asyncio.wait_for(extractor.read_job(jid), timeout=8.0)
-                raw_job = job_res.get("sections", {}).get("job_posting", "")
-                lines = [line.strip() for line in raw_job.split("\n") if line.strip()]
-                company = lines[0] if len(lines) > 0 else "Unknown Company"
-                title = lines[1] if len(lines) > 1 else "Job Opportunity"
-                location = lines[2] if len(lines) > 2 else (args.location or "Unspecified")
-
-                apply_type = "external"
-                apply_url = f"https://www.linkedin.com/jobs/view/{jid}/"
-                try:
-                    apply_info = await asyncio.wait_for(extractor.get_job_apply_url(jid), timeout=4.0)
-                    apply_data = apply_info.get("apply", {})
-                    apply_type = apply_data.get("type", "external")
-                    apply_url = apply_data.get("url", apply_url)
-                except Exception:
-                    pass
-
-                jobs_list.append({
-                    "job_id": str(jid),
-                    "title": title,
-                    "company": company,
-                    "location": location,
-                    "url": f"https://www.linkedin.com/jobs/view/{jid}/",
-                    "apply_type": apply_type,
-                    "apply_url": apply_url,
-                    "snippet": raw_job[:500] if raw_job else "",
-                })
-            except Exception as e:
-                jobs_list.append({
-                    "job_id": str(jid),
-                    "title": f"LinkedIn Job #{jid}",
-                    "company": "LinkedIn Company",
-                    "location": args.location or "Remote",
-                    "url": f"https://www.linkedin.com/jobs/view/{jid}/",
-                    "apply_type": "external",
-                    "apply_url": f"https://www.linkedin.com/jobs/view/{jid}/",
-                    "snippet": "",
-                })
+        jobs_list = parse_search_results(job_ids, references, raw_text, default_location=args.location)
 
         return {
             "keywords": args.keywords,
@@ -117,7 +125,10 @@ async def run_search_jobs(args):
             "errors": [str(e) for e in result.get("section_errors", {}).values()] if "section_errors" in result else [],
         }
     finally:
-        await close_browser()
+        try:
+            await asyncio.wait_for(close_browser(), timeout=4.0)
+        except Exception:
+            pass
 
 
 async def run_get_job_details(args):
