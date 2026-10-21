@@ -83,6 +83,49 @@ class TestProfileAPI:
         assert response.status_code == 200
         assert response.json()["status"] == "ok"
 
+    def test_multi_profile_lifecycle(self, _session):
+        client = TestClient(_test_app)
+
+        # 1. Create first profile
+        p1_resp = client.post("/profiles", json={"name": "Publishing Leader", "summary": "30 yrs in publishing"})
+        assert p1_resp.status_code == 201
+        p1 = p1_resp.json()
+        assert p1["name"] == "Publishing Leader"
+        assert p1["is_active"] is True
+
+        # 2. Create second profile
+        p2_resp = client.post("/profiles", json={"name": "Digital Transformation Director", "summary": "Enterprise transformation"})
+        assert p2_resp.status_code == 201
+        p2 = p2_resp.json()
+        assert p2["name"] == "Digital Transformation Director"
+        assert p2["is_active"] is False
+
+        # 3. List all profiles
+        list_resp = client.get("/profiles")
+        assert list_resp.status_code == 200
+        profiles = list_resp.json()
+        assert len(profiles) == 2
+        assert profiles[0]["name"] == "Publishing Leader"
+        assert profiles[1]["name"] == "Digital Transformation Director"
+
+        # 4. Activate second profile
+        act_resp = client.post(f"/profiles/{p2['id']}/activate")
+        assert act_resp.status_code == 200
+        assert act_resp.json()["is_active"] is True
+
+        # 5. Check GET /profile returns the active one
+        active_resp = client.get("/profile")
+        assert active_resp.status_code == 200
+        assert active_resp.json()["id"] == p2["id"]
+        assert active_resp.json()["name"] == "Digital Transformation Director"
+
+        # 6. Delete first profile
+        del_resp = client.delete(f"/profiles/{p1['id']}")
+        assert del_resp.status_code == 204
+        list_after = client.get("/profiles").json()
+        assert len(list_after) == 1
+        assert list_after[0]["id"] == p2["id"]
+
 
 class TestProfileService:
     def test_get_returns_none_when_no_profile(self, _session):

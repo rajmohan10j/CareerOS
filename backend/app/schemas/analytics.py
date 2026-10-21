@@ -2,6 +2,7 @@ from pydantic import BaseModel
 
 
 class ProfileAnalytics(BaseModel):
+    total: int = 0
     exists: bool = False
     completeness_pct: float = 0.0
     fields_populated: int = 0

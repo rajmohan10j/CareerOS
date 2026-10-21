@@ -153,12 +153,58 @@ async function apiPut(endpoint, body) {
   }
 }
 
+async function apiDelete(endpoint, timeoutMs = 5000) {
+  const baseUrl = await getStoredBackendUrl();
+  const url = `${baseUrl}${endpoint}`;
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const resp = await fetch(url, {
+      method: "DELETE",
+      signal: controller.signal,
+    });
+    clearTimeout(timeout);
+    if (!resp.ok) {
+      const detail = await resp.json().catch(() => ({}));
+      return { status: "error", message: `${endpoint} returned HTTP ${resp.status}${detail.detail ? ": " + detail.detail : ""}.` };
+    }
+    return { status: "ok" };
+  } catch (err) {
+    clearTimeout(timeout);
+    return { status: "error", message: `Failed to DELETE ${url} — ${err.message}.` };
+  }
+}
+
 async function fetchProfile() {
   return apiFetch("/profile");
 }
 
 async function saveProfile(data) {
   return apiPut("/profile", data);
+}
+
+async function fetchProfiles() {
+  return apiFetch("/profiles");
+}
+
+async function createProfile(data) {
+  return apiPost("/profiles", data);
+}
+
+async function fetchProfileById(profileId) {
+  return apiFetch(`/profiles/${profileId}`);
+}
+
+async function updateProfileById(profileId, data) {
+  return apiPut(`/profiles/${profileId}`, data);
+}
+
+async function activateProfile(profileId) {
+  return apiPost(`/profiles/${profileId}/activate`, {});
+}
+
+async function deleteProfile(profileId) {
+  return apiDelete(`/profiles/${profileId}`);
 }
 
 async function fetchResumes() {
@@ -331,6 +377,12 @@ export {
   DEFAULT_BACKEND_URL,
   fetchProfile,
   saveProfile,
+  fetchProfiles,
+  createProfile,
+  fetchProfileById,
+  updateProfileById,
+  activateProfile,
+  deleteProfile,
   fetchResumes,
   fetchResume,
   createResume,

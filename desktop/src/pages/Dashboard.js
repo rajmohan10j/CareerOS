@@ -82,7 +82,9 @@ function render() {
   const a = d.applications || {};
   const doc = d.documents || {};
 
-  const profileSub = p.exists ? `${p.completeness_pct || 0}% complete (${p.fields_populated || 0}/${p.fields_total || 0})` : "No profile yet";
+  const profileCount = p.total != null ? p.total : (p.exists ? 1 : 0);
+  const profileLabel = profileCount > 1 ? "Profiles" : "Profile";
+  const profileSub = p.exists ? `${p.completeness_pct || 0}% complete (${p.fields_populated || 0}/${p.fields_total || 0} fields)` : "No profile yet";
   const resumeSub = r.total > 0 ? `${r.has_content || 0} with content` : "No resumes yet";
   const jobSub = j.total > 0 ? `${j.with_score || 0} with scores` : "No jobs yet";
   const appSub = a.total > 0 ? `${a.with_resume || 0} with resume` : "No applications yet";
@@ -104,7 +106,7 @@ function render() {
       <h1 class="page-title">Dashboard</h1>
       <p class="page-subtitle">Welcome to CareerOS — your local career management platform.</p>
       <div class="dashboard-cards">
-        ${cardHtml("dash-card-profile", "👤", "Profile", p.exists ? p.fields_populated : 0, profileSub)}
+        ${cardHtml("dash-card-profile", "👤", profileLabel, profileCount, profileSub)}
         ${cardHtml("dash-card-resumes", "📄", "Resumes", r.total || 0, resumeSub)}
         ${cardHtml("dash-card-jobs", "💼", "Jobs", j.total || 0, jobSub)}
         ${cardHtml("dash-card-applications", "📋", "Applications", a.total || 0, appSub)}

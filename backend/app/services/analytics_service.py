@@ -56,9 +56,11 @@ class AnalyticsService:
         self._plugin_repo = plugin_repo
 
     def get_profile_analytics(self) -> ProfileAnalytics:
+        profiles = self._profile_repo.list_all()
+        profile_count = len(profiles)
         profile = self._profile_repo.get()
         if profile is None:
-            return ProfileAnalytics()
+            return ProfileAnalytics(total=profile_count, exists=False)
         fields = {
             "has_summary": bool(profile.summary),
             "has_target_roles": bool(profile.target_roles),
@@ -67,12 +69,13 @@ class AnalyticsService:
             "has_salary_expectations": bool(profile.salary_expectations),
         }
         populated = sum(1 for v in fields.values() if v)
-        total = len(fields)
+        fields_total = len(fields)
         return ProfileAnalytics(
+            total=profile_count,
             exists=True,
-            completeness_pct=round(populated / total * 100, 1),
+            completeness_pct=round(populated / fields_total * 100, 1),
             fields_populated=populated,
-            fields_total=total,
+            fields_total=fields_total,
             **fields,
         )
 
