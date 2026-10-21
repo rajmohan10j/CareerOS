@@ -292,6 +292,14 @@ async function createJob(data) {
   return apiPost("/jobs", data);
 }
 
+async function updateJob(jobId, data) {
+  return apiPut(`/jobs/${jobId}`, data);
+}
+
+async function deleteJob(jobId) {
+  return apiDelete(`/jobs/${jobId}`);
+}
+
 async function evaluateJobText(description) {
   return apiPost("/jobs/evaluate-text", { description });
 }
@@ -394,6 +402,8 @@ export {
   generateResume,
   fetchJobs,
   createJob,
+  updateJob,
+  deleteJob,
   evaluateJobText,
   fetchApplications,
   createApplication,
