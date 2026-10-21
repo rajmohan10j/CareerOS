@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from sqlmodel import Session
 
 from app.core.database import get_session
@@ -39,6 +39,38 @@ def get_resume(resume_id: int, session: Session = Depends(get_session)):
 def create_resume(body: ResumeCreate, session: Session = Depends(get_session)):
     service = _service(session)
     resume = service.create(body)
+    return resume_to_response(resume)
+
+
+@router.post("/resumes/upload", status_code=201)
+async def upload_resume(
+    file: UploadFile = File(...),
+    title: str | None = Form(None),
+    target_role: str | None = Form(None),
+    session: Session = Depends(get_session),
+):
+    service = _service(session)
+    filename = file.filename or "resume.txt"
+    file_bytes = await file.read()
+    if not file_bytes:
+        raise HTTPException(status_code=400, detail="Uploaded file is empty.")
+
+    from app.services.resume_service import parse_resume_file
+    content = parse_resume_file(filename, file_bytes)
+    if not content or not content.strip():
+        raise HTTPException(
+            status_code=400,
+            detail=f"Could not extract text from '{filename}'. Please ensure the document is not corrupted or password-protected.",
+        )
+
+    resume_title = title.strip() if title and title.strip() else filename.rsplit(".", 1)[0]
+    resume = service.create(
+        ResumeCreate(
+            title=resume_title,
+            content=content,
+            target_role=target_role,
+        )
+    )
     return resume_to_response(resume)
 
 

@@ -1,4 +1,4 @@
-import { fetchResumes, createResume, fetchResume, downloadResumeText } from "../apiClient.js";
+import { fetchResumes, createResume, fetchResume, downloadResumeText, uploadResumeBinary } from "../apiClient.js";
 
 let _resumes = [];
 let _loading = true;
@@ -10,7 +10,7 @@ let _saving = false;
 let _successMsg = null;
 let _uploadMsg = null;
 
-const UNSUPPORTED_EXTS = ["pdf", "doc", "docx"];
+const SUPPORTED_EXTS = ["docx", "doc", "pdf", "txt", "md"];
 
 function render() {
   let listHtml = "";
@@ -101,7 +101,7 @@ function render() {
       <div class="setting-group">
         <label for="uploadFile">Choose File</label>
         <input type="file" id="uploadFile" accept=".txt,.md,.pdf,.doc,.docx" />
-        <p class="setting-hint">Supported: .txt, .md. PDF/DOC/DOCX upload detected will show guidance. Folder import is not supported in MVP. Please upload one resume file at a time.</p>
+        <p class="setting-hint">Supported formats: <strong>.docx, .pdf, .txt, .md</strong> (local parsing, zero cloud telemetry). Folder import is not supported in MVP. Please upload one resume file at a time.</p>
       </div>
       <div class="setting-actions">
         <button class="btn btn-primary" id="saveUploadBtn" ${_saving ? 'disabled' : ''}>${_saving ? 'Uploading...' : 'Upload Resume'}</button>
@@ -266,10 +266,21 @@ function bindEvents(container) {
     });
   }
 
+  const uploadFileInput = document.getElementById("uploadFile");
+  if (uploadFileInput) {
+    uploadFileInput.addEventListener("change", () => {
+      const file = uploadFileInput.files?.[0];
+      const titleInput = document.getElementById("uploadTitle");
+      if (file && titleInput && !titleInput.value.trim()) {
+        titleInput.value = file.name.replace(/\.[^/.]+$/, "");
+      }
+    });
+  }
+
   const saveUploadBtn = document.getElementById("saveUploadBtn");
   if (saveUploadBtn) {
     saveUploadBtn.addEventListener("click", async () => {
-      const title = document.getElementById("uploadTitle")?.value || "Uploaded Resume";
+      const titleInput = document.getElementById("uploadTitle")?.value?.trim();
       const fileInput = document.getElementById("uploadFile");
       if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
         _error = "Please select a file to upload.";
@@ -281,13 +292,8 @@ function bindEvents(container) {
       const file = fileInput.files[0];
       const ext = file.name.split(".").pop().toLowerCase();
 
-      if (UNSUPPORTED_EXTS.includes(ext)) {
-        setUploadMsg("PDF/DOCX parsing is not supported yet. Please paste resume text or upload .txt/.md for now.", true);
-        return;
-      }
-
-      if (ext !== "txt" && ext !== "md") {
-        _error = `Unsupported file type: .${ext}. Please use .txt or .md files.`;
+      if (!SUPPORTED_EXTS.includes(ext)) {
+        _error = `Unsupported file type: .${ext}. Supported formats are .docx, .pdf, .txt, and .md.`;
         container.innerHTML = render();
         bindEvents(container);
         return;
@@ -295,22 +301,23 @@ function bindEvents(container) {
 
       _saving = true;
       _error = null;
+      _uploadMsg = null;
       container.innerHTML = render();
       bindEvents(container);
 
       try {
-        const text = await file.text();
-        const payload = { title, content: text };
-        const result = await createResume(payload);
+        const title = titleInput || file.name.replace(/\.[^/.]+$/, "");
+        const result = await uploadResumeBinary(file, title);
         if (result.status === "ok") {
           _resumes.unshift(result.data);
+          _selectedResume = result.data;
           _showUploadForm = false;
-          setSuccess("Resume uploaded successfully.");
+          setSuccess(`Resume "${result.data.title}" uploaded & parsed successfully!`);
         } else {
-          _error = result.message;
+          _error = result.message || "Failed to upload and parse resume.";
         }
       } catch (err) {
-        _error = "Failed to read file. Please try again.";
+        _error = "Failed to upload resume: " + (err.message || "Unknown error");
       }
 
       _saving = false;

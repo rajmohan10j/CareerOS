@@ -224,7 +224,7 @@ const pageActionChecks = [
   { file: "Resumes.js", check: "Upload Resume", label: "Resumes.js has Upload Resume action" },
   { file: "Resumes.js", check: "Paste Resume Text", label: "Resumes.js has Paste Resume Text action" },
   { file: "Resumes.js", check: "Create Blank Resume", label: "Resumes.js has Create Blank Resume action" },
-  { file: "Resumes.js", check: "PDF/DOCX parsing is not supported yet", label: "Resumes.js shows unsupported PDF/DOCX message" },
+  { file: "Resumes.js", check: "uploadResumeBinary", label: "Resumes.js uses uploadResumeBinary API" },
   { file: "Resumes.js", check: "pasteContent", label: "Resumes.js has paste content textarea" },
   { file: "Resumes.js", check: "savePasteBtn", label: "Resumes.js has save paste button" },
   { file: "Resumes.js", check: "pasteTitle", label: "Resumes.js has paste title input" },
@@ -233,8 +233,8 @@ const pageActionChecks = [
   { file: "Resumes.js", check: "Download .md", label: "Resumes.js has download .md option" },
   { file: "Resumes.js", check: "downloadResumeText", label: "Resumes.js uses downloadResumeText API" },
   { file: "Resumes.js", check: "Folder import is not supported in MVP", label: "Resumes.js has folder import limitation message" },
-  { file: "Resumes.js", check: "PDF/DOCX parsing is not supported yet", label: "Resumes.js has updated PDF/DOCX message" },
-  { file: "Resumes.js", check: ".doc", label: "Resumes.js handles .doc as unsupported" },
+  { file: "Resumes.js", check: "SUPPORTED_EXTS", label: "Resumes.js defines supported extensions" },
+  { file: "Resumes.js", check: ".docx", label: "Resumes.js handles .docx upload" },
   { file: "Resumes.js", check: "item-card-meta", label: "Resumes.js shows metadata in content view" },
   { file: "Jobs.js", check: "createJob", label: "Jobs.js calls createJob API" },
   { file: "Jobs.js", check: "showAddJobBtn", label: "Jobs.js has add job button" },
@@ -289,7 +289,7 @@ assert(resumesPage.includes("No resumes yet"), "Resumes.js has empty state");
 assert(resumesPage.includes("Upload Resume"), "Resumes.js has upload action");
 assert(resumesPage.includes("Paste Resume Text"), "Resumes.js has paste action");
 assert(resumesPage.includes("Create Blank Resume"), "Resumes.js has create blank action");
-assert(resumesPage.includes("PDF/DOCX parsing is not supported yet"), "Resumes.js warns on PDF/DOCX");
+assert(resumesPage.includes("uploadResumeBinary"), "Resumes.js supports binary upload");
 assert(resumesPage.includes("Folder import is not supported in MVP"), "Resumes.js shows folder import limitation");
 assert(resumesPage.includes("Download .txt"), "Resumes.js has download .txt option");
 assert(resumesPage.includes("Download .md"), "Resumes.js has download .md option");

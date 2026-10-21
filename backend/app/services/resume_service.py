@@ -61,6 +61,56 @@ def _build_generation_prompt(
     return "\n".join(lines)
 
 
+def parse_resume_file(filename: str, file_bytes: bytes) -> str:
+    """Extract text from .docx, .doc, .pdf, .txt, or .md file bytes with zero external dependencies."""
+    ext = filename.rsplit(".", 1)[-1].lower() if "." in filename else ""
+
+    if ext in ("docx", "doc"):
+        try:
+            import io
+            import docx
+
+            doc = docx.Document(io.BytesIO(file_bytes))
+            parts = []
+            for p in doc.paragraphs:
+                t = p.text.strip()
+                if t:
+                    parts.append(t)
+            for table in doc.tables:
+                for row in table.rows:
+                    cells = [c.text.strip() for c in row.cells if c.text.strip()]
+                    if cells:
+                        parts.append(" | ".join(cells))
+            text = "\n\n".join(parts)
+            return text.strip()
+        except Exception:
+            return ""
+
+    if ext == "pdf":
+        try:
+            import io
+            import pypdf
+
+            reader = pypdf.PdfReader(io.BytesIO(file_bytes))
+            pages = []
+            for page in reader.pages:
+                t = page.extract_text()
+                if t and t.strip():
+                    pages.append(t.strip())
+            text = "\n\n".join(pages)
+            return text.strip()
+        except Exception:
+            return ""
+
+    if ext in ("txt", "md", ""):
+        try:
+            return file_bytes.decode("utf-8", errors="replace").strip()
+        except Exception:
+            return ""
+
+    return ""
+
+
 class ResumeService:
     def __init__(
         self,

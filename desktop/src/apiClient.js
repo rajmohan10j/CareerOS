@@ -181,6 +181,41 @@ async function importResumeText(data) {
   return apiPost("/resumes", data);
 }
 
+async function apiUpload(endpoint, formData, timeoutMs = 30000) {
+  const baseUrl = await getStoredBackendUrl();
+  const url = `${baseUrl}${endpoint}`;
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const resp = await fetch(url, {
+      method: "POST",
+      body: formData,
+      signal: controller.signal,
+    });
+    clearTimeout(timeout);
+    if (!resp.ok) {
+      const detail = await resp.json().catch(() => ({}));
+      return { status: "error", message: `${endpoint} returned HTTP ${resp.status}${detail.detail ? ": " + detail.detail : ""}.` };
+    }
+    const data = await resp.json();
+    return { status: "ok", data };
+  } catch (err) {
+    clearTimeout(timeout);
+    if (err.name === "AbortError") {
+      return { status: "error", message: `Request timed out for ${url}.` };
+    }
+    return { status: "error", message: `Failed to upload to ${url} — ${err.message}.` };
+  }
+}
+
+async function uploadResumeBinary(file, title, targetRole) {
+  const formData = new FormData();
+  formData.append("file", file);
+  if (title) formData.append("title", title);
+  if (targetRole) formData.append("target_role", targetRole);
+  return apiUpload("/resumes/upload", formData, 30000);
+}
+
 async function uploadResumeFile(data) {
   return apiPost("/resumes", data);
 }
@@ -301,6 +336,7 @@ export {
   createResume,
   importResumeText,
   uploadResumeFile,
+  uploadResumeBinary,
   uploadResumeTextFile,
   downloadResumeText,
   generateResume,

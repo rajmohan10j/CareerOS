@@ -119,6 +119,50 @@ class TestResumeAPI:
         assert response.status_code == 200
         assert len(response.json()) == 2
 
+    def test_upload_resume_txt(self, _session):
+        client = TestClient(_test_app)
+        files = {"file": ("my_resume.txt", b"Software Engineer with 8 years experience in Python", "text/plain")}
+        data = {"title": "Uploaded TXT Resume", "target_role": "Python Engineer"}
+        response = client.post("/resumes/upload", files=files, data=data)
+        assert response.status_code == 201
+        res = response.json()
+        assert res["title"] == "Uploaded TXT Resume"
+        assert res["target_role"] == "Python Engineer"
+        assert "Software Engineer" in res["content"]
+
+    def test_upload_resume_docx(self, _session):
+        import io
+        import docx
+
+        doc = docx.Document()
+        doc.add_heading("Jane Doe", level=1)
+        doc.add_paragraph("Lead Cloud Architect with Kubernetes and Terraform expertise.")
+        doc_bytes = io.BytesIO()
+        doc.save(doc_bytes)
+        doc_bytes.seek(0)
+
+        client = TestClient(_test_app)
+        files = {"file": ("Jane_CV.docx", doc_bytes.getvalue(), "application/vnd.openxmlformats-officedocument.wordprocessingml.document")}
+        response = client.post("/resumes/upload", files=files)
+        assert response.status_code == 201
+        res = response.json()
+        assert res["title"] == "Jane_CV"
+        assert "Jane Doe" in res["content"]
+        assert "Lead Cloud Architect" in res["content"]
+
+    def test_upload_empty_file_returns_400(self, _session):
+        client = TestClient(_test_app)
+        files = {"file": ("empty.txt", b"", "text/plain")}
+        response = client.post("/resumes/upload", files=files)
+        assert response.status_code == 400
+        assert "empty" in response.json()["detail"].lower()
+
+    def test_upload_corrupt_docx_returns_400(self, _session):
+        client = TestClient(_test_app)
+        files = {"file": ("corrupt.docx", b"not a real docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document")}
+        response = client.post("/resumes/upload", files=files)
+        assert response.status_code == 400
+
     def test_generate_requires_profile(self, _session):
         client = TestClient(_test_app)
         with patch.object(AIService, "generate", new_callable=AsyncMock) as mock_gen:
