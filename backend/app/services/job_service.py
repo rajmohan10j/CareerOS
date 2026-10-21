@@ -339,3 +339,92 @@ class JobService:
         response = _build_evaluate_response(None, result, None, user_skills)
 
         return response.model_dump()
+
+    def check_availability(self, job_id: int) -> dict:
+        job = self._job_repo.get_by_id(job_id)
+        if not job:
+            return {"status": "error", "message": "Job not found"}
+        res = check_url_liveness(job.url)
+        if not res.get("available", True):
+            job.status = "unavailable"
+            job.updated_at = datetime.now(timezone.utc)
+            self._job_repo.update(job)
+        return {
+            "job_id": job.id,
+            "status": job.status,
+            "available": res.get("available", True),
+            "reason": res.get("reason", ""),
+        }
+
+    def check_all_availability(self) -> dict:
+        jobs = self._job_repo.list_all()
+        updated_count = 0
+        results = []
+        for job in jobs:
+            if not job.url or job.status == "unavailable":
+                continue
+            res = check_url_liveness(job.url)
+            if not res.get("available", True):
+                job.status = "unavailable"
+                job.updated_at = datetime.now(timezone.utc)
+                self._job_repo.update(job)
+                updated_count += 1
+            results.append({
+                "id": job.id,
+                "title": job.title,
+                "status": job.status,
+                "available": res.get("available", True),
+                "reason": res.get("reason", ""),
+            })
+        return {
+            "checked": len(results),
+            "updated_unavailable": updated_count,
+            "results": results,
+        }
+
+
+def check_url_liveness(url: str | None) -> dict:
+    if not url or not url.strip():
+        return {"available": True, "reason": "No URL provided"}
+
+    import urllib.error
+    import urllib.request
+
+    clean_url = url.strip()
+    headers = {
+        "User-Agent": (
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+        ),
+        "Accept-Language": "en-US,en;q=0.9",
+    }
+    req = urllib.request.Request(clean_url, headers=headers)
+    try:
+        with urllib.request.urlopen(req, timeout=8) as resp:
+            html = resp.read().decode("utf-8", errors="ignore").lower()
+            closed_signals = [
+                "no longer accepting applications",
+                "closed-job__flavor--closed",
+                "this job is closed",
+                "job posting is no longer available",
+                "job post has expired",
+                "position has been filled",
+            ]
+            for signal in closed_signals:
+                if signal in html:
+                    return {
+                        "available": False,
+                        "status": "unavailable",
+                        "reason": "Posting closed / no longer accepting applications",
+                    }
+            return {"available": True, "status": "open", "reason": "Posting is active"}
+    except urllib.error.HTTPError as e:
+        if e.code in (404, 410):
+            return {
+                "available": False,
+                "status": "unavailable",
+                "reason": f"Job page not found (HTTP {e.code})",
+            }
+        return {"available": True, "reason": f"HTTP status {e.code}"}
+    except Exception as e:
+        return {"available": True, "reason": f"Check note: {str(e)}"}

@@ -1,12 +1,22 @@
-import { fetchJobs, createJob, updateJob, deleteJob } from "../apiClient.js";
+import {
+  fetchJobs,
+  createJob,
+  updateJob,
+  deleteJob,
+  checkJobAvailability,
+  checkAllJobsAvailability,
+} from "../apiClient.js";
 
 let _jobs = [];
 let _loading = true;
 let _error = null;
 let _showForm = false;
 let _saving = false;
+let _checking = false;
 let _selectedJob = null;
 let _currentFilter = "all";
+let _viewMode = "list"; // "list" or "board"
+let _hideUnavailable = false;
 let _statusMsg = null;
 
 const STATUS_CONFIG = {
@@ -24,6 +34,45 @@ const STATUS_CATEGORIES = [
   { id: "interviewing", label: "Interviewing", icon: "💼" },
   { id: "unavailable", label: "No Longer Available", icon: "⛔" },
   { id: "not_interested", label: "Closed / Passed", icon: "🚫" },
+];
+
+const BOARD_COLUMNS = [
+  {
+    id: "discovered",
+    title: "Not Yet Applied",
+    icon: "⏳",
+    color: "#475569",
+    bg: "#f8fafc",
+    border: "#cbd5e1",
+    statuses: ["discovered"],
+  },
+  {
+    id: "applied",
+    title: "Applied",
+    icon: "📤",
+    color: "#166534",
+    bg: "#f0fdf4",
+    border: "#86efac",
+    statuses: ["applied"],
+  },
+  {
+    id: "interviewing",
+    title: "Interviewing",
+    icon: "💼",
+    color: "#6b21a8",
+    bg: "#faf5ff",
+    border: "#d8b4fe",
+    statuses: ["interviewing"],
+  },
+  {
+    id: "closed",
+    title: "Closed / Expired",
+    icon: "⛔",
+    color: "#991b1b",
+    bg: "#fef2f2",
+    border: "#fca5a5",
+    statuses: ["unavailable", "not_interested"],
+  },
 ];
 
 function normalizeStatus(status) {
@@ -46,7 +95,7 @@ function setFlashMessage(msg) {
       container.innerHTML = render();
       bindEvents(container);
     }
-  }, 4000);
+  }, 4500);
 }
 
 function renderJobModal() {
@@ -72,7 +121,7 @@ function renderJobModal() {
 
           <!-- Categorization & Status Bar -->
           <div style="background: var(--color-bg); padding: 14px 18px; border-radius: 8px; border: 1px solid var(--color-border); margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
-            <div style="display: flex; align-items: center; gap: 10px; flex: 1; min-width: 280px;">
+            <div style="display: flex; align-items: center; gap: 10px; flex: 1; min-width: 260px;">
               <label for="modalJobStatusSelect" style="font-weight: 600; font-size: 13px; color: var(--color-text); white-space: nowrap;">Status / Category:</label>
               <select id="modalJobStatusSelect" class="form-input" style="padding: 6px 12px; font-weight: 600; font-size: 13px; border-radius: 6px; background: ${cfg.bg}; color: ${cfg.color}; border: 1px solid var(--color-border); flex: 1; max-width: 260px;">
                 <option value="discovered" ${currStatus === 'discovered' ? 'selected' : ''}>⏳ Not Yet Applied</option>
@@ -82,10 +131,15 @@ function renderJobModal() {
                 <option value="not_interested" ${currStatus === 'not_interested' ? 'selected' : ''}>🚫 Not Interested / Closed</option>
               </select>
             </div>
-            <div style="display: flex; gap: 8px; align-items: center;">
+            <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+              ${j.url ? `
+                <button class="btn btn-secondary btn-sm" id="btnCheckSingleAvailability" style="font-weight: 500;">
+                  🔍 Verify Availability
+                </button>
+              ` : ''}
               ${currStatus !== 'unavailable' ? `
                 <button class="btn btn-secondary btn-sm" id="btnQuickMarkUnavailable" style="color: #991b1b; font-weight: 500;">
-                  ⛔ Mark No Longer Available
+                  ⛔ Mark Unavailable
                 </button>
               ` : ''}
               ${currStatus !== 'applied' ? `
@@ -142,6 +196,65 @@ function renderJobModal() {
   `;
 }
 
+function renderBoardView(jobsToDisplay) {
+  return `
+    <div class="kanban-board" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-top: 16px; align-items: start;">
+      ${BOARD_COLUMNS.map(col => {
+        const colJobs = jobsToDisplay.filter(j => col.statuses.includes(normalizeStatus(j.status)));
+        return `
+          <div class="kanban-column" style="background: ${col.bg}; border-radius: 8px; border: 1px solid ${col.border}; padding: 14px; min-height: 480px; display: flex; flex-direction: column;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid ${col.border};">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 18px;">${col.icon}</span>
+                <strong style="color: ${col.color}; font-size: 14px;">${col.title}</strong>
+              </div>
+              <span class="badge" style="background: #fff; color: ${col.color}; font-weight: 700; border: 1px solid ${col.border}; border-radius: 12px; padding: 2px 8px; font-size: 11px;">
+                ${colJobs.length}
+              </span>
+            </div>
+
+            <div class="kanban-cards-container" style="display: flex; flex-direction: column; gap: 10px; flex: 1;">
+              ${colJobs.length === 0 ? `
+                <div style="padding: 24px 12px; text-align: center; color: var(--color-text-secondary); font-size: 12px; border: 1px dashed ${col.border}; border-radius: 6px;">
+                  No jobs in this stage
+                </div>
+              ` : colJobs.map(j => {
+                const currStatus = normalizeStatus(j.status);
+                const cfg = STATUS_CONFIG[currStatus] || STATUS_CONFIG.discovered;
+                return `
+                  <div class="item-card kanban-card" data-job-id="${j.id}" style="background: #fff; padding: 12px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); border-left: 4px solid ${cfg.color}; cursor: pointer;" title="Click to view full details">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 6px;">
+                      <strong style="font-size: 13px; color: var(--color-text); line-height: 1.3;">${j.title || "Untitled"}</strong>
+                      ${j.fit_score != null ? `<span class="item-card-score" style="font-size: 10px; padding: 2px 6px;">Fit: ${j.fit_score}</span>` : ""}
+                    </div>
+                    <div style="font-size: 12px; color: var(--color-text-secondary); margin-bottom: 8px;">
+                      ${j.company ? `@ ${j.company}` : "Unspecified"} ${j.location ? `• 📍 ${j.location}` : ""}
+                    </div>
+
+                    <!-- Quick transition buttons -->
+                    <div style="display: flex; gap: 6px; justify-content: space-between; align-items: center; margin-top: 10px; padding-top: 8px; border-top: 1px solid #f1f5f9;" onclick="event.stopPropagation()">
+                      <select class="job-status-quick-select" data-job-id="${j.id}" style="font-size: 11px; padding: 2px 6px; border-radius: 4px; border: 1px solid var(--color-border); background: ${cfg.bg}; color: ${cfg.color}; font-weight: 600;">
+                        <option value="discovered" ${currStatus === 'discovered' ? 'selected' : ''}>⏳ Not Applied</option>
+                        <option value="applied" ${currStatus === 'applied' ? 'selected' : ''}>📤 Applied</option>
+                        <option value="interviewing" ${currStatus === 'interviewing' ? 'selected' : ''}>💼 Interviewing</option>
+                        <option value="unavailable" ${currStatus === 'unavailable' ? 'selected' : ''}>⛔ Unavailable</option>
+                        <option value="not_interested" ${currStatus === 'not_interested' ? 'selected' : ''}>🚫 Closed</option>
+                      </select>
+                      <button class="btn btn-secondary btn-sm btn-open-modal" data-job-id="${j.id}" style="font-size: 11px; padding: 2px 8px;">
+                        👁 Details
+                      </button>
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+  `;
+}
+
 function render() {
   // Category counts
   const counts = {
@@ -176,10 +289,17 @@ function render() {
     </div>
   `;
 
-  // Filtered jobs list
-  const filteredJobs = _currentFilter === "all"
+  // Filtered jobs list based on tab and hide-unavailable toggle
+  let filteredJobs = _currentFilter === "all"
     ? _jobs
     : _jobs.filter(j => normalizeStatus(j.status) === _currentFilter);
+
+  if (_hideUnavailable && _currentFilter === "all") {
+    filteredJobs = filteredJobs.filter(j => {
+      const st = normalizeStatus(j.status);
+      return st !== "unavailable" && st !== "not_interested";
+    });
+  }
 
   let listHtml = "";
   if (_loading) {
@@ -193,11 +313,13 @@ function render() {
     listHtml = `
       <div class="empty-state" style="padding: 40px 20px; background: #fff; border-radius: 8px; border: 1px dashed var(--color-border); text-align: center;">
         <p style="font-size: 15px; font-weight: 500; color: var(--color-text-secondary); margin-bottom: 12px;">
-          No jobs categorized as "${currentCat ? currentCat.label : _currentFilter}".
+          No jobs in "${currentCat ? currentCat.label : _currentFilter}"${_hideUnavailable ? ' (hidden closed jobs)' : ''}.
         </p>
         <button class="btn btn-secondary btn-sm" id="btnResetFilter">View All Jobs</button>
       </div>
     `;
+  } else if (_viewMode === "board") {
+    listHtml = renderBoardView(filteredJobs);
   } else {
     listHtml = '<div class="item-list">';
     for (const j of filteredJobs) {
@@ -285,9 +407,34 @@ function render() {
       
       ${_statusMsg ? `<div class="status-ok" style="margin-bottom: 14px; padding: 10px 14px; background: #e8f5e9; border-radius: 6px; font-weight: 500;">${_statusMsg}</div>` : ''}
 
-      <div class="page-actions" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
-        <button class="btn btn-primary" id="showAddJobBtn">+ Add Job</button>
+      <!-- Action & View Controls Bar -->
+      <div class="page-actions" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
+        <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+          <button class="btn btn-primary" id="showAddJobBtn">+ Add Job</button>
+          <button class="btn btn-secondary" id="btnCheckAllAvailability" ${_checking ? 'disabled' : ''} title="Check active jobs to auto-detect closed postings">
+            ${_checking ? '🔄 Checking Availability...' : '🔍 Auto-Check Availability'}
+          </button>
+        </div>
+
+        <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+          <!-- Hide Unavailable Toggle -->
+          <label style="display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; cursor: pointer; user-select: none;">
+            <input type="checkbox" id="toggleHideUnavailable" ${_hideUnavailable ? 'checked' : ''} style="cursor: pointer;" />
+            <span>Hide Expired / Closed</span>
+          </label>
+
+          <!-- List vs Board View Switcher -->
+          <div style="display: flex; background: #e2e8f0; border-radius: 6px; padding: 2px;">
+            <button class="btn btn-sm ${_viewMode === 'list' ? 'btn-primary' : 'btn-secondary'}" id="btnViewList" style="border-radius: 4px; padding: 4px 10px; font-size: 12px;">
+              📋 List
+            </button>
+            <button class="btn btn-sm ${_viewMode === 'board' ? 'btn-primary' : 'btn-secondary'}" id="btnViewBoard" style="border-radius: 4px; padding: 4px 10px; font-size: 12px;">
+              📊 Board
+            </button>
+          </div>
+        </div>
       </div>
+
       ${formHtml}
       ${filterTabsHtml}
       ${listHtml}
@@ -345,6 +492,61 @@ async function handleStatusChange(jobId, newStatus) {
 function bindEvents(container) {
   if (!container) return;
 
+  // View mode switcher
+  const btnViewList = document.getElementById("btnViewList");
+  if (btnViewList) {
+    btnViewList.addEventListener("click", () => {
+      _viewMode = "list";
+      container.innerHTML = render();
+      bindEvents(container);
+    });
+  }
+
+  const btnViewBoard = document.getElementById("btnViewBoard");
+  if (btnViewBoard) {
+    btnViewBoard.addEventListener("click", () => {
+      _viewMode = "board";
+      container.innerHTML = render();
+      bindEvents(container);
+    });
+  }
+
+  // Toggle Hide Unavailable
+  const toggleHide = document.getElementById("toggleHideUnavailable");
+  if (toggleHide) {
+    toggleHide.addEventListener("change", (e) => {
+      _hideUnavailable = e.target.checked;
+      container.innerHTML = render();
+      bindEvents(container);
+    });
+  }
+
+  // Auto-Check All Jobs Availability button
+  const btnCheckAll = document.getElementById("btnCheckAllAvailability");
+  if (btnCheckAll) {
+    btnCheckAll.addEventListener("click", async () => {
+      _checking = true;
+      container.innerHTML = render();
+      bindEvents(container);
+
+      const res = await checkAllJobsAvailability();
+      _checking = false;
+      if (res.status === "ok" && res.data) {
+        const { checked, updated_unavailable } = res.data;
+        // Refresh jobs from backend
+        const jobsRes = await fetchJobs();
+        if (jobsRes.status === "ok") {
+          _jobs = jobsRes.data;
+        }
+        setFlashMessage(`Availability verified: ${checked} jobs checked, ${updated_unavailable} marked as No Longer Available.`);
+      } else {
+        setFlashMessage("Failed to complete availability check.", false);
+      }
+      container.innerHTML = render();
+      bindEvents(container);
+    });
+  }
+
   // Filter category buttons
   container.querySelectorAll(".job-filter-btn").forEach((btn) => {
     btn.addEventListener("click", () => {
@@ -375,7 +577,8 @@ function bindEvents(container) {
 
   // Open Job Details Modal on item-card click
   container.querySelectorAll(".item-card").forEach((card) => {
-    card.addEventListener("click", () => {
+    card.addEventListener("click", (e) => {
+      if (e.target.closest("select") || e.target.closest("a")) return;
       const jobId = card.dataset.jobId;
       const found = _jobs.find((j) => String(j.id) === String(jobId));
       if (found) {
@@ -391,6 +594,30 @@ function bindEvents(container) {
   if (modalStatusSelect && _selectedJob) {
     modalStatusSelect.addEventListener("change", (e) => {
       handleStatusChange(_selectedJob.id, e.target.value);
+    });
+  }
+
+  // Single job live availability check in modal
+  const btnCheckSingle = document.getElementById("btnCheckSingleAvailability");
+  if (btnCheckSingle && _selectedJob) {
+    btnCheckSingle.addEventListener("click", async () => {
+      btnCheckSingle.disabled = true;
+      btnCheckSingle.innerText = "Checking...";
+      const res = await checkJobAvailability(_selectedJob.id);
+      if (res.status === "ok" && res.data) {
+        if (!res.data.available) {
+          _selectedJob.status = "unavailable";
+          const jIdx = _jobs.findIndex(j => j.id === _selectedJob.id);
+          if (jIdx >= 0) _jobs[jIdx].status = "unavailable";
+          setFlashMessage(`Posting is closed on LinkedIn: marked as No Longer Available.`);
+        } else {
+          setFlashMessage(`Posting is active and accepting applications!`);
+        }
+      } else {
+        alert(res.message || "Failed to check job availability.");
+      }
+      container.innerHTML = render();
+      bindEvents(container);
     });
   }
 

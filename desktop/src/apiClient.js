@@ -300,6 +300,14 @@ async function deleteJob(jobId) {
   return apiDelete(`/jobs/${jobId}`);
 }
 
+async function checkJobAvailability(jobId) {
+  return apiPost(`/jobs/${jobId}/check-availability`, {}, 15000);
+}
+
+async function checkAllJobsAvailability() {
+  return apiPost("/jobs/check-availability", {}, 30000);
+}
+
 async function evaluateJobText(description) {
   return apiPost("/jobs/evaluate-text", { description });
 }
@@ -404,6 +412,8 @@ export {
   createJob,
   updateJob,
   deleteJob,
+  checkJobAvailability,
+  checkAllJobsAvailability,
   evaluateJobText,
   fetchApplications,
   createApplication,

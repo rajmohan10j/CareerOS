@@ -885,3 +885,67 @@ class TestJobRepository:
         repo.create(Job(profile_id=1, jd_text="Python backend developer needed"))
         repo.create(Job(profile_id=1, jd_text="Frontend React developer"))
         assert len(repo.search("Python")) == 1
+
+
+class TestJobAvailability:
+    def test_check_availability_job_not_found(self, _session):
+        repo = JobRepository(_session)
+        svc = JobService(repo)
+        res = svc.check_availability(99999)
+        assert res["status"] == "error"
+
+    def test_check_availability_active_job(self, _session):
+        repo = JobRepository(_session)
+        svc = JobService(repo)
+        job = svc.create(JobCreate(title="Active Dev", url="https://example.com/job/123"))
+        with patch("app.services.job_service.check_url_liveness") as mock_live:
+            mock_live.return_value = {"available": True, "status": "open", "reason": "Posting is active"}
+            res = svc.check_availability(job.id)
+            assert res["available"] is True
+            assert res["status"] != "unavailable"
+
+    def test_check_availability_closed_job_updates_status(self, _session):
+        repo = JobRepository(_session)
+        svc = JobService(repo)
+        job = svc.create(JobCreate(title="Closed Role", url="https://example.com/job/closed"))
+        with patch("app.services.job_service.check_url_liveness") as mock_live:
+            mock_live.return_value = {"available": False, "status": "unavailable", "reason": "Posting closed"}
+            res = svc.check_availability(job.id)
+            assert res["available"] is False
+            assert res["status"] == "unavailable"
+            # Verify in db
+            fetched = repo.get_by_id(job.id)
+            assert fetched.status == "unavailable"
+
+    def test_check_all_availability(self, _session):
+        repo = JobRepository(_session)
+        svc = JobService(repo)
+        job1 = svc.create(JobCreate(title="Open Job", url="https://example.com/1"))
+        job2 = svc.create(JobCreate(title="Closed Job", url="https://example.com/2"))
+        with patch("app.services.job_service.check_url_liveness") as mock_live:
+            def side_effect(url):
+                if "2" in url:
+                    return {"available": False, "status": "unavailable", "reason": "closed"}
+                return {"available": True, "status": "open", "reason": "active"}
+            mock_live.side_effect = side_effect
+            res = svc.check_all_availability()
+            assert res["checked"] == 2
+            assert res["updated_unavailable"] == 1
+
+    def test_availability_endpoints(self, _session):
+        client = TestClient(_test_app)
+        create_resp = client.post("/jobs", json={"title": "Test URL Job", "url": "https://example.com/test"})
+        job_id = create_resp.json()["id"]
+
+        with patch("app.services.job_service.check_url_liveness") as mock_live:
+            mock_live.return_value = {"available": False, "status": "unavailable", "reason": "Job page not found"}
+            resp = client.post(f"/jobs/{job_id}/check-availability")
+            assert resp.status_code == 200
+            assert resp.json()["status"] == "unavailable"
+
+        with patch("app.services.job_service.check_url_liveness") as mock_live:
+            mock_live.return_value = {"available": True, "status": "open", "reason": "active"}
+            resp_all = client.post("/jobs/check-availability")
+            assert resp_all.status_code == 200
+            assert "checked" in resp_all.json()
+

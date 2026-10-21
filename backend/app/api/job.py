@@ -94,3 +94,18 @@ def delete_job(job_id: int, session: Session = Depends(get_session)):
     service = _service(session)
     if not service.delete(job_id):
         raise HTTPException(status_code=404, detail="Job not found")
+
+
+@router.post("/jobs/{job_id}/check-availability")
+def check_job_availability(job_id: int, session: Session = Depends(get_session)):
+    service = _service(session)
+    res = service.check_availability(job_id)
+    if res.get("status") == "error":
+        raise HTTPException(status_code=404, detail=res.get("message"))
+    return res
+
+
+@router.post("/jobs/check-availability")
+def check_all_jobs_availability(session: Session = Depends(get_session)):
+    service = _service(session)
+    return service.check_all_availability()

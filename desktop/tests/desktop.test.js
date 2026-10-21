@@ -181,7 +181,7 @@ console.log("\n[api client — new helpers]");
 const apiHelpers = [
   "fetchProfile", "saveProfile",
   "fetchResumes", "fetchResume", "createResume", "importResumeText", "uploadResumeFile", "uploadResumeTextFile", "downloadResumeText", "generateResume",
-  "fetchJobs", "createJob", "evaluateJobText",
+  "fetchJobs", "createJob", "updateJob", "deleteJob", "checkJobAvailability", "checkAllJobsAvailability", "evaluateJobText",
   "fetchApplications", "createApplication",
   "fetchDocuments", "createDocument",
   "fetchAiProviders", "fetchAiModels", "fetchAiHealth",
