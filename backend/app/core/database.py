@@ -29,6 +29,16 @@ def init_db() -> None:
                 session.exec(text("ALTER TABLE profiles ADD COLUMN name TEXT DEFAULT 'Primary Profile'"))
             if cols and "is_active" not in cols:
                 session.exec(text("ALTER TABLE profiles ADD COLUMN is_active BOOLEAN DEFAULT 1"))
+            
+            # Check SQLite migrations for jobs table
+            job_info = session.exec(text("PRAGMA table_info(jobs)")).all()
+            job_cols = {row[1] for row in job_info}
+            if job_cols and "role_category" not in job_cols:
+                session.exec(text("ALTER TABLE jobs ADD COLUMN role_category TEXT DEFAULT NULL"))
+            if job_cols and "region" not in job_cols:
+                session.exec(text("ALTER TABLE jobs ADD COLUMN region TEXT DEFAULT NULL"))
+            if job_cols and "salary_bracket" not in job_cols:
+                session.exec(text("ALTER TABLE jobs ADD COLUMN salary_bracket TEXT DEFAULT NULL"))
             session.commit()
     except Exception:
         pass

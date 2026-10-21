@@ -18,6 +18,9 @@ class JobCreate(BaseModel):
     requirements: str | None = None
     experience: str | None = None
     notes: str | None = None
+    role_category: str | None = None
+    region: str | None = None
+    salary_bracket: str | None = None
 
 
 class JobUpdate(BaseModel):
@@ -37,6 +40,9 @@ class JobUpdate(BaseModel):
     notes: str | None = None
     evaluation_json: str | None = None
     fit_score: int | None = None
+    role_category: str | None = None
+    region: str | None = None
+    salary_bracket: str | None = None
 
 
 class JobResponse(BaseModel):
@@ -59,6 +65,9 @@ class JobResponse(BaseModel):
     notes: str | None = None
     evaluation_json: str | None = None
     fit_score: int | None = None
+    role_category: str | None = None
+    region: str | None = None
+    salary_bracket: str | None = None
     created_at: datetime
     updated_at: datetime
 

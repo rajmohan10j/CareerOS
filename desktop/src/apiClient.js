@@ -312,6 +312,11 @@ async function evaluateJobText(description) {
   return apiPost("/jobs/evaluate-text", { description });
 }
 
+function getJobsExcelExportUrl() {
+  const base = getStoredBackendUrl() || DEFAULT_BACKEND_URL;
+  return `${base.replace(/\/+$/, "")}/jobs/export-excel`;
+}
+
 async function fetchApplications() {
   return apiFetch("/applications");
 }
@@ -414,6 +419,7 @@ export {
   deleteJob,
   checkJobAvailability,
   checkAllJobsAvailability,
+  getJobsExcelExportUrl,
   evaluateJobText,
   fetchApplications,
   createApplication,

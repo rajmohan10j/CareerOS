@@ -949,3 +949,40 @@ class TestJobAvailability:
             assert resp_all.status_code == 200
             assert "checked" in resp_all.json()
 
+
+class TestJobExportExcel:
+    def test_export_to_excel_service(self, _session):
+        repo = JobRepository(_session)
+        svc = JobService(repo)
+        svc.create(JobCreate(title="LinkedIn Eng", source="linkedin", role_category="Engineering", region="india"))
+        svc.create(JobCreate(title="Naukri Dir", source="naukri", role_category="Director", region="india"))
+        svc.create(JobCreate(title="Indeed Mgr", source="indeed", role_category="Management", region="international"))
+        svc.create(JobCreate(title="Closed Role", source="linkedin", status="unavailable"))
+
+        excel_bytes = svc.export_to_excel()
+        assert excel_bytes is not None
+        assert len(excel_bytes) > 0
+
+        # Verify sheets using openpyxl
+        import io
+        import openpyxl
+        wb = openpyxl.load_workbook(io.BytesIO(excel_bytes))
+        assert "Master Tracker" in wb.sheetnames
+        assert "LinkedIn" in wb.sheetnames
+        assert "Naukri" in wb.sheetnames
+        assert "Indeed" in wb.sheetnames
+        assert "Archived & Closed" in wb.sheetnames
+
+        ws_master = wb["Master Tracker"]
+        assert ws_master.max_row >= 5  # header + 4 rows
+
+    def test_export_to_excel_endpoint(self, _session):
+        client = TestClient(_test_app)
+        client.post("/jobs", json={"title": "Test Excel Job", "source": "naukri", "role_category": "Executive"})
+        resp = client.get("/jobs/export-excel")
+        assert resp.status_code == 200
+        assert resp.headers["content-type"] == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        assert "careeros_jobs_tracker.xlsx" in resp.headers["content-disposition"]
+        assert len(resp.content) > 1000
+
+

@@ -33,6 +33,9 @@ def job_to_response(job: Job) -> dict:
         "notes": job.notes,
         "evaluation_json": job.evaluation_json,
         "fit_score": job.fit_score,
+        "role_category": job.role_category,
+        "region": job.region,
+        "salary_bracket": job.salary_bracket,
         "created_at": job.created_at.replace(tzinfo=None).isoformat() if job.created_at else None,
         "updated_at": job.updated_at.replace(tzinfo=None).isoformat() if job.updated_at else None,
     }
@@ -237,6 +240,9 @@ class JobService:
             requirements=data.requirements,
             experience=data.experience,
             notes=data.notes,
+            role_category=data.role_category,
+            region=data.region,
+            salary_bracket=data.salary_bracket,
         )
         return self._job_repo.create(job)
 
@@ -381,6 +387,118 @@ class JobService:
             "updated_unavailable": updated_count,
             "results": results,
         }
+
+    def export_to_excel(self) -> bytes:
+        import io
+        import openpyxl
+        from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+        from openpyxl.utils import get_column_letter
+
+        wb = openpyxl.Workbook()
+        wb.remove(wb.active)  # Remove default blank sheet
+
+        jobs = self._job_repo.list_all()
+
+        def normalize_source(j):
+            src = (j.source or "").lower().strip()
+            url = (j.url or "").lower().strip()
+            if "linkedin" in src or "linkedin.com" in url:
+                return "linkedin"
+            if "naukri" in src or "naukri.com" in url:
+                return "naukri"
+            if "indeed" in src or "indeed.com" in url:
+                return "indeed"
+            if "google" in src or "google.com" in url:
+                return "google"
+            return src or "other"
+
+        sheets_data = {
+            "Master Tracker": jobs,
+            "LinkedIn": [j for j in jobs if normalize_source(j) == "linkedin"],
+            "Naukri": [j for j in jobs if normalize_source(j) == "naukri"],
+            "Indeed": [j for j in jobs if normalize_source(j) == "indeed"],
+            "Other Portals": [j for j in jobs if normalize_source(j) not in ("linkedin", "naukri", "indeed")],
+            "Archived & Closed": [j for j in jobs if (j.status or "").lower() in ("unavailable", "closed", "not_interested")],
+        }
+
+        header_fill = PatternFill(start_color="1E293B", end_color="1E293B", fill_type="solid")
+        header_font = Font(name="Calibri", size=11, bold=True, color="FFFFFF")
+        header_align = Alignment(horizontal="center", vertical="center", wrap_text=True)
+
+        alt_fill = PatternFill(start_color="F8FAFC", end_color="F8FAFC", fill_type="solid")
+        white_fill = PatternFill(start_color="FFFFFF", end_color="FFFFFF", fill_type="solid")
+        cell_font = Font(name="Calibri", size=10)
+        cell_align = Alignment(vertical="center")
+        thin_border = Border(
+            left=Side(style="thin", color="E2E8F0"),
+            right=Side(style="thin", color="E2E8F0"),
+            top=Side(style="thin", color="E2E8F0"),
+            bottom=Side(style="thin", color="E2E8F0"),
+        )
+
+        headers = [
+            "ID", "Job Title", "Company", "Portal Source", "Status",
+            "Role Category", "Region", "Location", "Salary Range", "Fit Score",
+            "Job URL", "Created Date", "Notes"
+        ]
+
+        for sheet_name, sheet_jobs in sheets_data.items():
+            ws = wb.create_sheet(title=sheet_name)
+            ws.views.sheetView[0].showGridLines = True
+            ws.freeze_panes = "A2"
+            ws.row_dimensions[1].height = 26
+
+            # Write header row
+            for col_idx, h in enumerate(headers, 1):
+                cell = ws.cell(row=1, column=col_idx, value=h)
+                cell.fill = header_fill
+                cell.font = header_font
+                cell.alignment = header_align
+                cell.border = thin_border
+
+            # Write rows
+            for row_idx, j in enumerate(sheet_jobs, 2):
+                ws.row_dimensions[row_idx].height = 20
+                fill = alt_fill if row_idx % 2 == 0 else white_fill
+                row_data = [
+                    j.id,
+                    j.title or "N/A",
+                    j.company or "N/A",
+                    (j.source or normalize_source(j)).capitalize(),
+                    (j.status or "discovered").capitalize(),
+                    j.role_category or "Unassigned",
+                    (j.region or "Unassigned").capitalize(),
+                    j.location or "N/A",
+                    j.salary_range or "Not Disclosed",
+                    f"{j.fit_score}%" if j.fit_score is not None else "N/A",
+                    j.url or "",
+                    j.created_at.strftime("%Y-%m-%d %H:%M") if j.created_at else "",
+                    j.notes or "",
+                ]
+                for col_idx, val in enumerate(row_data, 1):
+                    c = ws.cell(row=row_idx, column=col_idx, value=val)
+                    c.fill = fill
+                    c.font = cell_font
+                    c.alignment = cell_align
+                    c.border = thin_border
+
+            # Column width auto-fit
+            for col in ws.columns:
+                max_len = 0
+                col_letter = get_column_letter(col[0].column)
+                for cell in col:
+                    val_str = str(cell.value or "")
+                    if cell.row == 1:
+                        max_len = max(max_len, len(val_str) + 4)
+                    else:
+                        max_len = max(max_len, min(len(val_str), 40))
+                ws.column_dimensions[col_letter].width = max(max_len + 3, 12)
+
+        buffer = io.BytesIO()
+        wb.save(buffer)
+        buffer.seek(0)
+        return buffer.getvalue()
+
 
 
 def check_url_liveness(url: str | None) -> dict:

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Response
 from sqlmodel import Session
 
 from app.core.database import get_session
@@ -35,6 +35,17 @@ def search_jobs(q: str = Query(""), session: Session = Depends(get_session)):
     service = _service(session)
     jobs = service.search(q)
     return [job_to_response(j) for j in jobs]
+
+
+@router.get("/jobs/export-excel")
+def export_jobs_excel(session: Session = Depends(get_session)):
+    service = _service(session)
+    excel_bytes = service.export_to_excel()
+    return Response(
+        content=excel_bytes,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": "attachment; filename=careeros_jobs_tracker.xlsx"},
+    )
 
 
 @router.get("/jobs/{job_id}")

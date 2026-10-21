@@ -23,3 +23,7 @@ class Job(BaseTable, table=True):
     notes: str | None = Field(default=None)
     evaluation_json: str | None = Field(default=None)
     fit_score: int | None = Field(default=None)
+    role_category: str | None = Field(default=None)
+    region: str | None = Field(default=None)
+    salary_bracket: str | None = Field(default=None)
+
