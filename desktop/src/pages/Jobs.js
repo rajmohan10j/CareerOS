@@ -6,12 +6,18 @@ import {
   checkJobAvailability,
   checkAllJobsAvailability,
   getJobsExcelExportUrl,
+  fetchPortals,
+  detectPortal,
+  fetchPortalSearchUrls,
 } from "../apiClient.js";
 
 let _jobs = [];
+let _portals = [];
 let _loading = true;
 let _error = null;
 let _showForm = false;
+let _showQuickImport = false;
+let _showLaunchpad = true;
 let _saving = false;
 let _checking = false;
 let _selectedJob = null;
@@ -22,6 +28,20 @@ let _currentRegionFilter = "all"; // region filter
 let _viewMode = "list"; // "list" or "board"
 let _hideUnavailable = false;
 let _statusMsg = null;
+
+// Search Launchpad State
+let _launchRole = localStorage.getItem("careeros_launch_role") || "Placement Director";
+let _launchLocation = localStorage.getItem("careeros_launch_loc") || "Bangalore";
+let _searchPresets = JSON.parse(localStorage.getItem("careeros_search_presets") || "[]");
+
+if (_searchPresets.length === 0) {
+  _searchPresets = [
+    { name: "Placement Director • Bangalore", role: "Placement Director", location: "Bangalore" },
+    { name: "Corporate Relations • India", role: "Corporate Relations Director", location: "India" },
+    { name: "VP Operations • Remote", role: "VP Operations", location: "Remote" },
+    { name: "Advisory / Consulting • UAE", role: "Advisory Consultant", location: "Dubai" },
+  ];
+}
 
 const STATUS_CONFIG = {
   discovered: { label: "Not Yet Applied", color: "#475569", bg: "#f1f5f9", icon: "⏳" },
@@ -40,13 +60,13 @@ const STATUS_CATEGORIES = [
   { id: "not_interested", label: "Closed / Passed", icon: "🚫" },
 ];
 
-const PORTALS = [
-  { id: "all", label: "All Portals", icon: "🌐", color: "#334155", bg: "#f1f5f9" },
-  { id: "linkedin", label: "LinkedIn", icon: "🔵", color: "#0284c7", bg: "#e0f2fe" },
-  { id: "naukri", label: "Naukri", icon: "🔷", color: "#0d9488", bg: "#ccfbf1" },
-  { id: "indeed", label: "Indeed", icon: "🔶", color: "#d97706", bg: "#fef3c7" },
-  { id: "google", label: "Google", icon: "🔴", color: "#dc2626", bg: "#fee2e2" },
-  { id: "other", label: "Direct / Other", icon: "⚪", color: "#64748b", bg: "#f8fafc" },
+const DEFAULT_PORTALS = [
+  { id: 1, slug: "linkedin", name: "LinkedIn", icon: "🔵", color: "#0284c7", domain: "linkedin.com" },
+  { id: 2, slug: "naukri", name: "Naukri", icon: "🔷", color: "#0d9488", domain: "naukri.com" },
+  { id: 3, slug: "indeed", name: "Indeed", icon: "🔶", color: "#d97706", domain: "indeed.com" },
+  { id: 4, slug: "google", name: "Google", icon: "🔴", color: "#dc2626", domain: "google.com" },
+  { id: 5, slug: "iimjobs", name: "IIMJobs", icon: "🎓", color: "#7c3aed", domain: "iimjobs.com" },
+  { id: 6, slug: "glassdoor", name: "Glassdoor", icon: "🟢", color: "#059669", domain: "glassdoor.com" },
 ];
 
 const ROLE_TIERS = [
@@ -118,11 +138,17 @@ function normalizeStatus(status) {
 function getJobPortal(job) {
   const src = (job.source || "").toLowerCase().trim();
   const url = (job.url || "").toLowerCase().trim();
+  const allPortals = _portals.length > 0 ? _portals : DEFAULT_PORTALS;
+  for (const p of allPortals) {
+    if (src === p.slug || (p.domain && url.includes(p.domain.toLowerCase()))) {
+      return p.slug;
+    }
+  }
   if (src === "linkedin" || url.includes("linkedin.com")) return "linkedin";
   if (src === "naukri" || url.includes("naukri.com")) return "naukri";
   if (src === "indeed" || url.includes("indeed.com")) return "indeed";
   if (src === "google" || url.includes("google.com")) return "google";
-  if (src) return "other";
+  if (src) return src;
   return "other";
 }
 
@@ -151,10 +177,11 @@ function matchesRegionFilter(job, filter) {
 
 function renderPortalBadge(job) {
   const portalId = getJobPortal(job);
-  const portal = PORTALS.find(p => p.id === portalId) || PORTALS[PORTALS.length - 1];
+  const allPortals = _portals.length > 0 ? _portals : DEFAULT_PORTALS;
+  const portal = allPortals.find(p => p.slug === portalId) || { name: portalId.toUpperCase(), icon: "🌐", color: "#64748b" };
   return `
-    <span class="badge" style="background: ${portal.bg}; color: ${portal.color}; font-weight: 600; padding: 2px 8px; border-radius: 4px; font-size: 11px; display: inline-flex; align-items: center; gap: 4px;">
-      <span>${portal.icon}</span> <span>${portal.label}</span>
+    <span class="badge" style="background: rgba(14, 165, 233, 0.1); color: ${portal.color || '#0284c7'}; font-weight: 600; padding: 2px 8px; border-radius: 4px; font-size: 11px; display: inline-flex; align-items: center; gap: 4px; border: 1px solid rgba(0,0,0,0.06);">
+      <span>${portal.icon || '🌐'}</span> <span>${portal.name}</span>
     </span>
   `;
 }
@@ -183,7 +210,7 @@ function renderJobModal() {
       <div class="modal-card" style="max-width: 750px;">
         <div class="modal-header">
           <div>
-            <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 4px;">
+            <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 4px; flex-wrap: wrap;">
               ${renderPortalBadge(j)}
               ${j.role_category ? `<span class="badge" style="background: #f3e8ff; color: #6b21a8; font-size: 11px; padding: 2px 8px;">${j.role_category}</span>` : ""}
               ${j.region ? `<span class="badge" style="background: #f1f5f9; color: #475569; font-size: 11px; padding: 2px 8px;">${j.region.toUpperCase()}</span>` : ""}
@@ -274,6 +301,51 @@ function renderJobModal() {
   `;
 }
 
+function renderQuickImportModal() {
+  if (!_showQuickImport) return "";
+  return `
+    <div class="modal-overlay" id="quickImportOverlay">
+      <div class="modal-card" style="max-width: 650px;">
+        <div class="modal-header">
+          <h3 style="margin: 0;">⚡ Smart Quick-Import Opportunity</h3>
+          <button class="modal-close" id="btnCloseQuickImportX">×</button>
+        </div>
+        <div class="modal-body">
+          <p style="font-size: 13px; color: var(--color-text-secondary); margin-top: 0;">
+            Paste any job link (Naukri, Indeed, LinkedIn, IIMJobs, Company Career Page) or copied job description. CareerOS will auto-detect the portal domain and add it directly to your tracker.
+          </p>
+
+          <div class="setting-group" style="margin-bottom: 14px;">
+            <label for="quickImportUrl">Job Posting URL</label>
+            <input type="url" id="quickImportUrl" class="form-input" placeholder="https://www.naukri.com/job-listings... or https://in.indeed.com/viewjob?..." />
+            <div id="detectedPortalBadge" style="margin-top: 6px; font-size: 12px; font-weight: 500;"></div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px;">
+            <div class="setting-group">
+              <label for="quickImportTitle">Job Title (Optional if in URL)</label>
+              <input type="text" id="quickImportTitle" class="form-input" placeholder="e.g. Placement Director" />
+            </div>
+            <div class="setting-group">
+              <label for="quickImportCompany">Company / Org</label>
+              <input type="text" id="quickImportCompany" class="form-input" placeholder="e.g. Leading University" />
+            </div>
+          </div>
+
+          <div class="setting-group" style="margin-bottom: 14px;">
+            <label for="quickImportJd">Job Description / Requirements (Optional)</label>
+            <textarea id="quickImportJd" class="form-textarea" rows="4" placeholder="Paste full or partial JD text here..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 8px;">
+          <button class="btn btn-secondary" id="btnCancelQuickImport">Cancel</button>
+          <button class="btn btn-primary" id="btnConfirmQuickImport">📥 Add to Job Tracker</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
 function renderBoardView(jobsToDisplay) {
   return `
     <div class="kanban-board" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-top: 16px; align-items: start;">
@@ -339,7 +411,9 @@ function renderBoardView(jobsToDisplay) {
 }
 
 function render() {
-  // Category counts
+  const allPortals = _portals.length > 0 ? _portals : DEFAULT_PORTALS;
+
+  // Status Counts
   const counts = {
     all: _jobs.length,
     discovered: 0,
@@ -349,23 +423,19 @@ function render() {
     not_interested: 0,
   };
 
-  // Portal counts
-  const portalCounts = {
-    all: _jobs.length,
-    linkedin: 0,
-    naukri: 0,
-    indeed: 0,
-    google: 0,
-    other: 0,
-  };
+  // Dynamic Portal Counts
+  const portalCounts = { all: _jobs.length, other: 0 };
+  for (const p of allPortals) {
+    portalCounts[p.slug] = 0;
+  }
 
   for (const j of _jobs) {
     const st = normalizeStatus(j.status);
     if (st in counts) counts[st]++;
     else counts.discovered++;
 
-    const p = getJobPortal(j);
-    if (p in portalCounts) portalCounts[p]++;
+    const pSlug = getJobPortal(j);
+    if (pSlug in portalCounts) portalCounts[pSlug]++;
     else portalCounts.other++;
   }
 
@@ -393,17 +463,25 @@ function render() {
       <!-- Portals Selection -->
       <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
         <span style="font-size: 12px; font-weight: 600; color: var(--color-text-secondary); margin-right: 4px;">Portals:</span>
-        ${PORTALS.map(p => {
-          const count = portalCounts[p.id] ?? 0;
-          const isActive = _currentPortalFilter === p.id;
+        <button class="btn btn-sm ${_currentPortalFilter === 'all' ? 'btn-primary' : 'btn-secondary'} job-portal-btn" data-portal="all" style="border-radius: 6px; padding: 3px 10px; font-size: 12px; font-weight: ${_currentPortalFilter === 'all' ? '600' : '500'};">
+          🌐 All (${portalCounts.all})
+        </button>
+        ${allPortals.map(p => {
+          const count = portalCounts[p.slug] ?? 0;
+          const isActive = _currentPortalFilter === p.slug;
           return `
-            <button class="btn btn-sm ${isActive ? 'btn-primary' : 'btn-secondary'} job-portal-btn" data-portal="${p.id}" style="border-radius: 6px; padding: 3px 10px; font-size: 12px; font-weight: ${isActive ? '600' : '500'}; display: flex; align-items: center; gap: 5px;">
-              <span>${p.icon}</span>
-              <span>${p.label}</span>
+            <button class="btn btn-sm ${isActive ? 'btn-primary' : 'btn-secondary'} job-portal-btn" data-portal="${p.slug}" style="border-radius: 6px; padding: 3px 10px; font-size: 12px; font-weight: ${isActive ? '600' : '500'}; display: flex; align-items: center; gap: 4px;">
+              <span>${p.icon || '🌐'}</span>
+              <span>${p.name}</span>
               <span style="font-size: 10px; opacity: 0.85;">(${count})</span>
             </button>
           `;
         }).join('')}
+        ${portalCounts.other > 0 ? `
+          <button class="btn btn-sm ${_currentPortalFilter === 'other' ? 'btn-primary' : 'btn-secondary'} job-portal-btn" data-portal="other" style="border-radius: 6px; padding: 3px 10px; font-size: 12px;">
+            ⚪ Other (${portalCounts.other})
+          </button>
+        ` : ''}
       </div>
 
       <!-- Role & Region Selectors -->
@@ -426,32 +504,83 @@ function render() {
     </div>
   `;
 
+  // Dynamic Multi-Portal Search Launchpad HTML
+  const launchpadHtml = `
+    <div class="search-launchpad-card" style="background: linear-gradient(135deg, #f8fafc 0%, #edf2f7 100%); border: 1px solid #cbd5e1; border-radius: 10px; padding: 16px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 20px;">🚀</span>
+          <div>
+            <strong style="font-size: 15px; color: var(--color-text);">Multi-Portal Search Launchpad</strong>
+            <span style="font-size: 12px; color: var(--color-text-secondary); margin-left: 8px;">Instant 1-click searches across all job portals with your target criteria</span>
+          </div>
+        </div>
+        <div style="display: flex; gap: 6px; align-items: center;">
+          <select id="selectSearchPreset" style="font-size: 12px; padding: 4px 8px; border-radius: 6px; border: 1px solid var(--color-border); background: #fff;">
+            <option value="">-- Choose Saved Preset --</option>
+            ${_searchPresets.map((p, idx) => `<option value="${idx}">${p.name}</option>`).join('')}
+          </select>
+          <button class="btn btn-secondary btn-sm" id="btnSavePreset" title="Save current role & location as quick preset" style="font-size: 11px; padding: 4px 8px;">
+            💾 Save Preset
+          </button>
+          <button class="btn btn-secondary btn-sm" id="btnToggleLaunchpad" style="font-size: 11px; padding: 4px 8px;">
+            ${_showLaunchpad ? '▲ Collapse' : '▼ Expand'}
+          </button>
+        </div>
+      </div>
+
+      ${_showLaunchpad ? `
+        <!-- Launchpad Inputs -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-bottom: 14px; background: #fff; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
+          <div>
+            <label style="font-size: 12px; font-weight: 600; color: var(--color-text-secondary); display: block; margin-bottom: 4px;">Target Role / Keywords:</label>
+            <input type="text" id="inputLaunchRole" class="form-input" style="font-size: 13px; font-weight: 600; padding: 6px 10px;" value="${_launchRole}" placeholder="e.g. Placement Director" />
+          </div>
+          <div>
+            <label style="font-size: 12px; font-weight: 600; color: var(--color-text-secondary); display: block; margin-bottom: 4px;">Target Location / City / Scope:</label>
+            <input type="text" id="inputLaunchLocation" class="form-input" style="font-size: 13px; font-weight: 600; padding: 6px 10px;" value="${_launchLocation}" placeholder="e.g. Bangalore or Remote" />
+          </div>
+        </div>
+
+        <!-- Dynamic Portal Launch Buttons -->
+        <div>
+          <div style="font-size: 12px; font-weight: 600; color: var(--color-text-secondary); margin-bottom: 8px;">1-Click Direct Portal Search Tabs:</div>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            ${allPortals.map(p => `
+              <button class="btn btn-secondary btn-sm btn-launch-portal" data-portal-slug="${p.slug}" style="border-left: 3px solid ${p.color || '#0284c7'}; font-size: 12px; padding: 6px 12px; display: inline-flex; align-items: center; gap: 6px; background: #fff;" title="Open live ${p.name} search for '${_launchRole}' in '${_launchLocation}'">
+                <span>${p.icon || '🌐'}</span>
+                <span><strong>${p.name}</strong> ↗</span>
+              </button>
+            `).join('')}
+            <a href="#settings" class="btn btn-secondary btn-sm" style="font-size: 11px; padding: 6px 10px; color: var(--color-text-secondary);">
+              ⚙️ Add More Portals...
+            </a>
+          </div>
+        </div>
+      ` : ''}
+    </div>
+  `;
+
   // Apply all filters
   let filteredJobs = _jobs.filter(j => {
-    // 1. Status Filter
     if (_currentFilter !== "all" && normalizeStatus(j.status) !== _currentFilter) return false;
-    // 2. Hide Unavailable
     if (_hideUnavailable && _currentFilter === "all") {
       const st = normalizeStatus(j.status);
       if (st === "unavailable" || st === "not_interested") return false;
     }
-    // 3. Portal Filter
     if (_currentPortalFilter !== "all" && getJobPortal(j) !== _currentPortalFilter) return false;
-    // 4. Role Tier Filter
     if (!matchesRoleFilter(j, _currentRoleFilter)) return false;
-    // 5. Region Filter
     if (!matchesRegionFilter(j, _currentRegionFilter)) return false;
-
     return true;
   });
 
   let listHtml = "";
   if (_loading) {
-    listHtml = '<p class="health-checking">Loading jobs...</p>';
+    listHtml = '<p class="health-checking">Loading opportunities...</p>';
   } else if (_error) {
     listHtml = `<p class="health-error">${_error}</p>`;
   } else if (_jobs.length === 0) {
-    listHtml = `<div class="empty-state"><div class="empty-state-icon">💼</div><p>No jobs tracked yet.</p><p class="placeholder-hint">Add a job to start tracking and evaluating opportunities.</p></div>`;
+    listHtml = `<div class="empty-state"><div class="empty-state-icon">💼</div><p>No jobs tracked yet.</p><p class="placeholder-hint">Add or Quick-Import a job to start evaluating opportunities.</p></div>`;
   } else if (filteredJobs.length === 0) {
     listHtml = `
       <div class="empty-state" style="padding: 40px 20px; background: #fff; border-radius: 8px; border: 1px dashed var(--color-border); text-align: center;">
@@ -527,13 +656,9 @@ function render() {
         <div class="setting-group">
           <label for="jobPortalSource">Portal Source</label>
           <select id="jobPortalSource" class="form-input">
-            <option value="linkedin" selected>LinkedIn</option>
-            <option value="naukri">Naukri</option>
-            <option value="indeed">Indeed</option>
-            <option value="google">Google Jobs</option>
-            <option value="iimjobs">IIMJobs</option>
-            <option value="direct">Direct / Company Page</option>
-            <option value="other">Other Portal</option>
+            ${allPortals.map(p => `<option value="${p.slug}">${p.name}</option>`).join('')}
+            <option value="direct">Direct / Company Site</option>
+            <option value="other">Other</option>
           </select>
         </div>
         <div class="setting-group">
@@ -595,20 +720,26 @@ function render() {
 
   return `
     <div class="page jobs-page">
-      <h1 class="page-title">Job Tracker</h1>
-      <p class="page-subtitle">Track, categorize, and segregate job opportunities across all portals throughout your career pipeline.</p>
+      <h1 class="page-title">Job Tracker & Sourcing Hub</h1>
+      <p class="page-subtitle">Multi-portal discovery, intelligent categorization, and pipeline tracking across all career platforms.</p>
       
       ${_statusMsg ? `<div class="status-ok" style="margin-bottom: 14px; padding: 10px 14px; background: #e8f5e9; border-radius: 6px; font-weight: 500;">${_statusMsg}</div>` : ''}
+
+      <!-- Multi-Portal Search Launchpad -->
+      ${launchpadHtml}
 
       <!-- Action & View Controls Bar -->
       <div class="page-actions" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
         <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
           <button class="btn btn-primary" id="showAddJobBtn">+ Add Job</button>
+          <button class="btn btn-secondary" id="btnShowQuickImport" style="background: #e0f2fe; color: #0284c7; font-weight: 600; border-color: #bae6fd;">
+            ⚡ Quick Import
+          </button>
           <button class="btn btn-secondary" id="btnExportExcelTracker" title="Download multi-sheet Excel tracking workbook (.xlsx)">
             📥 Export Excel (.xlsx)
           </button>
           <button class="btn btn-secondary" id="btnCheckAllAvailability" ${_checking ? 'disabled' : ''} title="Check active jobs to auto-detect closed postings">
-            ${_checking ? '🔄 Checking Availability...' : '🔍 Auto-Check Availability'}
+            ${_checking ? '🔄 Checking...' : '🔍 Auto-Check'}
           </button>
         </div>
 
@@ -636,6 +767,7 @@ function render() {
       ${portalPillsHtml}
       ${listHtml}
       ${renderJobModal()}
+      ${renderQuickImportModal()}
     </div>
   `;
 }
@@ -643,14 +775,22 @@ function render() {
 async function onMount() {
   _loading = true;
   _error = null;
-  const result = await fetchJobs();
-  if (result.status === "ok") {
-    _jobs = Array.isArray(result.data) ? result.data : [];
-    _error = null;
+  const [jobsRes, portalsRes] = await Promise.all([
+    fetchJobs(),
+    fetchPortals(),
+  ]);
+
+  if (jobsRes.status === "ok") {
+    _jobs = Array.isArray(jobsRes.data) ? jobsRes.data : [];
   } else {
     _jobs = [];
-    _error = result.message;
+    _error = jobsRes.message;
   }
+
+  if (portalsRes.status === "ok" && Array.isArray(portalsRes.data)) {
+    _portals = portalsRes.data;
+  }
+
   _loading = false;
   const container = document.getElementById("pageContainer");
   if (container) container.innerHTML = render();
@@ -688,6 +828,188 @@ async function handleStatusChange(jobId, newStatus) {
 
 function bindEvents(container) {
   if (!container) return;
+
+  // Toggle Launchpad Expand/Collapse
+  const btnToggleLaunch = document.getElementById("btnToggleLaunchpad");
+  if (btnToggleLaunch) {
+    btnToggleLaunch.addEventListener("click", () => {
+      _showLaunchpad = !_showLaunchpad;
+      container.innerHTML = render();
+      bindEvents(container);
+    });
+  }
+
+  // Update launchpad role & location on input
+  const inputRole = document.getElementById("inputLaunchRole");
+  if (inputRole) {
+    inputRole.addEventListener("input", (e) => {
+      _launchRole = e.target.value;
+      localStorage.setItem("careeros_launch_role", _launchRole);
+    });
+  }
+
+  const inputLoc = document.getElementById("inputLaunchLocation");
+  if (inputLoc) {
+    inputLoc.addEventListener("input", (e) => {
+      _launchLocation = e.target.value;
+      localStorage.setItem("careeros_launch_loc", _launchLocation);
+    });
+  }
+
+  // Presets dropdown
+  const selectPreset = document.getElementById("selectSearchPreset");
+  if (selectPreset) {
+    selectPreset.addEventListener("change", (e) => {
+      const idx = e.target.value;
+      if (idx !== "" && _searchPresets[idx]) {
+        _launchRole = _searchPresets[idx].role;
+        _launchLocation = _searchPresets[idx].location;
+        localStorage.setItem("careeros_launch_role", _launchRole);
+        localStorage.setItem("careeros_launch_loc", _launchLocation);
+        container.innerHTML = render();
+        bindEvents(container);
+      }
+    });
+  }
+
+  // Save Current Preset
+  const btnSavePreset = document.getElementById("btnSavePreset");
+  if (btnSavePreset) {
+    btnSavePreset.addEventListener("click", () => {
+      const name = prompt("Enter a label for this search preset:", `${_launchRole} • ${_launchLocation}`);
+      if (name) {
+        _searchPresets.push({ name, role: _launchRole, location: _launchLocation });
+        localStorage.setItem("careeros_search_presets", JSON.stringify(_searchPresets));
+        setFlashMessage(`Saved search preset "${name}".`);
+        container.innerHTML = render();
+        bindEvents(container);
+      }
+    });
+  }
+
+  // 1-Click Launch Portal search buttons
+  container.querySelectorAll(".btn-launch-portal").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      const slug = btn.dataset.portalSlug;
+      const allPortals = _portals.length > 0 ? _portals : DEFAULT_PORTALS;
+      const portal = allPortals.find(p => p.slug === slug);
+      if (!portal) return;
+
+      const roleEnc = encodeURIComponent(_launchRole.trim());
+      const locEnc = encodeURIComponent(_launchLocation.trim());
+      const roleSlug = _launchRole.trim().toLowerCase().replace(/[^a-zA-Z0-9]+/g, "-");
+      const locSlug = _launchLocation.trim().toLowerCase().replace(/[^a-zA-Z0-9]+/g, "-");
+
+      let url = portal.search_url_template || "https://www.google.com/search?q={role}+jobs+{location}";
+      url = url.replace(/{role}/g, roleEnc).replace(/{location}/g, locEnc);
+      url = url.replace(/{role_slug}/g, roleSlug).replace(/{loc_slug}/g, locSlug);
+
+      window.open(url, "_blank");
+    });
+  });
+
+  // Quick Import Modal Toggle
+  const btnShowQuick = document.getElementById("btnShowQuickImport");
+  if (btnShowQuick) {
+    btnShowQuick.addEventListener("click", () => {
+      _showQuickImport = true;
+      container.innerHTML = render();
+      bindEvents(container);
+    });
+  }
+
+  const btnCancelQuick = document.getElementById("btnCancelQuickImport");
+  if (btnCancelQuick) {
+    btnCancelQuick.addEventListener("click", () => {
+      _showQuickImport = false;
+      container.innerHTML = render();
+      bindEvents(container);
+    });
+  }
+
+  const btnCloseQuickX = document.getElementById("btnCloseQuickImportX");
+  if (btnCloseQuickX) {
+    btnCloseQuickX.addEventListener("click", () => {
+      _showQuickImport = false;
+      container.innerHTML = render();
+      bindEvents(container);
+    });
+  }
+
+  // Quick Import URL input auto-detect
+  const quickUrlInput = document.getElementById("quickImportUrl");
+  const quickBadge = document.getElementById("detectedPortalBadge");
+  if (quickUrlInput && quickBadge) {
+    quickUrlInput.addEventListener("input", async (e) => {
+      const url = e.target.value.trim();
+      if (url.length > 8) {
+        const det = await detectPortal(url);
+        if (det.status === "ok" && det.data) {
+          quickBadge.innerHTML = `<span style="color: ${det.data.color || '#0284c7'};">Detected: <strong>${det.data.icon || '🌐'} ${det.data.name}</strong></span>`;
+        }
+      } else {
+        quickBadge.innerHTML = "";
+      }
+    });
+  }
+
+  // Confirm Quick Import
+  const btnConfirmQuick = document.getElementById("btnConfirmQuickImport");
+  if (btnConfirmQuick) {
+    btnConfirmQuick.addEventListener("click", async () => {
+      const url = document.getElementById("quickImportUrl")?.value.trim() || "";
+      let title = document.getElementById("quickImportTitle")?.value.trim() || "";
+      const company = document.getElementById("quickImportCompany")?.value.trim() || "";
+      const jd_text = document.getElementById("quickImportJd")?.value.trim() || "";
+
+      if (!url && !title && !jd_text) {
+        alert("Please paste either a Job URL, Title, or Description.");
+        return;
+      }
+
+      let source = "direct";
+      if (url) {
+        const det = await detectPortal(url);
+        if (det.status === "ok" && det.data) {
+          source = det.data.source || "direct";
+        }
+      }
+
+      if (!title) {
+        if (url.includes("naukri.com")) {
+          const match = url.match(/job-listings-([a-zA-Z0-9-]+)-\d+/);
+          title = match ? match[1].replace(/-/g, " ").replace(/\b\w/g, l => l.toUpperCase()) : "Naukri Opportunity";
+        } else if (url.includes("linkedin.com")) {
+          title = "LinkedIn Opportunity";
+        } else if (url.includes("indeed.com")) {
+          title = "Indeed Opportunity";
+        } else {
+          title = "Imported Opportunity";
+        }
+      }
+
+      const res = await createJob({
+        title,
+        company: company || (source !== 'direct' ? source.toUpperCase() : 'Company'),
+        url,
+        source,
+        jd_text,
+        status: "discovered",
+        role_category: "Executive / Director",
+        region: "india",
+      });
+
+      _showQuickImport = false;
+      if (res.status === "ok") {
+        _jobs.unshift(res.data);
+        setFlashMessage(`Imported "${title}" into Job Tracker.`);
+      } else {
+        alert(res.message || "Failed to import job.");
+      }
+      container.innerHTML = render();
+      bindEvents(container);
+    });
+  }
 
   // View mode switcher
   const btnViewList = document.getElementById("btnViewList");
@@ -745,7 +1067,6 @@ function bindEvents(container) {
       _checking = false;
       if (res.status === "ok" && res.data) {
         const { checked, updated_unavailable } = res.data;
-        // Refresh jobs from backend
         const jobsRes = await fetchJobs();
         if (jobsRes.status === "ok") {
           _jobs = jobsRes.data;

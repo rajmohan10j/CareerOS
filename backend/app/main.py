@@ -14,6 +14,7 @@ from app.api.job import router as job_router
 from app.api.knowledge import router as knowledge_router
 from app.api.linkedin import router as linkedin_router
 from app.api.plugin import router as plugin_router
+from app.api.portal import router as portal_router
 from app.api.profile import router as profile_router
 from app.api.resume import router as resume_router
 from app.api.skill import router as skill_router
@@ -61,3 +62,4 @@ app.include_router(knowledge_router)
 app.include_router(analytics_router)
 app.include_router(ai_router)
 app.include_router(linkedin_router)
+app.include_router(portal_router)

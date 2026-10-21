@@ -37,9 +37,16 @@ def init_db() -> None:
                 session.exec(text("ALTER TABLE jobs ADD COLUMN role_category TEXT DEFAULT NULL"))
             if job_cols and "region" not in job_cols:
                 session.exec(text("ALTER TABLE jobs ADD COLUMN region TEXT DEFAULT NULL"))
-            if job_cols and "salary_bracket" not in job_cols:
-                session.exec(text("ALTER TABLE jobs ADD COLUMN salary_bracket TEXT DEFAULT NULL"))
             session.commit()
+
+            # Seed default portals if empty
+            try:
+                from app.repositories.portal import PortalRepository
+                from app.services.portal_service import PortalService
+                p_service = PortalService(PortalRepository(session))
+                p_service.seed_defaults()
+            except Exception:
+                pass
     except Exception:
         pass
 

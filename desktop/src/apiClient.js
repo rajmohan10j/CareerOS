@@ -317,6 +317,30 @@ function getJobsExcelExportUrl() {
   return `${base.replace(/\/+$/, "")}/jobs/export-excel`;
 }
 
+async function fetchPortals() {
+  return apiFetch("/portals");
+}
+
+async function createPortal(data) {
+  return apiPost("/portals", data);
+}
+
+async function updatePortal(portalId, data) {
+  return apiPut(`/portals/${portalId}`, data);
+}
+
+async function deletePortal(portalId) {
+  return apiDelete(`/portals/${portalId}`);
+}
+
+async function detectPortal(url) {
+  return apiPost("/portals/detect", { url });
+}
+
+async function fetchPortalSearchUrls(role, location) {
+  return apiPost("/portals/search-urls", { role, location });
+}
+
 async function fetchApplications() {
   return apiFetch("/applications");
 }
@@ -420,6 +444,12 @@ export {
   checkJobAvailability,
   checkAllJobsAvailability,
   getJobsExcelExportUrl,
+  fetchPortals,
+  createPortal,
+  updatePortal,
+  deletePortal,
+  detectPortal,
+  fetchPortalSearchUrls,
   evaluateJobText,
   fetchApplications,
   createApplication,

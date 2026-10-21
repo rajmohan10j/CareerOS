@@ -7,6 +7,7 @@ from app.models.job import Job
 from app.models.knowledge import Knowledge
 from app.models.openrouter import OpenRouterProvider
 from app.models.plugin import Plugin
+from app.models.portal import Portal
 from app.models.profile import Profile
 from app.models.resume import Resume
 from app.models.skill import Skill
@@ -21,6 +22,7 @@ __all__ = [
     "Resume",
     "Document",
     "Job",
+    "Portal",
     "Experience",
     "Skill",
     "Application",
